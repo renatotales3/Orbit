@@ -6,7 +6,6 @@
 /* --- 1. DESIGN SYSTEM (Soft UI) --- */
 :root {
     --font-main: 'Inter', sans-serif;
-    /* Paleta de Cores */
     --color-background: #F8F9FA;
     --color-surface: #ffffff;
     --color-text-primary: #111827;
@@ -17,11 +16,10 @@
     --color-status-done: #008A05;
     --color-status-progress: #F59E0B;
     --color-status-pending: #EF4444;
-    /* UI Props */
     --card-border-radius: 12px;
     --navbar-height: 65px;
     --shadow-soft: 0px 1px 3px rgba(0, 0, 0, 0.05), 0px 1px 2px rgba(0, 0, 0, 0.06);
-    --shadow-hover: 0px 4px S6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-hover: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -1px rgba(0, 0, 0, 0.06);
     --padding-main: 24px;
 }
 
@@ -76,7 +74,7 @@ body { font-family: var(--font-main); background: var(--color-background); color
 .attached-note-link:hover { color: var(--color-text-primary); }
 .attached-note-link svg { width: 14px; height: 14px; stroke: currentColor; }
 .task-priority { font-size:.8rem;padding:.2rem .5rem;border-radius:8px;color:var(--color-text-primary); border: 1px solid transparent; }
-.task-priority.p1{background-color:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2)} .task-priority.p2{background-color:rgba(245,158,11,.1);border-color:rgba(245,158,11,.2)} .task-priority.p3{background-color:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2)} .task-priority.p4{background-color:#f3f4f6;border-color:#e5e7eb}
+.task-priority.p1{background-color:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2); color: #991B1B;} .task-priority.p2{background-color:rgba(245,158,11,.1);border-color:rgba(245,158,11,.2); color: #9A3412;} .task-priority.p3{background-color:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2); color: #047857;} .task-priority.p4{background-color:#f3f4f6;border-color:#e5e7eb; color: #4B5563;}
 
 /* --- 6. MODAL (Redesenhado) --- */
 .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.1);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;animation:fadeIn .3s forwards}@keyframes fadeIn{to{opacity:1}}
