@@ -16,29 +16,32 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('lifeOSState', JSON.stringify(state));
     }
 
+    // *** CORREÇÃO DEFINITIVA: Função loadState robusta ***
     function loadState() {
         const savedState = localStorage.getItem('lifeOSState');
         if (savedState) {
             try {
                 const parsedState = JSON.parse(savedState);
-                // Garante que o estado carregado tenha as chaves esperadas
-                state = {
-                    tasks: [],
-                    notes: [],
-                    calendarEvents: [],
-                    ...parsedState
-                };
+                // Valida a estrutura dos dados carregados para evitar erros
+                state.tasks = Array.isArray(parsedState.tasks) ? parsedState.tasks : [];
+                state.notes = Array.isArray(parsedState.notes) ? parsedState.notes : [];
+                state.calendarEvents = Array.isArray(parsedState.calendarEvents) ? parsedState.calendarEvents : [];
             } catch (e) {
                 console.error("Erro ao carregar o estado, resetando para o padrão.", e);
-                // O estado permanece o padrão, permitindo que o app inicie de forma limpa
+                // Se houver erro, o estado padrão (listas vazias) é mantido.
             }
         }
     }
 
     // --- RENDERIZAÇÃO ---
     function render() {
-        const currentPage = window.location.hash.replace('#', '') || 'home';
-        renderPage(currentPage);
+        try {
+            const currentPage = window.location.hash.replace('#', '') || 'home';
+            renderPage(currentPage);
+        } catch (error) {
+            console.error("Um erro ocorreu durante a renderização:", error);
+            appContent.innerHTML = `<div class="card"><div class="card-title">Ocorreu um Erro</div><div class="card-content">Não foi possível carregar esta página. Tente recarregar ou contate o suporte.</div></div>`;
+        }
     }
 
     function renderPage(page) {
@@ -57,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (routes[page]) {
             appContent.innerHTML = routes[page];
         } else {
-            appContent.innerHTML = '<h1>Página não encontrada</h1>';
+            renderPage('home'); // Rota padrão se a URL for inválida
         }
         updateActiveNav(page);
     }
@@ -91,18 +94,16 @@ document.addEventListener('DOMContentLoaded', () => {
         createFab(() => openTaskModal());
         
         const taskList = document.getElementById('task-list');
-        // *** CORREÇÃO: Adicionar listeners apenas se a lista existir ***
         if (taskList && state.tasks.length > 0) {
             taskList.addEventListener('change', (e) => {
                 if (e.target.matches('.task-checkbox')) {
                     const task = state.tasks.find(t => t.id === e.target.dataset.id);
-                    task.completed = e.target.checked;
+                    if (task) task.completed = e.target.checked;
                     saveState();
                     render();
                 }
             });
             
-            // Lógica de Drag & Drop
             let draggedItemId = null;
             taskList.addEventListener('dragstart', (e) => {
                 if (e.target.matches('.task-item')) {
@@ -110,7 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => e.target.classList.add('dragging'), 0);
                 }
             });
-            taskList.addEventListener('dragend', (e) => e.target.classList.remove('dragging'));
+            taskList.addEventListener('dragend', (e) => {
+                if(e.target.matches('.task-item')) e.target.classList.remove('dragging')
+            });
             taskList.addEventListener('dragover', (e) => e.preventDefault());
             taskList.addEventListener('drop', (e) => {
                 e.preventDefault();
@@ -118,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (dropTarget && draggedItemId !== dropTarget.dataset.id) {
                     const draggedIndex = state.tasks.findIndex(t => t.id === draggedItemId);
                     const targetIndex = state.tasks.findIndex(t => t.id === dropTarget.dataset.id);
+                    if(draggedIndex === -1 || targetIndex === -1) return;
                     const [draggedItem] = state.tasks.splice(draggedIndex, 1);
                     state.tasks.splice(targetIndex, 0, draggedItem);
                     saveState();
@@ -160,13 +164,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = document.getElementById('taskId').value;
         const taskData = {
             title: document.getElementById('taskTitle').value,
-            deadline: document.getElementById('taskDeadline').value,
+            deadline: document.getElementById('taskDeadline').value || null,
             priority: document.getElementById('taskPriority').value
         };
 
         if (id) {
             const task = state.tasks.find(t => t.id === id);
-            Object.assign(task, taskData);
+            if(task) Object.assign(task, taskData);
         } else {
             const newTask = { id: `task-${Date.now()}`, completed: false, ...taskData };
             state.tasks.push(newTask);
@@ -223,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (id) {
             const note = state.notes.find(n => n.id === id);
-            Object.assign(note, noteData);
+            if(note) Object.assign(note, noteData);
         } else {
             const newNote = { id: `note-${Date.now()}`, ...noteData };
             state.notes.push(newNote);
@@ -251,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <h1 class="page-title">📅 Calendário</h1>
             <ul class="event-list">
                 ${allEvents.map(event => {
-                    const eventDate = new Date(event.date + 'T12:00:00Z'); // Usar UTC para evitar problemas de fuso
+                    const eventDate = new Date(event.date + 'T12:00:00Z');
                     const day = eventDate.getUTCDate();
                     const month = months[eventDate.getUTCMonth()];
                     return `
@@ -277,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     const routes = {
-        'home': '<h1>🏠 Início</h1><div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Seu dashboard central será construído aqui.</div></div>',
+        'home': '<h1>🏠 Início</h1><div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Este é o seu espaço. Em breve, este painel será preenchido com insights sobre sua vida.</div></div>',
         'settings': '<h1>⚙️ Ajustes</h1><div class="card"><div class="card-title">Tema</div><div class="card-content">Opções para alterar o tema (Light/Dark/Glass) estarão aqui.</div></div>'
     };
 
@@ -300,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadState();
         navBar.addEventListener('click', navigate);
         window.addEventListener('hashchange', render);
-        render(); // Renderiza a página inicial
+        render();
     }
 
     init();
