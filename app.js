@@ -10,13 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const appContent = document.getElementById('app-content');
     const navBar = document.getElementById('bottom-navbar');
     const modalContainer = document.getElementById('modal-container');
-
     if (!appContent || !navBar || !modalContainer) { console.error('Elementos essenciais do DOM não foram encontrados.'); return; }
 
-    // --- ESTADO DA APLICAÇÃO ---
     let state = {};
 
-    // --- PERSISTÊNCIA ROBUSTA ---
+    // --- PERSISTÊNCIA ---
     function saveState() { try { localStorage.setItem('lifeOSState', JSON.stringify(state)); } catch (e) { console.error("Erro ao salvar o estado:", e); } }
     function loadState() {
         let savedState = null;
@@ -48,12 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- FUNÇÕES HELPER ---
     function calculateDaysRemaining(dateString) {
         const today = new Date();
-        const deadline = new Date(dateString + 'T23:59:59'); // Considera o final do dia
-        today.setHours(0, 0, 0, 0); // Zera a hora do dia atual para uma comparação justa
-
+        const deadline = new Date(dateString + 'T23:59:59');
+        today.setHours(0, 0, 0, 0);
         const diffTime = deadline - today;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
         if (diffDays < 0) return 'Prazo encerrado';
         if (diffDays === 0) return 'Termina hoje ⌛';
         if (diffDays === 1) return 'Falta 1 dia';
@@ -67,36 +63,32 @@ document.addEventListener('DOMContentLoaded', () => {
         appContent.innerHTML = `
             <h1 class="page-title">Tarefas & Projetos</h1>
             <ul class="card-grid" id="task-list">
-                ${state.tasks.map(task => {
-                    const subtasksInfo = task.subtasks && task.subtasks.length > 0 ? `${task.subtasks.filter(st => st.done).length} de ${task.subtasks.length} concluídas` : '';
-                    return `
+                ${state.tasks.map(task => `
                     <li class="task-item card ${task.completed ? 'completed' : ''}" data-id="${task.id}" draggable="true">
+                        <button class="delete-btn" data-id="${task.id}">&times;</button>
                         <div class="task-header">
+                            <label class="custom-checkbox-container">
+                                <input type="checkbox" class="task-checkbox" data-id="${task.id}" ${task.completed ? 'checked' : ''}>
+                                <span class="checkmark"></span>
+                            </label>
                             <div class="task-info">
-                                <label class="custom-checkbox-container">
-                                    <input type="checkbox" class="task-checkbox" data-id="${task.id}" ${task.completed ? 'checked' : ''}>
-                                    <span class="checkmark"></span>
-                                </label>
                                 <h3 class="card-title">${task.title}</h3>
                             </div>
-                            <span class="task-priority p${task.priority}">P${task.priority}</span>
                         </div>
-                        
                         <div class="card-content card-meta">
-                            ${subtasksInfo ? `<div class="meta-item"><svg viewBox="0 0 24 24"><path d="M.../></svg><span>${subtasksInfo}</span></div>` : ''}
                             ${task.deadline ? `<div class="meta-item"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg><span>${calculateDaysRemaining(task.deadline)}</span></div>` : ''}
                         </div>
-
                         <div class="progress-container">
                             <div class="progress-bar-container">
                                 <div class="progress-bar-fill" style="width: ${task.progress || 0}%;"></div>
                             </div>
                             <span class="progress-text">${task.progress || 0}%</span>
                         </div>
-                        <button class="delete-btn" data-id="${task.id}">&times;</button>
+                        <div class="task-footer">
+                            <span class="task-priority p${task.priority}">P${task.priority}</span>
+                        </div>
                     </li>
-                    `;
-                }).join('')}
+                `).join('')}
             </ul>
             ${state.tasks.length === 0 ? '<div class="card"><p class="card-content">Nenhuma tarefa encontrada. Adicione uma nova!</p></div>' : ''}
         `;
@@ -120,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${event.priority ? `<span class="task-priority p${event.priority}">P${event.priority}</span>` : ''}
                 </div>
                 <div class="event-countdown">
-                    <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
                     <span>${calculateDaysRemaining(event.deadline)}</span>
                 </div>
             </div>
@@ -128,35 +119,79 @@ document.addEventListener('DOMContentLoaded', () => {
         `}).join('')}</div>${allEvents.length === 0 ? '<div class="card"><p class="card-content">Nenhum evento ou tarefa com prazo encontrados.</p></div>' : ''}`;
     }
 
-    function renderNotesPage() { appContent.innerHTML = `<h1 class="page-title">Notas & Ideias</h1><div class="card-grid" id="notes-grid">${state.notes.map(note => `<div class="note-card card" data-id="${note.id}"><button class="delete-btn" data-id="${note.id}">&times;</button><h3 class="card-title">${note.title}</h3><p class="note-card-content card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p></div>`).join('')}</div>${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada. Adicione uma nova!</p></div>' : ''}`; createFab(() => openNoteModal()); attachNoteListeners(); }
+    function renderNotesPage() { appContent.innerHTML = `<h1 class="page-title">Notas & Ideias</h1><div class="card-grid" id="notes-grid">${state.notes.map(note => `<div class="note-card card" data-id="${note.id}"><button class="delete-btn" data-id="${note.id}">&times;</button><h3 class="card-title">${note.title}</h3><p class="card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p></div>`).join('')}</div>${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada. Adicione uma nova!</p></div>' : ''}`; createFab(() => openNoteModal()); attachNoteListeners(); }
     function renderSettingsPage() { appContent.innerHTML = `<h1 class="page-title">Ajustes</h1><div class="card"><div class="card-title">Em Breve</div><div class="card-content">Configurações de tema, importação/exportação e outras opções aparecerão aqui.</div></div>`; }
 
-    // --- LÓGICA DE EVENTOS & MODAIS ---
+    // --- MODAIS E EVENTOS ---
     function createFab(onClick) { const fab = document.createElement('button');fab.className = 'fab';fab.textContent = '+';fab.onclick = onClick;document.body.appendChild(fab); }
     function closeModal() { modalContainer.innerHTML = ''; }
+
+    function showConfirmationModal(message) {
+        return new Promise((resolve, reject) => {
+            modalContainer.innerHTML = `
+                <div class="modal-overlay">
+                    <div class="modal-content confirm-modal-content">
+                        <h2 class="modal-title">Confirmação</h2>
+                        <p class="card-content">${message}</p>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button>
+                            <button type="button" class="btn btn-primary" id="confirm-btn">Confirmar</button>
+                        </div>
+                    </div>
+                </div>`;
+            
+            modalContainer.querySelector('#confirm-btn').onclick = () => { closeModal(); resolve(); };
+            modalContainer.querySelector('#cancel-btn').onclick = () => { closeModal(); reject(); };
+        });
+    }
     
-    function attachTaskListeners() {
+    async function attachTaskListeners() {
         const taskList = document.getElementById('task-list');
         if (!taskList) return;
-        taskList.addEventListener('click', (e) => {
+        taskList.addEventListener('click', async (e) => {
             const deleteBtn = e.target.closest('.delete-btn');
             const taskCard = e.target.closest('.task-item');
             const checkboxContainer = e.target.closest('.custom-checkbox-container');
-            if (deleteBtn) { e.stopPropagation(); if (confirm('Tem certeza?')) { state.tasks = state.tasks.filter(t => t.id !== deleteBtn.dataset.id); saveState(); render(); } return; }
-            if (checkboxContainer) { e.stopPropagation(); const checkbox = checkboxContainer.querySelector('input'); const task = state.tasks.find(t => t.id === checkbox.dataset.id); if (task) { task.completed = checkbox.checked; saveState(); render(); } return; }
+
+            if (deleteBtn) {
+                e.stopPropagation();
+                try {
+                    await showConfirmationModal('Deseja realmente excluir esta tarefa?');
+                    state.tasks = state.tasks.filter(t => t.id !== deleteBtn.dataset.id);
+                    saveState();
+                    render();
+                } catch { /* Ação cancelada */ }
+                return;
+            }
+            if (checkboxContainer) { 
+                e.stopPropagation(); 
+                const checkbox = checkboxContainer.querySelector('input'); 
+                const task = state.tasks.find(t => t.id === checkbox.dataset.id); 
+                if (task) { task.completed = checkbox.checked; saveState(); render(); } 
+                return; 
+            }
             if (taskCard) { const task = state.tasks.find(t => t.id === taskCard.dataset.id); if (task) openTaskModal(task); }
         });
         // Drag & Drop
         let draggedItemId = null; taskList.addEventListener('dragstart', (e) => {if (e.target.matches('.task-item')) {draggedItemId = e.target.dataset.id;setTimeout(() => e.target.classList.add('dragging'), 0);}}); taskList.addEventListener('dragend', (e) => {if(e.target.matches('.task-item')) e.target.classList.remove('dragging')}); taskList.addEventListener('dragover', (e) => e.preventDefault()); taskList.addEventListener('drop', (e) => {e.preventDefault();const dropTarget = e.target.closest('.task-item');if (dropTarget && draggedItemId !== dropTarget.dataset.id) {const draggedIndex = state.tasks.findIndex(t => t.id === draggedItemId);const targetIndex = state.tasks.findIndex(t => t.id === dropTarget.dataset.id);if(draggedIndex === -1 || targetIndex === -1) return;const [draggedItem] = state.tasks.splice(draggedIndex, 1);state.tasks.splice(targetIndex, 0, draggedItem);saveState();render();}});
     }
     
-    function attachNoteListeners(){
+    async function attachNoteListeners(){
         const notesGrid = document.getElementById('notes-grid');
         if (!notesGrid) return;
-        notesGrid.addEventListener('click', (e) => {
+        notesGrid.addEventListener('click', async (e) => {
             const deleteBtn = e.target.closest('.delete-btn');
             const noteCard = e.target.closest('.note-card');
-            if(deleteBtn){ e.stopPropagation(); if(confirm('Tem certeza?')){ state.notes = state.notes.filter(n => n.id !== deleteBtn.dataset.id); saveState(); render(); } return; }
+            if(deleteBtn){
+                e.stopPropagation();
+                try {
+                    await showConfirmationModal('Deseja realmente excluir esta nota?');
+                    state.notes = state.notes.filter(n => n.id !== deleteBtn.dataset.id);
+                    saveState();
+                    render();
+                } catch { /* Ação cancelada */ }
+                return;
+            }
             if(noteCard){ const note = state.notes.find(n => n.id === noteCard.dataset.id); if(note) openNoteModal(note); }
         });
     }
@@ -192,12 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // --- INICIALIZAÇÃO ---
-    function init() {
-        loadState();
-        navBar.addEventListener('click', (e) => { const navItem = e.target.closest('.nav-item'); if (navItem) { e.preventDefault(); window.location.hash = navItem.dataset.page; } });
-        window.addEventListener('hashchange', render);
-        render();
-    }
+    function init() { loadState(); navBar.addEventListener('click', (e) => { const navItem = e.target.closest('.nav-item'); if (navItem) { e.preventDefault(); window.location.hash = navItem.dataset.page; } }); window.addEventListener('hashchange', render); render(); }
 
     init();
 });
