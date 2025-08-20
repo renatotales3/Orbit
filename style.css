@@ -117,16 +117,6 @@ body { font-family: var(--font-main); background: linear-gradient(135deg, var(--
 .day-toggle { flex: 1; padding: 0.75rem 0; border: 1px solid var(--color-border); background: transparent; color: var(--color-text-secondary); border-radius: 8px; cursor: pointer; text-align: center; }
 .day-toggle.selected { background-color: var(--color-accent); border-color: var(--color-accent); color: white; }
 .form-group.hidden { display: none; }
-/* NOVO: Estilos para o modal de registro rápido */
-.habit-log-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
-}
-.habit-log-actions .btn {
-    flex-grow: 1;
-}
-.btn-danger {
-    background: var(--color-danger);
-    color: white;
-}
+.habit-log-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
+.habit-log-actions .btn { flex-grow: 1; }
+.btn-danger { background: var(--color-danger); color: white; }
