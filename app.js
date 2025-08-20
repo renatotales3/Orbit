@@ -1,3 +1,4 @@
+// Adiciona um listener global para capturar erros não tratados
 window.addEventListener('error', function (event) {
     console.error('ERRO GLOBAL CAPTURADO:', event.error);
     document.body.innerHTML = `<div style="padding: 24px; color: white;">Ocorreu um erro crítico. Recarregue a página.</div>`;
@@ -46,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Lógica de Destaque
         if (page === 'notes' && state.pendingHighlightNoteId) {
             highlightNote(state.pendingHighlightNoteId);
-            state.pendingHighlightNoteId = null; // Limpa o estado
+            state.pendingHighlightNoteId = null;
             saveState();
         }
     }
@@ -165,10 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target.closest('.custom-checkbox-container')) { e.stopPropagation(); const checkbox = e.target.closest('.custom-checkbox-container').querySelector('input'); const task = state.tasks.find(t => t.id === id); if (task) { task.completed = checkbox.checked; saveState(); render(); } return; }
             if (e.target.closest('.attached-note-link')) { e.stopPropagation(); state.pendingHighlightNoteId = e.target.closest('.attached-note-link').dataset.noteId; saveState(); window.location.hash = '#notes'; return; }
             
-            // Se nenhum botão específico foi clicado, abre o viewer
             const task = state.tasks.find(t => t.id === id); if (task) openTaskViewer(task);
         });
-        // Drag & Drop
         let draggedItemId = null; taskList.addEventListener('dragstart', (e) => {if (e.target.matches('.task-item')) {draggedItemId = e.target.dataset.id;setTimeout(() => e.target.classList.add('dragging'), 0);}}); taskList.addEventListener('dragend', (e) => {if(e.target.matches('.task-item')) e.target.classList.remove('dragging')}); taskList.addEventListener('dragover', (e) => e.preventDefault()); taskList.addEventListener('drop', (e) => {e.preventDefault();const dropTarget = e.target.closest('.task-item');if (dropTarget && draggedItemId !== dropTarget.dataset.id) {const draggedIndex = state.tasks.findIndex(t => t.id === draggedItemId);const targetIndex = state.tasks.findIndex(t => t.id === dropTarget.dataset.id);if(draggedItemId === -1 || targetIndex === -1) return;const [draggedItem] = state.tasks.splice(draggedIndex, 1);state.tasks.splice(targetIndex, 0, draggedItem);saveState();render();}});
     }
     
@@ -187,7 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- MODAIS DE FORMULÁRIO ---
     function openTaskModal(task = null) {
         const notesOptions = state.notes.map(note => `<option value="${note.id}" ${task && task.attachedNoteId === note.id ? 'selected' : ''}>${note.title}</option>`).join('');
         modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content"><form id="task-form"><div class="modal-header"><h2 class="modal-title">${task ? 'Editar Tarefa' : 'Nova Tarefa'}</h2><button type="button" class="modal-close-btn">&times;</button></div><input type="hidden" id="taskId" value="${task ? task.id : ''}"><div class="form-group"><label for="taskTitle">Título</label><input type="text" id="taskTitle" class="form-control" value="${task ? task.title : ''}" required></div><div class="form-group"><label for="taskDeadline">Prazo</label><input type="date" id="taskDeadline" class="form-control" value="${task ? (task.deadline || '') : ''}"></div><div class="form-group"><label for="taskProgress">Progresso (%)</label><input type="number" id="taskProgress" class="form-control" value="${task ? (task.progress || 0) : 0}" min="0" max="100"></div><div class="form-group"><label for="taskPriority">Prioridade</label><select id="taskPriority" class="form-control"><option value="1" ${task && task.priority == 1 ? 'selected' : ''}>P1</option><option value="2" ${task && task.priority == 2 ? 'selected' : ''}>P2</option><option value="3" ${(task && task.priority == 3) || !task ? 'selected' : ''}>P3</option><option value="4" ${task && task.priority == 4 ? 'selected' : ''}>P4</option></select></div><div class="form-group"><label for="attachedNoteId">Anexar Nota</label><select id="attachedNoteId" class="form-control"><option value="">Nenhuma</option>${notesOptions}</select></div><div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div></form></div></div>`;
@@ -202,10 +200,23 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- NOVOS MODAIS DE VISUALIZAÇÃO ---
     function openTaskViewer(task) {
-        const noteLink = task.attachedNoteId ? `<button class="attached-note-link" data-note-id="${task.attachedNoteId}">${ICONS.note} Ver Nota de Referência</button>` : '';
-        modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content viewer-modal-content"><div class="modal-header"><h2 class="modal-title">${task.title}</h2><button type="button" class="modal-close-btn">&times;</button></div><div class="viewer-content"><div class="progress-container" style="margin-top:0;"><div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${task.progress || 0}%;"></div></div><span class="progress-text">${task.progress || 0}%</span></div><div class="card-meta" style="margin-top: 1.5rem;">${task.deadline ? `<div class="meta-item">${ICONS.calendar}<span>${calculateDaysRemaining(task.deadline)}</span></div>` : ''}${noteLink}</div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" id="edit-from-viewer-btn">Editar</button></div></div></div>`;
+        const noteLinkHTML = task.attachedNoteId ? `<button class="attached-note-link" data-note-id="${task.attachedNoteId}">${ICONS.note} Ver Nota de Referência</button>` : '';
+        modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content viewer-modal-content"><div class="modal-header"><h2 class="modal-title">${task.title}</h2><button type="button" class="modal-close-btn">&times;</button></div><div class="viewer-content"><div class="progress-container" style="margin-top:0;"><div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${task.progress || 0}%;"></div></div><span class="progress-text">${task.progress || 0}%</span></div><div class="card-meta" style="margin-top: 1.5rem;">${task.deadline ? `<div class="meta-item">${ICONS.calendar}<span>${calculateDaysRemaining(task.deadline)}</span></div>` : ''}${noteLinkHTML}</div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" id="edit-from-viewer-btn">Editar</button></div></div></div>`;
+        
         modalContainer.querySelector('.modal-close-btn').onclick = closeModal;
         modalContainer.querySelector('#edit-from-viewer-btn').onclick = () => openTaskModal(task);
+        
+        // *** CORREÇÃO: Adiciona o event listener para o link da nota ***
+        const noteLinkButton = modalContainer.querySelector('.attached-note-link');
+        if (noteLinkButton) {
+            noteLinkButton.onclick = (e) => {
+                e.stopPropagation();
+                closeModal();
+                state.pendingHighlightNoteId = noteLinkButton.dataset.noteId;
+                saveState();
+                window.location.hash = '#notes';
+            };
+        }
     }
 
     function openNoteViewer(note) {
