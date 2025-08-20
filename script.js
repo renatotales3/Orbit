@@ -1,296 +1,56 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- ELEMENTOS DO DOM ---
+    // 1. Tenta encontrar os elementos essenciais da página.
     const appContent = document.getElementById('app-content');
     const navBar = document.getElementById('bottom-navbar');
-    const modalContainer = document.getElementById('modal-container');
 
-    // --- ESTADO DA APLICAÇÃO ---
-    let state = {
-        tasks: [],
-        notes: [],
-        calendarEvents: []
-    };
-
-    // --- PERSISTÊNCIA (localStorage) ---
-    function saveState() {
-        localStorage.setItem('lifeOSState', JSON.stringify(state));
+    // Se um dos elementos principais não for encontrado, o app não pode funcionar.
+    if (!appContent || !navBar) {
+        console.error("Erro Crítico: Elementos essenciais do HTML (app-content ou bottom-navbar) não foram encontrados.");
+        document.body.innerHTML = "Erro Crítico de Inicialização. Verifique o HTML.";
+        return; // Interrompe a execução
     }
 
-    // *** CORREÇÃO DEFINITIVA: Função loadState robusta ***
-    function loadState() {
-        const savedState = localStorage.getItem('lifeOSState');
-        if (savedState) {
-            try {
-                const parsedState = JSON.parse(savedState);
-                // Valida a estrutura dos dados carregados para evitar erros
-                state.tasks = Array.isArray(parsedState.tasks) ? parsedState.tasks : [];
-                state.notes = Array.isArray(parsedState.notes) ? parsedState.notes : [];
-                state.calendarEvents = Array.isArray(parsedState.calendarEvents) ? parsedState.calendarEvents : [];
-            } catch (e) {
-                console.error("Erro ao carregar o estado, resetando para o padrão.", e);
-                // Se houver erro, o estado padrão (listas vazias) é mantido.
-            }
-        }
-    }
-
-    // --- RENDERIZAÇÃO ---
-    function render() {
-        try {
-            const currentPage = window.location.hash.replace('#', '') || 'home';
-            renderPage(currentPage);
-        } catch (error) {
-            console.error("Um erro ocorreu durante a renderização:", error);
-            appContent.innerHTML = `<div class="card"><div class="card-title">Ocorreu um Erro</div><div class="card-content">Não foi possível carregar esta página. Tente recarregar ou contate o suporte.</div></div>`;
-        }
-    }
-
-    function renderPage(page) {
-        appContent.innerHTML = '';
-        const oldFab = document.querySelector('.fab');
-        if (oldFab) oldFab.remove();
-
-        const pageRenderer = {
-            'tasks': renderTasksPage,
-            'notes': renderNotesPage,
-            'calendar': renderCalendarPage,
-        }[page];
-
-        if (pageRenderer) {
-            pageRenderer();
-        } else if (routes[page]) {
-            appContent.innerHTML = routes[page];
-        } else {
-            renderPage('home'); // Rota padrão se a URL for inválida
-        }
-        updateActiveNav(page);
-    }
-    
-    function createFab(onClick) {
-        const fab = document.createElement('button');
-        fab.className = 'fab';
-        fab.textContent = '+';
-        fab.onclick = onClick;
-        document.body.appendChild(fab);
-    }
-
-    // --- MÓDULO DE TAREFAS ---
-    function renderTasksPage() {
-        const tasksHTML = `
-            <h1 class="page-title">✅ Tarefas & Projetos</h1>
-            <ul class="task-list" id="task-list">
-                ${state.tasks.map(task => `
-                    <li class="task-item card ${task.completed ? 'completed' : ''}" data-id="${task.id}" draggable="true">
-                        <div class="task-info">
-                            <input type="checkbox" class="task-checkbox" data-id="${task.id}" ${task.completed ? 'checked' : ''}>
-                            <span class="task-title">${task.title}</span>
-                        </div>
-                        <span class="task-priority p${task.priority}">P${task.priority}</span>
-                    </li>
-                `).join('')}
-            </ul>
-            ${state.tasks.length === 0 ? '<p class="card-content">Nenhuma tarefa encontrada. Adicione uma nova!</p>' : ''}
-        `;
-        appContent.innerHTML = tasksHTML;
-        createFab(() => openTaskModal());
-        
-        const taskList = document.getElementById('task-list');
-        if (taskList && state.tasks.length > 0) {
-            taskList.addEventListener('change', (e) => {
-                if (e.target.matches('.task-checkbox')) {
-                    const task = state.tasks.find(t => t.id === e.target.dataset.id);
-                    if (task) task.completed = e.target.checked;
-                    saveState();
-                    render();
-                }
-            });
-            
-            let draggedItemId = null;
-            taskList.addEventListener('dragstart', (e) => {
-                if (e.target.matches('.task-item')) {
-                    draggedItemId = e.target.dataset.id;
-                    setTimeout(() => e.target.classList.add('dragging'), 0);
-                }
-            });
-            taskList.addEventListener('dragend', (e) => {
-                if(e.target.matches('.task-item')) e.target.classList.remove('dragging')
-            });
-            taskList.addEventListener('dragover', (e) => e.preventDefault());
-            taskList.addEventListener('drop', (e) => {
-                e.preventDefault();
-                const dropTarget = e.target.closest('.task-item');
-                if (dropTarget && draggedItemId !== dropTarget.dataset.id) {
-                    const draggedIndex = state.tasks.findIndex(t => t.id === draggedItemId);
-                    const targetIndex = state.tasks.findIndex(t => t.id === dropTarget.dataset.id);
-                    if(draggedIndex === -1 || targetIndex === -1) return;
-                    const [draggedItem] = state.tasks.splice(draggedIndex, 1);
-                    state.tasks.splice(targetIndex, 0, draggedItem);
-                    saveState();
-                    render();
-                }
-            });
-        }
-    }
-
-    function openTaskModal(task = null) {
-        const modalHTML = `
-            <div class="modal-overlay">
-                <div class="modal-content">
-                    <div class="modal-header"><h2 class="modal-title">${task ? 'Editar Tarefa' : 'Nova Tarefa'}</h2><button class="modal-close-btn">&times;</button></div>
-                    <form id="task-form">
-                        <input type="hidden" id="taskId" value="${task ? task.id : ''}">
-                        <div class="form-group"><label for="taskTitle">Título</label><input type="text" id="taskTitle" class="form-control" value="${task ? task.title : ''}" required></div>
-                        <div class="form-group"><label for="taskDeadline">Prazo (Opcional)</label><input type="date" id="taskDeadline" class="form-control" value="${task ? task.deadline : ''}"></div>
-                        <div class="form-group"><label for="taskPriority">Prioridade</label>
-                            <select id="taskPriority" class="form-control">
-                                <option value="1" ${task && task.priority == 1 ? 'selected' : ''}>P1 - Urgente</option>
-                                <option value="2" ${task && task.priority == 2 ? 'selected' : ''}>P2 - Alta</option>
-                                <option value="3" ${(task && task.priority == 3) || !task ? 'selected' : ''}>P3 - Média</option>
-                                <option value="4" ${task && task.priority == 4 ? 'selected' : ''}>P4 - Baixa</option>
-                            </select>
-                        </div>
-                        <div class="modal-footer"><button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div>
-                    </form>
-                </div>
-            </div>`;
-        modalContainer.innerHTML = modalHTML;
-        
-        modalContainer.querySelector('#task-form').addEventListener('submit', handleTaskSave);
-        modalContainer.querySelector('.modal-close-btn').addEventListener('click', closeModal);
-        modalContainer.querySelector('#cancel-btn').addEventListener('click', closeModal);
-    }
-    
-    function handleTaskSave(e) {
-        e.preventDefault();
-        const id = document.getElementById('taskId').value;
-        const taskData = {
-            title: document.getElementById('taskTitle').value,
-            deadline: document.getElementById('taskDeadline').value || null,
-            priority: document.getElementById('taskPriority').value
-        };
-
-        if (id) {
-            const task = state.tasks.find(t => t.id === id);
-            if(task) Object.assign(task, taskData);
-        } else {
-            const newTask = { id: `task-${Date.now()}`, completed: false, ...taskData };
-            state.tasks.push(newTask);
-        }
-        saveState();
-        render();
-        closeModal();
-    }
-
-    // --- MÓDULO DE NOTAS ---
-    function renderNotesPage() {
-        const notesHTML = `
-            <h1 class="page-title">📓 Notas & Ideias</h1>
-            <div class="notes-grid">
-                ${state.notes.map(note => `
-                    <div class="note-card card" data-id="${note.id}">
-                        <h3 class="card-title">${note.title}</h3>
-                        <p class="note-card-content card-content">${note.content.substring(0, 150)}${note.content.length > 150 ? '...' : ''}</p>
-                    </div>
-                `).join('')}
-            </div>
-             ${state.notes.length === 0 ? '<p class="card-content">Nenhuma nota encontrada. Adicione uma nova!</p>' : ''}`;
-        appContent.innerHTML = notesHTML;
-        createFab(() => openNoteModal());
-    }
-
-    function openNoteModal(note = null) {
-        const modalHTML = `
-            <div class="modal-overlay">
-                <div class="modal-content">
-                    <div class="modal-header"><h2 class="modal-title">${note ? 'Editar Nota' : 'Nova Nota'}</h2><button class="modal-close-btn">&times;</button></div>
-                    <form id="note-form">
-                        <input type="hidden" id="noteId" value="${note ? note.id : ''}">
-                        <div class="form-group"><label for="noteTitle">Título</label><input type="text" id="noteTitle" class="form-control" value="${note ? note.title : ''}" required></div>
-                        <div class="form-group"><label for="noteContent">Conteúdo</label><textarea id="noteContent" class="form-control">${note ? note.content : ''}</textarea></div>
-                        <div class="modal-footer"><button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div>
-                    </form>
-                </div>
-            </div>`;
-        modalContainer.innerHTML = modalHTML;
-        
-        modalContainer.querySelector('#note-form').addEventListener('submit', handleNoteSave);
-        modalContainer.querySelector('.modal-close-btn').addEventListener('click', closeModal);
-        modalContainer.querySelector('#cancel-btn').addEventListener('click', closeModal);
-    }
-
-    function handleNoteSave(e) {
-        e.preventDefault();
-        const id = document.getElementById('noteId').value;
-        const noteData = {
-            title: document.getElementById('noteTitle').value,
-            content: document.getElementById('noteContent').value
-        };
-
-        if (id) {
-            const note = state.notes.find(n => n.id === id);
-            if(note) Object.assign(note, noteData);
-        } else {
-            const newNote = { id: `note-${Date.now()}`, ...noteData };
-            state.notes.push(newNote);
-        }
-        saveState();
-        render();
-        closeModal();
-    }
-
-    // --- MÓDULO DE CALENDÁRIO ---
-    function renderCalendarPage() {
-        const tasksWithDeadline = state.tasks
-            .filter(task => task.deadline)
-            .map(task => ({
-                date: task.deadline,
-                title: task.title,
-                source: 'Tarefas'
-            }));
-            
-        const allEvents = [...tasksWithDeadline].sort((a, b) => new Date(a.date) - new Date(b.date));
-        
-        const months = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
-
-        const calendarHTML = `
+    // 2. Define um conteúdo SIMPLES e ESTÁTICO para cada página.
+    const diagnosticRoutes = {
+        'home': `
+            <h1 class="page-title">🏠 Início</h1>
+            <div class="card"><div class="card-title">Diagnóstico</div><div class="card-content">A página de Início carregou.</div></div>
+        `,
+        'tasks': `
+            <h1 class="page-title">✅ Tarefas</h1>
+            <div class="card"><div class="card-title">Diagnóstico</div><div class="card-content">A página de Tarefas carregou.</div></div>
+        `,
+        'calendar': `
             <h1 class="page-title">📅 Calendário</h1>
-            <ul class="event-list">
-                ${allEvents.map(event => {
-                    const eventDate = new Date(event.date + 'T12:00:00Z');
-                    const day = eventDate.getUTCDate();
-                    const month = months[eventDate.getUTCMonth()];
-                    return `
-                    <li class="event-item card">
-                        <div class="event-date">
-                            <span class="event-day">${day}</span>
-                            <span class="event-month">${month}</span>
-                        </div>
-                        <div class="event-details">
-                            <p class="event-title">${event.title}</p>
-                            <span class="event-source">${event.source}</span>
-                        </div>
-                    </li>
-                `}).join('')}
-            </ul>
-            ${allEvents.length === 0 ? '<p class="card-content">Nenhum evento ou tarefa com prazo encontrados.</p>' : ''}`;
-        appContent.innerHTML = calendarHTML;
-    }
-
-    // --- MODAL & NAVEGAÇÃO ---
-    function closeModal() {
-        modalContainer.innerHTML = '';
-    }
-    
-    const routes = {
-        'home': '<h1>🏠 Início</h1><div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Este é o seu espaço. Em breve, este painel será preenchido com insights sobre sua vida.</div></div>',
-        'settings': '<h1>⚙️ Ajustes</h1><div class="card"><div class="card-title">Tema</div><div class="card-content">Opções para alterar o tema (Light/Dark/Glass) estarão aqui.</div></div>'
+            <div class="card"><div class="card-title">Diagnóstico</div><div class="card-content">A página de Calendário carregou.</div></div>
+        `,
+        'notes': `
+            <h1 class="page-title">📓 Notas</h1>
+            <div class="card"><div class="card-title">Diagnóstico</div><div class="card-content">A página de Notas carregou.</div></div>
+        `,
+        'settings': `
+            <h1 class="page-title">⚙️ Ajustes</h1>
+            <div class="card"><div class="card-title">Diagnóstico</div><div class="card-content">A página de Ajustes carregou.</div></div>
+        `
     };
 
+    // 3. Função de renderização simplificada.
+    function renderPage(page) {
+        // Se a página não existir no nosso mapa de rotas, vai para a home.
+        const content = diagnosticRoutes[page] || diagnosticRoutes['home'];
+        appContent.innerHTML = content;
+        updateActiveNav(page);
+        console.log(`Página renderizada: ${page}`);
+    }
+
+    // 4. Função para atualizar o ícone ativo na navbar.
     function updateActiveNav(page) {
         navBar.querySelectorAll('.nav-item').forEach(item => {
             item.classList.toggle('active', item.dataset.page === page);
         });
     }
 
+    // 5. Função de navegação principal.
     function navigate(e) {
         const navItem = e.target.closest('.nav-item');
         if (navItem) {
@@ -299,13 +59,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- INICIALIZAÇÃO ---
+    // 6. Função de inicialização
     function init() {
-        loadState();
+        console.log("LifeOS Diagnóstico: Iniciando aplicação...");
         navBar.addEventListener('click', navigate);
-        window.addEventListener('hashchange', render);
-        render();
+
+        // Ouve por mudanças na URL (ex: #home -> #tasks)
+        window.addEventListener('hashchange', () => {
+            const page = window.location.hash.replace('#', '') || 'home';
+            renderPage(page);
+        });
+
+        // Renderiza a página inicial ou a que estiver na URL.
+        const initialPage = window.location.hash.replace('#', '') || 'home';
+        renderPage(initialPage);
+        console.log("LifeOS Diagnóstico: Aplicação iniciada.");
     }
 
+    // Inicia tudo.
     init();
 });
