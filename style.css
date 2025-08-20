@@ -46,12 +46,11 @@ body { font-family: var(--font-main); background: var(--color-background); color
 .card.highlight { animation: highlight-pulse 1.5s ease-out; }
 @keyframes highlight-pulse { 0% { box-shadow: 0 0 0 0 var(--color-accent); } 50% { box-shadow: 0 0 15px 5px rgba(255, 90, 95, 0.5); } 100% { box-shadow: 0 0 0 0 rgba(255, 90, 95, 0); } }
 .card-actions { position: absolute; top: 1rem; right: 1rem; display: flex; gap: 0.5rem; }
-.card-action-btn { width: 28px; height: 28px; background: var(--color-background); color: var(--color-text-secondary); border: 1px solid var(--color-border-subtle); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; opacity: 0.6; }
+.card-action-btn { width: 28px; height: 28px; background: var(--color-background); color: var(--color-text-secondary); border: 1px solid var(--color-border-subtle); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; opacity: 1; /* BOTÕES SEMPRE VISÍVEIS */ }
 .card-action-btn svg { width: 16px; height: 16px; stroke: currentColor; }
 .card-action-btn:hover { background-color: #f0f0f0; color: var(--color-text-primary); }
-@media (hover: hover) { .card-action-btn { opacity: 0; } .card:hover .card-action-btn { opacity: 1; } }
 
-/* --- 5. COMPONENTES UNIFICADOS --- */
+/* --- 5. MÓDULOS (ESTILO UNIFICADO) --- */
 .item-header { display: flex; align-items: center; gap: 1rem; }
 .custom-checkbox-container { display: block; position: relative; cursor: pointer; user-select: none; padding-left: 28px; height: 24px; }
 .custom-checkbox-container input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
@@ -72,7 +71,7 @@ body { font-family: var(--font-main); background: var(--color-background); color
 .tag.status-pending { background-color: rgba(239,68,68,.1); border-color: rgba(239,68,68,.2); color: #B91C1C; }
 
 .task-item.completed .card-title { text-decoration: line-through; color: var(--color-text-secondary); }
-.progress-container { display: flex; align-items: center; gap: 0.75rem; }
+.progress-container { display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem; }
 .progress-bar-container { background-color: var(--color-border-subtle); border-radius: 4px; height: 6px; flex-grow: 1; overflow: hidden; }
 .progress-bar-fill { background-color: var(--color-text-primary); height: 100%; border-radius: 4px; transition: width 0.3s ease-in-out; }
 .progress-text { font-size: 0.8rem; color: var(--color-text-secondary); font-weight: 500; }
@@ -86,9 +85,6 @@ body { font-family: var(--font-main); background: var(--color-background); color
 .day-square { width: 16px; height: 16px; background-color: var(--color-border-subtle); border-radius: 3px; }
 .day-square.completed { background-color: var(--color-status-done); opacity: 0.7; }
 .day-square.today { border: 1px solid var(--color-text-secondary); }
-.quant-action { display: flex; align-items: baseline; gap: 0.5rem; cursor: pointer; }
-.quant-progress { font-size: 1.1rem; font-weight: 600; color: var(--color-text-primary); }
-.quant-target { font-size: 0.8rem; color: var(--color-text-secondary); }
 
 .event-date{display:flex;flex-direction:column;align-items:center;justify-content:center;background-color:var(--color-background);border-radius:10px;padding:.8rem;text-align:center;width:65px;height:65px;flex-shrink:0}.event-day{font-size:1.8rem;font-weight:700;color:var(--color-accent);line-height:1}.event-month{font-size:.8rem;text-transform:uppercase;margin-top:2px}.event-details{display:flex;flex-direction:column;flex-grow:1;gap:.5rem}.event-details-header{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}.event-details .event-title{font-weight:600;color:var(--color-text-primary)}.event-footer{display: flex; align-items: center; gap: 0.75rem; margin-top: auto; padding-top: 0.5rem;}
 
