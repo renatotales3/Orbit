@@ -54,30 +54,11 @@ body {
 }
 
 /* --- 3. NAVBAR INFERIOR --- */
-.bottom-navbar {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    height: var(--navbar-height);
-    background: var(--color-navbar-background);
-    backdrop-filter: blur(var(--backdrop-blur));
-    -webkit-backdrop-filter: blur(var(--backdrop-blur));
-    border-top: 1px solid var(--color-border);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    box-shadow: var(--shadow-soft);
-    z-index: 100;
-}
+.bottom-navbar{position:fixed;bottom:0;left:0;right:0;height:var(--navbar-height);background:var(--color-navbar-background);backdrop-filter:blur(var(--backdrop-blur));-webkit-backdrop-filter:blur(var(--backdrop-blur));border-top:1px solid var(--color-border);display:flex;justify-content:space-around;align-items:center;box-shadow:var(--shadow-soft);z-index:100}
+.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:var(--color-text-secondary);transition:color .2s ease-in-out;padding:0 10px;height:100%}
+.nav-item.active,.nav-item:hover{color:var(--color-accent)}
+.nav-text{font-size:.85rem;font-weight:500}
 
-.nav-item {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; text-decoration: none;
-    color: var(--color-text-secondary);
-    transition: color 0.2s ease-in-out;
-    padding: 0 10px; height: 100%;
-}
-
-.nav-item.active, .nav-item:hover { color: var(--color-accent); }
-.nav-text { font-size: 0.85rem; font-weight: 500; }
 
 /* --- 4. COMPONENTES GENÉRICOS --- */
 .card {
@@ -91,8 +72,8 @@ body {
     box-shadow: var(--shadow-soft);
     transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
     cursor: pointer;
-    display: flex; /* Adicionado para layout interno */
-    flex-direction: column; /* Adicionado para layout interno */
+    display: flex;
+    flex-direction: column;
 }
 
 .card:hover {
@@ -101,36 +82,21 @@ body {
 }
 
 .card-title {
-    font-size: 1.2rem;
+    font-size: 1.1rem; /* Ajuste fino */
     font-weight: 600;
     color: var(--color-text-primary);
-    margin-bottom: 0.5rem;
-    padding-right: 20px;
+    margin: 0;
 }
 
 .card-content {
     font-size: 0.95rem;
     color: var(--color-text-secondary);
     line-height: 1.5;
-    flex-grow: 1; /* Faz o conteúdo principal ocupar o espaço */
+    flex-grow: 1;
 }
 
-.fab { /* Floating Action Button */
-    position: fixed;
-    bottom: calc(var(--navbar-height) + 20px);
-    right: 20px;
-    width: 56px; height: 56px;
-    background: var(--color-accent);
-    color: white; border: none; border-radius: 50%;
-    font-size: 28px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    transition: transform 0.2s ease;
-    z-index: 50;
-}
-
-.fab:hover { transform: scale(1.05); }
+.fab{position:fixed;bottom:calc(var(--navbar-height) + 20px);right:20px;width:56px;height:56px;background:var(--color-accent);color:white;border:none;border-radius:50%;font-size:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.2);transition:transform .2s ease;z-index:50}
+.fab:hover{transform:scale(1.05)}
 
 /* --- Grid Responsivo para Cards --- */
 .card-grid {
@@ -141,7 +107,7 @@ body {
     list-style: none;
 }
 
-/* --- 5. MÓDULO DE TAREFAS (Layout Interno do Card) --- */
+/* --- 5. MÓDULO DE TAREFAS --- */
 .task-item.completed .card-title {
     text-decoration: line-through;
     opacity: 0.6;
@@ -153,41 +119,90 @@ body {
     justify-content: space-between;
     align-items: flex-start;
     gap: 1rem;
+    margin-bottom: 1rem;
 }
 
 .task-info { display: flex; align-items: flex-start; gap: 1rem; }
-.task-checkbox { width: 20px; height: 20px; accent-color: var(--color-accent); cursor: pointer; margin-top: 4px; }
 
-/* NOVO: Meta-dados do Card */
+/* NOVO: Checkbox Customizado */
+.custom-checkbox-container {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    font-size: 22px;
+    user-select: none;
+    padding-left: 28px; /* Espaço para o checkbox */
+    margin-top: 2px;
+}
+.custom-checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: transparent;
+    border: 2px solid var(--color-text-secondary);
+    border-radius: 6px;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+.custom-checkbox-container:hover input ~ .checkmark {
+    border-color: var(--color-accent);
+}
+.custom-checkbox-container input:checked ~ .checkmark {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+.custom-checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+.custom-checkbox-container .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}
+/* Fim do Checkbox Customizado */
+
 .card-meta {
-    margin: 1rem 0;
+    margin: 0.5rem 0 1rem 0;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
     font-size: 0.85rem;
     color: var(--color-text-secondary);
+    flex-grow: 1;
 }
-.meta-item {
+.meta-item { display: flex; align-items: center; gap: 0.5rem; }
+.meta-item svg { width: 16px; height: 16px; fill: currentColor; opacity: 0.8; }
+
+.progress-container {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-}
-.meta-item svg {
-    width: 16px;
-    height: 16px;
-    fill: currentColor;
-    opacity: 0.8;
+    gap: 0.75rem;
+    margin: 1rem 0;
 }
 
-/* NOVO: Barra de Progresso */
 .progress-bar-container {
     background-color: rgba(120, 120, 128, 0.12);
     border-radius: 4px;
     height: 8px;
-    width: 100%;
+    flex-grow: 1;
     overflow: hidden;
-    margin-top: auto; /* Empurra para baixo */
-    margin-bottom: 1rem;
 }
 .progress-bar-fill {
     background-color: var(--color-accent);
@@ -195,48 +210,59 @@ body {
     border-radius: 4px;
     transition: width 0.3s ease-in-out;
 }
-
-.task-footer {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: auto; /* Empurra para baixo */
-}
-
-.task-priority {
+.progress-text {
     font-size: 0.8rem;
-    padding: 0.2rem 0.5rem;
-    border-radius: 8px;
-    color: var(--color-text-primary);
-}
-.task-priority.p1 { background-color: rgba(255, 59, 48, 0.5); }
-.task-priority.p2 { background-color: rgba(255, 149, 0, 0.5); }
-.task-priority.p3 { background-color: rgba(52, 199, 89, 0.5); }
-.task-priority.p4 { background-color: rgba(88, 86, 214, 0.5); }
-
-/* --- Botão de Deletar --- */
-.delete-btn {
-    position: absolute; top: 12px; right: 12px;
-    width: 28px; height: 28px;
-    background: rgba(120, 120, 128, 0.2);
     color: var(--color-text-secondary);
-    border: none; border-radius: 50%;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; line-height: 1;
-    transition: background-color 0.2s, color 0.2s;
-    opacity: 0.5;
+    font-weight: 500;
 }
-.card:hover .delete-btn { opacity: 1; }
-.delete-btn:hover { background-color: var(--color-danger); color: white; }
+
+.task-footer { margin-top: auto; }
+
+.task-priority{font-size:.8rem;padding:.2rem .5rem;border-radius:8px;color:var(--color-text-primary);display:inline-block;}
+.task-priority.p1{background-color:rgba(255,59,48,.5)}
+.task-priority.p2{background-color:rgba(255,149,0,.5)}
+.task-priority.p3{background-color:rgba(52,199,89,.5)}
+.task-priority.p4{background-color:rgba(88,86,214,.5)}
+
+.delete-btn{position:absolute;top:12px;right:12px;width:28px;height:28px;background:rgba(120,120,128,.2);color:var(--color-text-secondary);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;transition:background-color .2s,color .2s;opacity:.5}
+.card:hover .delete-btn{opacity:1}
+.delete-btn:hover{background-color:var(--color-danger);color:white}
+
 
 /* --- 6. MODAL --- */
-/* (Sem alterações aqui) */
 .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;animation:fadeIn .3s forwards}@keyframes fadeIn{to{opacity:1}}.modal-content{background:var(--color-card-background);backdrop-filter:blur(var(--backdrop-blur));border-radius:var(--card-border-radius);border:1px solid var(--color-border);padding:2rem;width:90%;max-width:500px;box-shadow:var(--shadow-soft);transform:scale(.95);animation:scaleIn .3s forwards}@keyframes scaleIn{to{transform:scale(1)}}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}.modal-title{font-size:1.5rem;font-weight:600}.modal-close-btn{background:none;border:none;color:var(--color-text-secondary);font-size:1.5rem;cursor:pointer}.form-group{margin-bottom:1rem}.form-group label{display:block;margin-bottom:.5rem;font-weight:500;color:var(--color-text-secondary)}.form-control,textarea.form-control{width:100%;padding:.8rem 1rem;background:rgba(120,120,128,.12);border:1px solid var(--color-border);border-radius:10px;color:var(--color-text-primary);font-size:1rem;font-family:var(--font-main)}textarea.form-control{resize:vertical;min-height:120px}.form-control:focus{outline:none;border-color:var(--color-accent);box-shadow:0 0 0 2px var(--color-accent)}.modal-footer{display:flex;justify-content:flex-end;gap:1rem;margin-top:2rem}.btn{padding:.8rem 1.5rem;border-radius:10px;border:none;font-weight:600;cursor:pointer;font-size:1rem}.btn-primary{background:var(--color-accent);color:white}.btn-secondary{background:rgba(120,120,128,.24);color:var(--color-text-primary)}
 
 /* --- 7. MÓDULO DE NOTAS --- */
 .note-card-content { white-space: pre-wrap; word-wrap: break-word; }
 
-/* --- 8. MÓDULO DE CALENDÁRIO --- */
-.event-list { list-style: none; padding: 0; }
-.event-item{display:flex;align-items:center;padding:1.25rem;gap:1.5rem;cursor:default}.event-item:hover{transform:none;box-shadow:var(--shadow-soft)}.event-date{display:flex;flex-direction:column;align-items:center;justify-content:center;background-color:rgba(120,120,128,.12);border-radius:10px;padding:.8rem;text-align:center;min-width:60px}.event-day{font-size:1.5rem;font-weight:600;color:var(--color-accent)}.event-month{font-size:.9rem;text-transform:uppercase}.event-details .event-title{font-weight:600;color:var(--color-text-primary)}.event-details .event-source{font-size:.8rem;margin-top:.25rem;padding:.2rem .5rem;border-radius:8px;background-color:rgba(120,120,128,.24);display:inline-block}
+/* --- 8. MÓDULO DE CALENDÁRIO (Layout Renovado) --- */
+.event-item{
+    flex-direction: row;
+    gap: 1.5rem;
+    align-items: center;
+    cursor: default;
+}
+.event-item:hover{transform:none;box-shadow:var(--shadow-soft)}
+.event-date{display:flex;flex-direction:column;align-items:center;justify-content:center;background-color:rgba(120,120,128,.12);border-radius:10px;padding:.8rem;text-align:center;min-width:65px;height:65px}
+.event-day{font-size:1.8rem;font-weight:700;color:var(--color-accent);line-height:1}
+.event-month{font-size:.8rem;text-transform:uppercase;margin-top:2px}
+
+.event-details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 0.5rem;
+}
+.event-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.event-details .event-title{font-weight:600;color:var(--color-text-primary)}
+.event-countdown {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
