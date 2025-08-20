@@ -48,7 +48,7 @@ body {
 .page-title {
     font-size: 2.5rem;
     font-weight: 700;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem; /* <<< ESPAÇAMENTO AUMENTADO */
     color: var(--color-text-primary);
 }
 
@@ -78,14 +78,18 @@ body {
     text-decoration: none;
     color: var(--color-text-secondary);
     transition: color 0.2s ease-in-out;
+    padding: 0 10px;
+    height: 100%;
 }
 
 .nav-item.active, .nav-item:hover {
     color: var(--color-accent);
 }
 
-.nav-icon { width: 26px; height: 26px; fill: currentColor; }
-.nav-text { font-size: 0.7rem; margin-top: 4px; }
+.nav-text {
+    font-size: 0.85rem; /* Aumentado para compensar a falta do ícone */
+    font-weight: 500;
+}
 
 /* --- 4. COMPONENTES GENÉRICOS --- */
 .card {
