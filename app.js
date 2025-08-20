@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function updateActiveNav(page) { navBar.querySelectorAll('.nav-item').forEach(item => { item.classList.toggle('active', item.dataset.page === page); }); }
 
+    // --- FUNÇÕES HELPER ---
     function calculateDaysRemaining(dateString) {
         const today = new Date();
         const deadline = new Date(dateString + 'T23:59:59');
@@ -52,6 +53,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return `Faltam ${diffDays} dias`;
     }
 
+    // NOVO: Helper para status da tarefa
+    function getTaskStatus(task) {
+        if (task.completed) {
+            return { text: 'Concluída', className: 'status-done' };
+        }
+        if (task.progress > 0) {
+            return { text: 'Em Progresso', className: 'status-progress' };
+        }
+        return { text: 'Pendente', className: 'status-pending' };
+    }
+
+
+    // --- FUNÇÕES DE RENDERIZAÇÃO DE PÁGINA ---
     function renderHomePage() { appContent.innerHTML = `<h1 class="page-title">Início</h1><div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Este é o seu espaço. Em breve, este painel será preenchido com insights sobre sua vida.</div></div>`; }
 
     function renderTasksPage() {
@@ -79,9 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             <span class="progress-text">${task.progress || 0}%</span>
                         </div>
-                        <div class="task-footer">
-                            <span class="task-priority p${task.priority}">P${task.priority}</span>
-                        </div>
+                        <span class="task-priority p${task.priority}">P${task.priority}</span>
                     </li>
                 `).join('')}
             </ul>
@@ -95,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const tasksWithDeadline = state.tasks.filter(task => task.deadline);
         const allEvents = [...tasksWithDeadline, ...state.calendarEvents].sort((a, b) => new Date(a.date || a.deadline) - new Date(b.date || b.deadline));
         const months = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
-        appContent.innerHTML = `<h1 class="page-title">Calendário</h1><div class="card-grid">${allEvents.map(event => { const eventDate = new Date((event.date || event.deadline) + 'T12:00:00Z'); const day = eventDate.getUTCDate(); const month = months[eventDate.getUTCMonth()]; return `
+        appContent.innerHTML = `<h1 class="page-title">Calendário</h1><div class="card-grid">${allEvents.map(event => { const eventDate = new Date((event.date || event.deadline) + 'T12:00:00Z'); const day = eventDate.getUTCDate(); const month = months[eventDate.getUTCMonth()]; const status = event.deadline ? getTaskStatus(event) : null; return `
         <div class="event-item card">
             <div class="event-date">
                 <span class="event-day">${day}</span>
@@ -106,7 +118,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h3 class="card-title event-title">${event.title}</h3>
                     ${event.priority ? `<span class="task-priority p${event.priority}">P${event.priority}</span>` : ''}
                 </div>
-                <div class="event-countdown">
+                ${status ? `<span class="status-tag ${status.className}">${status.text}</span>` : ''}
+                <div class="event-countdown" style="margin-top: auto; padding-top: 0.5rem;">
                     <span>${calculateDaysRemaining(event.deadline)}</span>
                 </div>
             </div>
@@ -115,37 +128,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderNotesPage() { appContent.innerHTML = `<h1 class="page-title">Notas & Ideias</h1><div class="card-grid" id="notes-grid">${state.notes.map(note => `<div class="note-card card" data-id="${note.id}"><button class="delete-btn" data-id="${note.id}">&times;</button><h3 class="card-title">${note.title}</h3><p class="card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p></div>`).join('')}</div>${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada. Adicione uma nova!</p></div>' : ''}`; createFab(() => openNoteModal()); attachNoteListeners(); }
-    
-    function renderSettingsPage() {
-        appContent.innerHTML = `
-            <h1 class="page-title">Ajustes</h1>
-            <div class="card">
-                <div class="card-title">LifeOS</div>
-                <div class="card-content">Versão 1.2</div>
-            </div>
-            <div class="card">
-                <div class="card-title">Em Breve</div>
-                <div class="card-content">Configurações de tema, importação/exportação e outras opções aparecerão aqui.</div>
-            </div>
-        `;
-    }
+    function renderSettingsPage() { appContent.innerHTML = `<h1 class="page-title">Ajustes</h1><div class="card"><div class="card-title">LifeOS</div><div class="card-content">Versão 1.2</div></div>`; }
 
+    // --- MODAIS E EVENTOS ---
     function createFab(onClick) { const fab = document.createElement('button');fab.className = 'fab';fab.textContent = '+';fab.onclick = onClick;document.body.appendChild(fab); }
     function closeModal() { modalContainer.innerHTML = ''; }
-
     function showConfirmationModal(message) {
         return new Promise((resolve, reject) => {
-            modalContainer.innerHTML = `
-                <div class="modal-overlay">
-                    <div class="modal-content confirm-modal-content">
-                        <h2 class="modal-title">Confirmação</h2>
-                        <p class="card-content">${message}</p>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button>
-                            <button type="button" class="btn btn-primary" id="confirm-btn">Confirmar</button>
-                        </div>
-                    </div>
-                </div>`;
+            modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content confirm-modal-content"><h2 class="modal-title">Confirmação</h2><p class="card-content">${message}</p><div class="modal-footer"><button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button><button type="button" class="btn btn-primary" id="confirm-btn">Confirmar</button></div></div></div>`;
             modalContainer.querySelector('#confirm-btn').onclick = () => { closeModal(); resolve(); };
             modalContainer.querySelector('#cancel-btn').onclick = () => { closeModal(); reject(); };
         });
@@ -158,11 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const deleteBtn = e.target.closest('.delete-btn');
             const taskCard = e.target.closest('.task-item');
             const checkboxContainer = e.target.closest('.custom-checkbox-container');
-            if (deleteBtn) {
-                e.stopPropagation();
-                try { await showConfirmationModal('Deseja realmente excluir esta tarefa?'); state.tasks = state.tasks.filter(t => t.id !== deleteBtn.dataset.id); saveState(); render(); } catch { /* Ação cancelada */ }
-                return;
-            }
+            if (deleteBtn) { e.stopPropagation(); try { await showConfirmationModal('Deseja realmente excluir esta tarefa?'); state.tasks = state.tasks.filter(t => t.id !== deleteBtn.dataset.id); saveState(); render(); } catch {} return; }
             if (checkboxContainer) { e.stopPropagation(); const checkbox = checkboxContainer.querySelector('input'); const task = state.tasks.find(t => t.id === checkbox.dataset.id); if (task) { task.completed = checkbox.checked; saveState(); render(); } return; }
             if (taskCard) { const task = state.tasks.find(t => t.id === taskCard.dataset.id); if (task) openTaskModal(task); }
         });
@@ -175,11 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         notesGrid.addEventListener('click', async (e) => {
             const deleteBtn = e.target.closest('.delete-btn');
             const noteCard = e.target.closest('.note-card');
-            if(deleteBtn){
-                e.stopPropagation();
-                try { await showConfirmationModal('Deseja realmente excluir esta nota?'); state.notes = state.notes.filter(n => n.id !== deleteBtn.dataset.id); saveState(); render(); } catch { /* Ação cancelada */ }
-                return;
-            }
+            if(deleteBtn){ e.stopPropagation(); try { await showConfirmationModal('Deseja realmente excluir esta nota?'); state.notes = state.notes.filter(n => n.id !== deleteBtn.dataset.id); saveState(); render(); } catch {} return; }
             if(noteCard){ const note = state.notes.find(n => n.id === noteCard.dataset.id); if(note) openNoteModal(note); }
         });
     }
