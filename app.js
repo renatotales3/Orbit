@@ -40,32 +40,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function updateActiveNav(page) { navBar.querySelectorAll('.nav-item').forEach(item => { item.classList.toggle('active', item.dataset.page === page); }); }
 
-    // --- FUNÇÕES HELPER ---
+    // AJUSTE: Lógica de cálculo de data corrigida
     function calculateDaysRemaining(dateString) {
         const today = new Date();
-        const deadline = new Date(dateString + 'T23:59:59');
-        today.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0); // Zera a hora do dia atual para uma comparação justa de datas
+
+        const deadline = new Date(dateString);
+        deadline.setHours(0, 0, 0, 0); // Zera a hora do prazo também
+        
         const diffTime = deadline - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
         if (diffDays < 0) return 'Prazo encerrado';
-        if (diffDays === 0) return 'Termina hoje ⌛';
+        if (diffDays === 0) return 'Termina hoje';
         if (diffDays === 1) return 'Falta 1 dia';
         return `Faltam ${diffDays} dias`;
     }
 
-    // NOVO: Helper para status da tarefa
     function getTaskStatus(task) {
-        if (task.completed) {
-            return { text: 'Concluída', className: 'status-done' };
-        }
-        if (task.progress > 0) {
-            return { text: 'Em Progresso', className: 'status-progress' };
-        }
+        if (task.completed) { return { text: 'Concluída', className: 'status-done' }; }
+        if (task.progress > 0) { return { text: 'Em Progresso', className: 'status-progress' }; }
         return { text: 'Pendente', className: 'status-pending' };
     }
 
-
-    // --- FUNÇÕES DE RENDERIZAÇÃO DE PÁGINA ---
     function renderHomePage() { appContent.innerHTML = `<h1 class="page-title">Início</h1><div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Este é o seu espaço. Em breve, este painel será preenchido com insights sobre sua vida.</div></div>`; }
 
     function renderTasksPage() {
@@ -118,9 +115,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h3 class="card-title event-title">${event.title}</h3>
                     ${event.priority ? `<span class="task-priority p${event.priority}">P${event.priority}</span>` : ''}
                 </div>
-                ${status ? `<span class="status-tag ${status.className}">${status.text}</span>` : ''}
-                <div class="event-countdown" style="margin-top: auto; padding-top: 0.5rem;">
-                    <span>${calculateDaysRemaining(event.deadline)}</span>
+                <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem;">
+                    ${status ? `<span class="status-tag ${status.className}">${status.text}</span>` : ''}
+                    <div class="event-countdown">
+                        <span>${calculateDaysRemaining(event.deadline)}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -130,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderNotesPage() { appContent.innerHTML = `<h1 class="page-title">Notas & Ideias</h1><div class="card-grid" id="notes-grid">${state.notes.map(note => `<div class="note-card card" data-id="${note.id}"><button class="delete-btn" data-id="${note.id}">&times;</button><h3 class="card-title">${note.title}</h3><p class="card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p></div>`).join('')}</div>${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada. Adicione uma nova!</p></div>' : ''}`; createFab(() => openNoteModal()); attachNoteListeners(); }
     function renderSettingsPage() { appContent.innerHTML = `<h1 class="page-title">Ajustes</h1><div class="card"><div class="card-title">LifeOS</div><div class="card-content">Versão 1.2</div></div>`; }
 
-    // --- MODAIS E EVENTOS ---
     function createFab(onClick) { const fab = document.createElement('button');fab.className = 'fab';fab.textContent = '+';fab.onclick = onClick;document.body.appendChild(fab); }
     function closeModal() { modalContainer.innerHTML = ''; }
     function showConfirmationModal(message) {
