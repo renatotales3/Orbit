@@ -34,7 +34,7 @@ body { font-family: var(--font-main); background: linear-gradient(135deg, var(--
 /* --- 4. COMPONENTES GENÉRICOS --- */
 .card { position: relative; background: var(--color-card-background); backdrop-filter: blur(var(--backdrop-blur)); -webkit-backdrop-filter: blur(var(--backdrop-blur)); border-radius: var(--card-border-radius); border: 1px solid var(--color-border); padding: 1.5rem; box-shadow: var(--shadow-soft); transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; cursor: pointer; display: flex; flex-direction: column; }
 .card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.25); }
-.card-title { font-size: 1.1rem; font-weight: 600; color: var(--color-text-primary); margin: 0; padding-right: 32px; /* Espaço para tag e botão */ }
+.card-title { font-size: 1.1rem; font-weight: 600; color: var(--color-text-primary); margin: 0; padding-right: 32px; }
 .card-content { font-size: 0.95rem; color: var(--color-text-secondary); line-height: 1.5; flex-grow: 1; }
 .fab{position:fixed;bottom:calc(var(--navbar-height) + 20px);right:20px;width:56px;height:56px;background:var(--color-accent);color:white;border:none;border-radius:50%;font-size:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.2);transition:transform .2s ease;z-index:50}
 .fab:hover{transform:scale(1.05)}
@@ -43,31 +43,31 @@ body { font-family: var(--font-main); background: linear-gradient(135deg, var(--
 /* --- 5. MÓDULO DE TAREFAS --- */
 .task-item.completed .card-title { text-decoration: line-through; opacity: 0.6; }
 .task-item.dragging { opacity: 0.5; background: var(--color-accent); }
-.task-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+/* AJUSTE: Alinhamento vertical do header do card */
+.task-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
 .task-info { flex-grow: 1; }
 
-.custom-checkbox-container { display: block; position: relative; cursor: pointer; font-size: 22px; user-select: none; padding-left: 28px; margin-top: 2px; }
+.custom-checkbox-container { display: block; position: relative; cursor: pointer; user-select: none; padding-left: 28px; height: 24px; /* Altura definida para alinhamento */ }
 .custom-checkbox-container input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
-.checkmark { position: absolute; top: 0; left: 0; height: 20px; width: 20px; background-color: transparent; border: 2px solid var(--color-text-secondary); border-radius: 6px; transition: background-color 0.2s, border-color 0.2s; }
+.checkmark { position: absolute; top: 2px; /* Ajuste para centralizar com o texto */ left: 0; height: 20px; width: 20px; background-color: transparent; border: 2px solid var(--color-text-secondary); border-radius: 6px; transition: background-color 0.2s, border-color 0.2s; }
 .custom-checkbox-container:hover input ~ .checkmark { border-color: var(--color-accent); }
 .custom-checkbox-container input:checked ~ .checkmark { background-color: var(--color-accent); border-color: var(--color-accent); }
 .checkmark:after { content: ""; position: absolute; display: none; }
 .custom-checkbox-container input:checked ~ .checkmark:after { display: block; }
-.custom-checkbox-container .checkmark:after { left: 6px; top: 2px; width: 5px; height: 10px; border: solid white; border-width: 0 3px 3px 0; transform: rotate(45deg); }
+/* AJUSTE: Centralização do check ✓ */
+.custom-checkbox-container .checkmark:after { left: 6px; top: 3px; width: 5px; height: 10px; border: solid white; border-width: 0 3px 3px 0; transform: rotate(45deg); }
 
-.card-meta { margin: 0.5rem 0 1rem 0; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.85rem; color: var(--color-text-secondary); flex-grow: 1; }
-.meta-item { display: flex; align-items: center; gap: 0.5rem; }
+.card-meta { margin: 0.5rem 0 1rem 0; display: flex; flex-direction: column; gap: 0.75rem; color: var(--color-text-secondary); flex-grow: 1; }
+/* AJUSTE: Destaque da informação de prazo */
+.meta-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: 500; }
 .meta-item svg { width: 16px; height: 16px; fill: currentColor; opacity: 0.8; }
 .progress-container { display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem; }
 .progress-bar-container { background-color: rgba(120, 120, 128, 0.12); border-radius: 4px; height: 8px; flex-grow: 1; overflow: hidden; }
 .progress-bar-fill { background-color: var(--color-accent); height: 100%; border-radius: 4px; transition: width 0.3s ease-in-out; }
 .progress-text { font-size: 0.8rem; color: var(--color-text-secondary); font-weight: 500; }
 .task-footer { display: flex; justify-content: flex-end; align-items: center; margin-top: auto; padding-top: 1rem; }
-
-/* AJUSTE: Posicionamento da tag de prioridade */
 .task-priority { position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); font-size:.8rem;padding:.2rem .5rem;border-radius:8px;color:var(--color-text-primary); }
 .task-priority.p1{background-color:rgba(255,59,48,.5)} .task-priority.p2{background-color:rgba(255,149,0,.5)} .task-priority.p3{background-color:rgba(52,199,89,.5)} .task-priority.p4{background-color:rgba(88,86,214,.5)}
-
 .delete-btn{position:absolute;top:1rem;right:1.5rem;width:28px;height:28px;background:rgba(120,120,128,.2);color:var(--color-text-secondary);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;transition:background-color .2s,color .2s;opacity:.5}
 .card:hover .delete-btn{opacity:1}
 .delete-btn:hover{background-color:var(--color-danger);color:white}
@@ -84,8 +84,15 @@ body { font-family: var(--font-main); background: linear-gradient(135deg, var(--
 /* --- 8. MÓDULO DE CALENDÁRIO --- */
 .event-item{flex-direction:row;gap:1.5rem;align-items:center;cursor:default}.event-item:hover{transform:none;box-shadow:var(--shadow-soft)}.event-date{display:flex;flex-direction:column;align-items:center;justify-content:center;background-color:rgba(120,120,128,.12);border-radius:10px;padding:.8rem;text-align:center;width:65px;height:65px;flex-shrink:0}.event-day{font-size:1.8rem;font-weight:700;color:var(--color-accent);line-height:1}.event-month{font-size:.8rem;text-transform:uppercase;margin-top:2px}.event-details{display:flex;flex-direction:column;flex-grow:1;gap:.5rem}.event-details-header{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}.event-details .event-title{font-weight:600;color:var(--color-text-primary)}.event-countdown{font-size:.85rem;color:var(--color-text-secondary);display:flex;align-items:center;gap:.5rem}
 
-/* NOVO: Tag de Status */
-.status-tag { font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 8px; color: var(--color-text-primary); }
+.status-tag { 
+    font-size: 0.8rem; 
+    padding: 0.2rem 0.6rem; 
+    border-radius: 8px; 
+    color: var(--color-text-primary); 
+    /* AJUSTE: Faz a tag se ajustar ao conteúdo */
+    display: inline-block;
+    width: fit-content;
+}
 .status-tag.status-done { background-color: var(--color-status-done); }
 .status-tag.status-progress { background-color: var(--color-status-progress); }
 .status-tag.status-pending { background-color: var(--color-status-pending); }
