@@ -29,31 +29,6 @@
     --padding-main: 24px;
 }
 
-/* --- THEME: LIGHT --- */
-.theme-light {
-    --color-background-start: #f0f2f5;
-    --color-background-end: #e4e6eb;
-    --color-text-primary: #1c1c1e;
-    --color-text-secondary: #6d6d70;
-    --color-accent: #007aff;
-    --color-card-background: rgba(255, 255, 255, 0.45);
-    --color-navbar-background: rgba(242, 242, 247, 0.75);
-    --color-border: rgba(0, 0, 0, 0.08);
-}
-
-/* --- THEME: DARK --- */
-.theme-dark {
-    --color-background-start: #121212;
-    --color-background-end: #000000;
-    --color-text-primary: #e5e5e7;
-    --color-text-secondary: #8e8e93;
-    --color-accent: #0a84ff;
-    --color-card-background: rgba(28, 28, 30, 0.8);
-    --color-navbar-background: rgba(18, 18, 18, 0.85);
-    --color-border: rgba(255, 255, 255, 0.15);
-}
-
-
 /* --- 2. LAYOUT BASE --- */
 body {
     font-family: var(--font-main);
@@ -162,7 +137,7 @@ body {
 }
 
 /* --- 5. MÓDULO DE TAREFAS --- */
-.task-list { list-style: none; }
+.task-list { list-style: none; padding: 0;}
 
 .task-item {
     display: flex;
@@ -242,10 +217,10 @@ textarea.form-control { resize: vertical; min-height: 120px; }
     gap: 1.5rem;
 }
 
-.note-card-content { white-space: pre-wrap; word-wrap: break-word; } /* Mostra quebras de linha */
+.note-card-content { white-space: pre-wrap; word-wrap: break-word; }
 
 /* --- 8. MÓDULO DE CALENDÁRIO --- */
-.event-list { list-style: none; }
+.event-list { list-style: none; padding: 0; }
 .event-item {
     display: flex;
     align-items: center;
