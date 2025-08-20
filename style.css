@@ -7,19 +7,19 @@
 :root {
     --font-main: 'Inter', sans-serif;
     /* Paleta de Cores */
-    --color-background: #f8f8f8; /* Cinza muito claro */
-    --color-surface: #ffffff;    /* Branco para os cards */
-    --color-text-primary: #1a1a1a; /* Preto suave */
-    --color-text-secondary: #7e7e7e; /* Cinza médio */
-    --color-accent: #ff5a5f;      /* Laranja/Vermelho Airbnb */
-    --color-border-subtle: #ebebeb; /* Borda muito sutil */
-    --color-status-done: #00a699;  /* Verde Airbnb */
-
+    --color-background: #F7F7F7;
+    --color-surface: #ffffff;
+    --color-text-primary: #222222;
+    --color-text-secondary: #717171;
+    --color-accent: #FF5A5F;
+    --color-accent-hover: #E01C22;
+    --color-border-subtle: #DDDDDD;
+    --color-status-done: #008A05;
     /* UI Props */
     --card-border-radius: 12px;
     --navbar-height: 65px;
-    --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.05);
-    --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.08);
+    --shadow-soft: 0px 2px 8px rgba(0, 0, 0, 0.06);
+    --shadow-hover: 0px 4px 16px rgba(0, 0, 0, 0.1);
     --padding-main: 24px;
 }
 
@@ -42,17 +42,12 @@ body {
     background: var(--color-surface);
     border-top: 1px solid var(--color-border-subtle);
     display: flex; justify-content: space-around; align-items: center;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
     z-index: 100;
 }
-.nav-item {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; text-decoration: none;
-    color: var(--color-text-secondary);
-    transition: color .2s ease-in-out;
-    padding: 0 10px; height: 100%; flex: 1;
-}
+.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--color-text-secondary); transition: color .2s ease-in-out; padding: 0 10px; height: 100%; flex: 1; }
 .nav-item.active, .nav-item:hover { color: var(--color-accent); }
-.nav-icon { width: 24px; height: 24px; }
+.nav-icon { width: 24px; height: 24px; stroke-width: 2; }
 .nav-text { font-size: 0.7rem; font-weight: 500; margin-top: 4px; }
 
 /* --- 4. COMPONENTES GENÉRICOS --- */
@@ -69,8 +64,8 @@ body {
 .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
 .card-title { font-size: 1.1rem; font-weight: 600; color: var(--color-text-primary); margin: 0; padding-right: 60px; }
 .card-content { font-size: 0.95rem; color: var(--color-text-secondary); line-height: 1.5; flex-grow: 1; }
-.fab { position: fixed; bottom: calc(var(--navbar-height) + 20px); right: 20px; width: 56px; height: 56px; background: var(--color-accent); color: white; border: none; border-radius: 50%; font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-hover); transition: transform .2s ease; z-index: 50; }
-.fab:hover { transform: scale(1.05); }
+.fab { position: fixed; bottom: calc(var(--navbar-height) + 20px); right: 20px; width: 56px; height: 56px; background: var(--color-accent); color: white; border: none; border-radius: 50%; font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-hover); transition: transform .2s ease, background-color .2s ease; z-index: 50; }
+.fab:hover { transform: scale(1.05); background-color: var(--color-accent-hover); }
 .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; padding: 0; list-style: none; }
 .card.highlight { animation: highlight-pulse 1.5s ease-out; }
 @keyframes highlight-pulse { 0% { box-shadow: 0 0 0 0 var(--color-accent); } 50% { box-shadow: 0 0 15px 5px rgba(255, 90, 95, 0.5); } 100% { box-shadow: 0 0 0 0 rgba(255, 90, 95, 0); } }
@@ -79,36 +74,39 @@ body {
 .task-item.completed .card-title { text-decoration: line-through; color: var(--color-text-secondary); }
 .task-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
 .task-info { flex-grow: 1; }
+
 .custom-checkbox-container { display: block; position: relative; cursor: pointer; user-select: none; padding-left: 28px; height: 24px; }
 .custom-checkbox-container input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
-.checkmark { position: absolute; top: 2px; left: 0; height: 20px; width: 20px; background-color: transparent; border: 2px solid #ccc; border-radius: 6px; transition: all 0.2s; }
+.checkmark { position: absolute; top: 2px; left: 0; height: 20px; width: 20px; background-color: #fff; border: 1.5px solid #b0b0b0; border-radius: 6px; transition: all 0.2s; }
 .custom-checkbox-container:hover input ~ .checkmark { border-color: var(--color-accent); }
 .custom-checkbox-container input:checked ~ .checkmark { background-color: var(--color-accent); border-color: var(--color-accent); }
 .checkmark:after { content: ""; position: absolute; display: none; }
 .custom-checkbox-container input:checked ~ .checkmark:after { display: block; }
-.custom-checkbox-container .checkmark:after { left: 6px; top: 3px; width: 5px; height: 10px; border: solid white; border-width: 0 3px 3px 0; transform: rotate(45deg); }
+.custom-checkbox-container .checkmark:after { left: 6px; top: 3px; width: 5px; height: 10px; border: solid white; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); }
+
 .card-meta { margin-top: auto; padding-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem; color: var(--color-text-secondary); }
 .meta-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; font-weight: 500; }
-.meta-item svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.meta-item svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; }
+
 .progress-container { display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem; }
 .progress-bar-container { background-color: var(--color-border-subtle); border-radius: 4px; height: 6px; flex-grow: 1; overflow: hidden; }
 .progress-bar-fill { background-color: var(--color-text-primary); height: 100%; border-radius: 4px; transition: width 0.3s ease-in-out; }
 .progress-text { font-size: 0.8rem; color: var(--color-text-secondary); font-weight: 500; }
-.task-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 1rem; }
-.attached-note-link { background: none; border: none; padding: 0; cursor: pointer; color: var(--color-text-secondary); display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; }
+.task-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.attached-note-link { background: none; border: none; padding: 0; cursor: pointer; color: var(--color-text-secondary); display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; transition: color .2s ease; }
 .attached-note-link:hover { color: var(--color-text-primary); }
 .attached-note-link svg { width: 14px; height: 14px; stroke: currentColor; }
-.task-priority { font-size:.8rem;padding:.2rem .5rem;border-radius:8px;color:var(--color-text-primary); border: 1px solid var(--color-border-subtle); }
-.task-priority.p1{background-color:rgba(255,90,95,.1);border-color:rgba(255,90,95,.2)} .task-priority.p2{background-color:rgba(255,149,0,.1);border-color:rgba(255,149,0,.2)} .task-priority.p3{background-color:rgba(0,166,153,.1);border-color:rgba(0,166,153,.2)} .task-priority.p4{background-color:rgba(235,235,235,1);border-color:rgba(0,0,0,0)}
+.task-priority { font-size:.8rem;padding:.2rem .5rem;border-radius:8px;color:var(--color-text-primary); border: 1px solid transparent; }
+.task-priority.p1{background-color:rgba(255,90,95,.1);border-color:rgba(255,90,95,.2)} .task-priority.p2{background-color:rgba(255,149,0,.1);border-color:rgba(255,149,0,.2)} .task-priority.p3{background-color:rgba(0,166,153,.1);border-color:rgba(0,166,153,.2)} .task-priority.p4{background-color:#f0f0f0;border-color:#e0e0e0}
 
 .card-actions { position: absolute; top: 1rem; right: 1.5rem; display: flex; gap: 0.5rem; }
-.card-action-btn { width: 28px; height: 28px; background: transparent; color: var(--color-text-secondary); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; opacity: 0.6; }
+.card-action-btn { width: 28px; height: 28px; background: transparent; color: var(--color-text-secondary); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; opacity: 0; }
 .card:hover .card-action-btn { opacity: 1; }
-.card-action-btn svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.card-action-btn svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; }
 .card-action-btn:hover { background-color: #f0f0f0; color: var(--color-text-primary); }
 
-/* --- MODAIS (ainda no estilo antigo, serão atualizados depois) --- */
-.modal-overlay{/*...*/}.modal-content{/*...*/}.modal-header{/*...*/}.modal-title{/*...*/}.modal-close-btn{/*...*/}.form-group{/*...*/}.form-group label{/*...*/}.form-control,textarea.form-control{/*...*/}.form-control:focus{/*...*/}.modal-footer{/*...*/}.btn{/*...*/}.confirm-modal-content{/*...*/}.viewer-content{/*...*/}.viewer-text{/*...*/}.viewer-link{/*...*/}
-
-/* --- MÓDULOS ANTIGOS (ainda no estilo antigo, serão atualizados depois) --- */
-.note-card-content{/*...*/}.event-item{/*...*/}.event-date{/*...*/}.event-details{/*...*/}.status-tag{/*...*/}.habit-item{/*...*/}.habit-details{/*...*/}.habit-action{/*...*/}.day-selector{/*...*/}.form-group.hidden{display:none;}
+/* --- OUTROS MÓDULOS (Ainda com design antigo) --- */
+/* Estes estilos serão refatorados após a aprovação do protótipo */
+.note-card-content, .event-item, .habit-item {
+    background: #444; color: white; border-radius: 12px;
+}
