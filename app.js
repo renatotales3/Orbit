@@ -11,14 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalContainer = document.getElementById('modal-container');
     if (!appContent || !navBar || !modalContainer) { console.error('Elementos essenciais do DOM não foram encontrados.'); return; }
 
-    // Ícones SVG para reutilização
-    const ICONS = {
-        edit: `<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`,
-        delete: `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`,
-        calendar: `<svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>`,
-        note: `<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`
-    };
-
+    const ICONS = { edit: `<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`, delete: `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`, calendar: `<svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>`, note: `<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>` };
     let state = {};
 
     function saveState() { try { localStorage.setItem('lifeOSState', JSON.stringify(state)); } catch (e) { console.error("Erro ao salvar o estado:", e); } }
@@ -30,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const parsedState = JSON.parse(savedState);
                 state = { ...defaultState, ...parsedState };
-            } catch (e) { console.error("Erro ao interpretar o estado salvo, usando padrão.", e); state = defaultState; }
+            } catch (e) { console.error("Erro ao interpretar o estado salvo.", e); state = defaultState; }
         } else { state = defaultState; }
     }
 
@@ -43,8 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
         appContent.innerHTML = '';
         renderer();
         updateActiveNav(page);
-
-        // Lógica de Destaque
         if (page === 'notes' && state.pendingHighlightNoteId) {
             highlightNote(state.pendingHighlightNoteId);
             state.pendingHighlightNoteId = null;
@@ -67,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateDaysRemaining(dateString) { const today = new Date(); today.setHours(0, 0, 0, 0); const deadline = new Date(dateString); deadline.setHours(0, 0, 0, 0); const diffTime = deadline - today; const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)); if (diffDays < 0) return 'Prazo encerrado'; if (diffDays === 0) return 'Termina hoje'; if (diffDays === 1) return 'Falta 1 dia'; return `Faltam ${diffDays} dias`; }
     function getTaskStatus(task) { if (task.completed) { return { text: 'Concluída', className: 'status-done' }; } if (task.progress > 0) { return { text: 'Em Progresso', className: 'status-progress' }; } return { text: 'Pendente', className: 'status-pending' }; }
 
-    function renderHomePage() { appContent.innerHTML = `<h1 class="page-title">Início</h1><div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Este é o seu espaço. Em breve, este painel será preenchido com insights sobre sua vida.</div></div>`; }
+    function renderHomePage() { appContent.innerHTML = `<h1 class="page-title">Início</h1><div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Este é o seu espaço.</div></div>`; }
 
     function renderTasksPage() {
         appContent.innerHTML = `
@@ -76,12 +67,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${state.tasks.map(task => `
                     <li class="task-item card ${task.completed ? 'completed' : ''}" data-id="${task.id}" draggable="true">
                         <div class="card-actions">
-                            <button class="card-action-btn edit-btn" data-id="${task.id}">${ICONS.edit}</button>
-                            <button class="card-action-btn delete-btn" data-id="${task.id}">${ICONS.delete}</button>
+                            <button class="card-action-btn edit-btn">${ICONS.edit}</button>
+                            <button class="card-action-btn delete-btn">${ICONS.delete}</button>
                         </div>
                         <div class="task-header">
                             <label class="custom-checkbox-container">
-                                <input type="checkbox" class="task-checkbox" data-id="${task.id}" ${task.completed ? 'checked' : ''}>
+                                <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
                                 <span class="checkmark"></span>
                             </label>
                             <div class="task-info"><h3 class="card-title">${task.title}</h3></div>
@@ -134,8 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${state.notes.map(note => `
                     <div class="note-card card" data-id="${note.id}">
                         <div class="card-actions">
-                            <button class="card-action-btn edit-btn" data-id="${note.id}">${ICONS.edit}</button>
-                            <button class="card-action-btn delete-btn" data-id="${note.id}">${ICONS.delete}</button>
+                            <button class="card-action-btn edit-btn">${ICONS.edit}</button>
+                            <button class="card-action-btn delete-btn">${ICONS.delete}</button>
                         </div>
                         <h3 class="card-title">${note.title}</h3>
                         <p class="card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p>
@@ -198,32 +189,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function handleNoteSave(e) { e.preventDefault(); const id = document.getElementById('noteId').value; const noteData = { title: document.getElementById('noteTitle').value.trim(), content: document.getElementById('noteContent').value.trim(), link: document.getElementById('noteLink').value.trim() || null }; if(!noteData.title) return; if (id) { const note = state.notes.find(n => n.id === id); if(note) Object.assign(note, noteData); } else { const newNote = { id: `note-${Date.now()}`, ...noteData }; state.notes.push(newNote); } saveState(); render(); closeModal(); }
     
-    // --- NOVOS MODAIS DE VISUALIZAÇÃO ---
     function openTaskViewer(task) {
         const noteLinkHTML = task.attachedNoteId ? `<button class="attached-note-link" data-note-id="${task.attachedNoteId}">${ICONS.note} Ver Nota de Referência</button>` : '';
         modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content viewer-modal-content"><div class="modal-header"><h2 class="modal-title">${task.title}</h2><button type="button" class="modal-close-btn">&times;</button></div><div class="viewer-content"><div class="progress-container" style="margin-top:0;"><div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${task.progress || 0}%;"></div></div><span class="progress-text">${task.progress || 0}%</span></div><div class="card-meta" style="margin-top: 1.5rem;">${task.deadline ? `<div class="meta-item">${ICONS.calendar}<span>${calculateDaysRemaining(task.deadline)}</span></div>` : ''}${noteLinkHTML}</div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" id="edit-from-viewer-btn">Editar</button></div></div></div>`;
         
-        modalContainer.querySelector('.modal-close-btn').onclick = closeModal;
-        modalContainer.querySelector('#edit-from-viewer-btn').onclick = () => openTaskModal(task);
-        
-        // *** CORREÇÃO: Adiciona o event listener para o link da nota ***
-        const noteLinkButton = modalContainer.querySelector('.attached-note-link');
-        if (noteLinkButton) {
-            noteLinkButton.onclick = (e) => {
+        // CORREÇÃO: Gerenciador de eventos unificado para o modal de visualização
+        const viewerModal = modalContainer.querySelector('.viewer-modal-content');
+        if (!viewerModal) return;
+
+        viewerModal.addEventListener('click', (e) => {
+            if (e.target.closest('.modal-close-btn')) { closeModal(); }
+            if (e.target.closest('#edit-from-viewer-btn')) { openTaskModal(task); }
+            if (e.target.closest('.attached-note-link')) {
                 e.stopPropagation();
                 closeModal();
-                state.pendingHighlightNoteId = noteLinkButton.dataset.noteId;
+                state.pendingHighlightNoteId = e.target.closest('.attached-note-link').dataset.noteId;
                 saveState();
                 window.location.hash = '#notes';
-            };
-        }
+            }
+        });
     }
 
     function openNoteViewer(note) {
         const linkHTML = note.link ? `<a href="${note.link}" target="_blank" class="viewer-link">Acessar Link/Anexo</a>` : '';
         modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content viewer-modal-content"><div class="modal-header"><h2 class="modal-title">${note.title}</h2><button type="button" class="modal-close-btn">&times;</button></div><div class="viewer-content"><p class="viewer-text">${note.content}</p>${linkHTML}</div><div class="modal-footer"><button type="button" class="btn btn-secondary" id="edit-from-viewer-btn">Editar</button></div></div></div>`;
-        modalContainer.querySelector('.modal-close-btn').onclick = closeModal;
-        modalContainer.querySelector('#edit-from-viewer-btn').onclick = () => openNoteModal(note);
+        const viewerModal = modalContainer.querySelector('.viewer-modal-content');
+        if (!viewerModal) return;
+        viewerModal.addEventListener('click', (e) => {
+            if (e.target.closest('.modal-close-btn')) { closeModal(); }
+            if (e.target.closest('#edit-from-viewer-btn')) { openNoteModal(note); }
+        });
     }
 
     function init() { loadState(); navBar.addEventListener('click', (e) => { const navItem = e.target.closest('.nav-item'); if (navItem) { e.preventDefault(); window.location.hash = navItem.dataset.page; } }); window.addEventListener('hashchange', render); render(); }
