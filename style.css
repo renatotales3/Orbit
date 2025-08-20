@@ -97,14 +97,8 @@ body { font-family: var(--font-main); background: linear-gradient(135deg, var(--
 .status-tag.status-progress { background-color: var(--color-status-progress); }
 .status-tag.status-pending { background-color: var(--color-status-pending); }
 
-/* --- 9. MÓDULO DE HÁBITOS (Redesign v3.0) --- */
-.habit-item {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1.5rem;
-    cursor: default;
-}
+/* --- 9. MÓDULO DE HÁBITOS --- */
+.habit-item { flex-direction: row; justify-content: space-between; align-items: center; gap: 1.5rem; cursor: default; }
 .habit-item:hover { transform: none; box-shadow: var(--shadow-soft); }
 .habit-details { flex-grow: 1; }
 .habit-streak { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--color-text-secondary); margin-top: 0.25rem; margin-bottom: 1rem; }
@@ -113,13 +107,7 @@ body { font-family: var(--font-main); background: linear-gradient(135deg, var(--
 .day-square.completed { background-color: var(--color-status-done); }
 .day-square.today { border: 1px solid var(--color-text-secondary); }
 .habit-action { text-align: center; flex-shrink: 0; width: 80px; }
-.binary-btn {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    border: 2px solid var(--color-text-secondary);
-    background-color: transparent; color: var(--color-text-secondary);
-    font-size: 1.2rem; cursor: pointer; transition: all 0.2s;
-}
+.binary-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--color-text-secondary); background-color: transparent; color: var(--color-text-secondary); font-size: 1.2rem; cursor: pointer; transition: all 0.2s; }
 .binary-btn.completed { background-color: var(--color-status-done); border-color: var(--color-status-done); color: white; }
 .binary-btn:hover { border-color: var(--color-accent); }
 .quant-action { cursor: pointer; }
