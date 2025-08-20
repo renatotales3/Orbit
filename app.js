@@ -11,130 +11,89 @@ document.addEventListener('DOMContentLoaded', () => {
     const navBar = document.getElementById('bottom-navbar');
     const modalContainer = document.getElementById('modal-container');
 
-    if (!appContent || !navBar || !modalContainer) {
-        console.error('Elementos essenciais do DOM não foram encontrados.');
-        return;
-    }
+    if (!appContent || !navBar || !modalContainer) { console.error('Elementos essenciais do DOM não foram encontrados.'); return; }
 
     // --- ESTADO DA APLICAÇÃO ---
     let state = {};
 
     // --- PERSISTÊNCIA ROBUSTA ---
-    function saveState() {
-        try {
-            localStorage.setItem('lifeOSState', JSON.stringify(state));
-        } catch (e) {
-            console.error("Erro ao salvar o estado:", e);
-        }
-    }
-
+    function saveState() { try { localStorage.setItem('lifeOSState', JSON.stringify(state)); } catch (e) { console.error("Erro ao salvar o estado:", e); } }
     function loadState() {
         let savedState = null;
-        try {
-            savedState = localStorage.getItem('lifeOSState');
-        } catch (e) {
-            console.error("Erro ao ler o localStorage:", e);
-        }
-
-        const defaultState = {
-            tasks: [],
-            notes: [],
-            calendarEvents: []
-        };
-        
+        try { savedState = localStorage.getItem('lifeOSState'); } catch (e) { console.error("Erro ao ler o localStorage:", e); }
+        const defaultState = { tasks: [], notes: [], calendarEvents: [] };
         if (savedState) {
             try {
                 const parsedState = JSON.parse(savedState);
                 state.tasks = Array.isArray(parsedState.tasks) ? parsedState.tasks : [];
                 state.notes = Array.isArray(parsedState.notes) ? parsedState.notes : [];
                 state.calendarEvents = Array.isArray(parsedState.calendarEvents) ? parsedState.calendarEvents : [];
-            } catch (e) {
-                console.error("Erro ao interpretar o estado salvo, usando padrão.", e);
-                state = defaultState;
-            }
-        } else {
-            state = defaultState;
-        }
+            } catch (e) { console.error("Erro ao interpretar o estado salvo, usando padrão.", e); state = defaultState; }
+        } else { state = defaultState; }
     }
 
     // --- ROTEAMENTO E RENDERIZAÇÃO ---
-    const routes = {
-        'home': renderHomePage,
-        'tasks': renderTasksPage,
-        'calendar': renderCalendarPage,
-        'notes': renderNotesPage,
-        'settings': renderSettingsPage
-    };
-
+    const routes = { 'home': renderHomePage, 'tasks': renderTasksPage, 'calendar': renderCalendarPage, 'notes': renderNotesPage, 'settings': renderSettingsPage };
     function render() {
         const page = window.location.hash.replace('#', '') || 'home';
         const renderer = routes[page] || routes['home'];
-        
         const oldFab = document.querySelector('.fab');
         if (oldFab) oldFab.remove();
-
         appContent.innerHTML = '';
         renderer();
         updateActiveNav(page);
     }
-    
-    function updateActiveNav(page) {
-        navBar.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.toggle('active', item.dataset.page === page);
-        });
+    function updateActiveNav(page) { navBar.querySelectorAll('.nav-item').forEach(item => { item.classList.toggle('active', item.dataset.page === page); }); }
+
+    // --- FUNÇÕES HELPER ---
+    function calculateDaysRemaining(dateString) {
+        const today = new Date();
+        const deadline = new Date(dateString + 'T23:59:59'); // Considera o final do dia
+        today.setHours(0, 0, 0, 0); // Zera a hora do dia atual para uma comparação justa
+
+        const diffTime = deadline - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) return 'Prazo encerrado';
+        if (diffDays === 0) return 'Termina hoje ⌛';
+        if (diffDays === 1) return 'Falta 1 dia';
+        return `Faltam ${diffDays} dias`;
     }
 
     // --- FUNÇÕES DE RENDERIZAÇÃO DE PÁGINA ---
-    function renderHomePage() {
-        appContent.innerHTML = `<h1 class="page-title">Início</h1><div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Este é o seu espaço. Em breve, este painel será preenchido com insights sobre sua vida.</div></div>`;
-    }
+    function renderHomePage() { appContent.innerHTML = `<h1 class="page-title">Início</h1><div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Este é o seu espaço. Em breve, este painel será preenchido com insights sobre sua vida.</div></div>`; }
 
     function renderTasksPage() {
         appContent.innerHTML = `
             <h1 class="page-title">Tarefas & Projetos</h1>
             <ul class="card-grid" id="task-list">
                 ${state.tasks.map(task => {
-                    const subtasksInfo = task.subtasks && task.subtasks.length > 0
-                        ? `${task.subtasks.filter(st => st.done).length} de ${task.subtasks.length} concluídas`
-                        : '';
-                    const deadlineDate = task.deadline ? new Date(task.deadline + 'T12:00:00Z') : null;
-                    const formattedDeadline = deadlineDate ? deadlineDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
-
+                    const subtasksInfo = task.subtasks && task.subtasks.length > 0 ? `${task.subtasks.filter(st => st.done).length} de ${task.subtasks.length} concluídas` : '';
                     return `
                     <li class="task-item card ${task.completed ? 'completed' : ''}" data-id="${task.id}" draggable="true">
-                        <button class="delete-btn" data-id="${task.id}">&times;</button>
                         <div class="task-header">
-                           <div class="task-info">
-                                <input type="checkbox" class="task-checkbox" data-id="${task.id}" ${task.completed ? 'checked' : ''}>
+                            <div class="task-info">
+                                <label class="custom-checkbox-container">
+                                    <input type="checkbox" class="task-checkbox" data-id="${task.id}" ${task.completed ? 'checked' : ''}>
+                                    <span class="checkmark"></span>
+                                </label>
                                 <h3 class="card-title">${task.title}</h3>
                             </div>
-                        </div>
-                        
-                        <div class="card-content">
-                            <div class="card-meta">
-                                ${subtasksInfo ? `
-                                <div class="meta-item">
-                                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8.5 12H7v-2h3.5v2zm3.5 0h-2v-2h2v2zm0-4H7v-2h9v2zm0-4H7V7h9v2z"/></svg>
-                                    <span>${subtasksInfo}</span>
-                                </div>` : ''}
-
-                                ${formattedDeadline ? `
-                                <div class="meta-item">
-                                    <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
-                                    <span>${formattedDeadline}</span>
-                                </div>` : ''}
-                            </div>
-                        </div>
-
-                        ${task.progress > 0 ? `
-                        <div class="progress-bar-container">
-                            <div class="progress-bar-fill" style="width: ${task.progress}%;"></div>
-                        </div>
-                        ` : ''}
-                        
-                        <div class="task-footer">
                             <span class="task-priority p${task.priority}">P${task.priority}</span>
                         </div>
+                        
+                        <div class="card-content card-meta">
+                            ${subtasksInfo ? `<div class="meta-item"><svg viewBox="0 0 24 24"><path d="M.../></svg><span>${subtasksInfo}</span></div>` : ''}
+                            ${task.deadline ? `<div class="meta-item"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg><span>${calculateDaysRemaining(task.deadline)}</span></div>` : ''}
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: ${task.progress || 0}%;"></div>
+                            </div>
+                            <span class="progress-text">${task.progress || 0}%</span>
+                        </div>
+                        <button class="delete-btn" data-id="${task.id}">&times;</button>
                     </li>
                     `;
                 }).join('')}
@@ -149,155 +108,77 @@ document.addEventListener('DOMContentLoaded', () => {
         const tasksWithDeadline = state.tasks.filter(task => task.deadline);
         const allEvents = [...tasksWithDeadline, ...state.calendarEvents].sort((a, b) => new Date(a.date || a.deadline) - new Date(b.date || b.deadline));
         const months = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
-        appContent.innerHTML = `<h1 class="page-title">Calendário</h1><div class="card-grid">${allEvents.map(event => {const eventDate = new Date((event.date || event.deadline) + 'T12:00:00Z'); const day = eventDate.getUTCDate(); const month = months[eventDate.getUTCMonth()]; const source = event.deadline ? 'Tarefas' : 'Calendário'; return `<div class="event-item card"><div class="event-date"><span class="event-day">${day}</span><span class="event-month">${month}</span></div><div class="event-details"><p class="event-title">${event.title}</p><span class="event-source">${source}</span></div></div>`}).join('')}</div>${allEvents.length === 0 ? '<div class="card"><p class="card-content">Nenhum evento ou tarefa com prazo encontrados.</p></div>' : ''}`;
+        appContent.innerHTML = `<h1 class="page-title">Calendário</h1><div class="card-grid">${allEvents.map(event => { const eventDate = new Date((event.date || event.deadline) + 'T12:00:00Z'); const day = eventDate.getUTCDate(); const month = months[eventDate.getUTCMonth()]; return `
+        <div class="event-item card">
+            <div class="event-date">
+                <span class="event-day">${day}</span>
+                <span class="event-month">${month}</span>
+            </div>
+            <div class="event-details">
+                <div class="event-details-header">
+                    <h3 class="card-title event-title">${event.title}</h3>
+                    ${event.priority ? `<span class="task-priority p${event.priority}">P${event.priority}</span>` : ''}
+                </div>
+                <div class="event-countdown">
+                    <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                    <span>${calculateDaysRemaining(event.deadline)}</span>
+                </div>
+            </div>
+        </div>
+        `}).join('')}</div>${allEvents.length === 0 ? '<div class="card"><p class="card-content">Nenhum evento ou tarefa com prazo encontrados.</p></div>' : ''}`;
     }
 
-    function renderNotesPage() {
-        appContent.innerHTML = `<h1 class="page-title">Notas & Ideias</h1><div class="card-grid" id="notes-grid">${state.notes.map(note => `<div class="note-card card" data-id="${note.id}"><button class="delete-btn" data-id="${note.id}">&times;</button><h3 class="card-title">${note.title}</h3><p class="note-card-content card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p></div>`).join('')}</div>${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada. Adicione uma nova!</p></div>' : ''}`;
-        createFab(() => openNoteModal());
-        attachNoteListeners();
-    }
-
-    function renderSettingsPage() {
-        appContent.innerHTML = `<h1 class="page-title">Ajustes</h1><div class="card"><div class="card-title">Em Breve</div><div class="card-content">Configurações de tema, importação/exportação e outras opções aparecerão aqui.</div></div>`;
-    }
+    function renderNotesPage() { appContent.innerHTML = `<h1 class="page-title">Notas & Ideias</h1><div class="card-grid" id="notes-grid">${state.notes.map(note => `<div class="note-card card" data-id="${note.id}"><button class="delete-btn" data-id="${note.id}">&times;</button><h3 class="card-title">${note.title}</h3><p class="note-card-content card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p></div>`).join('')}</div>${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada. Adicione uma nova!</p></div>' : ''}`; createFab(() => openNoteModal()); attachNoteListeners(); }
+    function renderSettingsPage() { appContent.innerHTML = `<h1 class="page-title">Ajustes</h1><div class="card"><div class="card-title">Em Breve</div><div class="card-content">Configurações de tema, importação/exportação e outras opções aparecerão aqui.</div></div>`; }
 
     // --- LÓGICA DE EVENTOS & MODAIS ---
-    function createFab(onClick) {
-        const fab = document.createElement('button');fab.className = 'fab';fab.textContent = '+';fab.onclick = onClick;document.body.appendChild(fab);
-    }
-    
-    function closeModal() {
-        modalContainer.innerHTML = '';
-    }
+    function createFab(onClick) { const fab = document.createElement('button');fab.className = 'fab';fab.textContent = '+';fab.onclick = onClick;document.body.appendChild(fab); }
+    function closeModal() { modalContainer.innerHTML = ''; }
     
     function attachTaskListeners() {
         const taskList = document.getElementById('task-list');
         if (!taskList) return;
-
         taskList.addEventListener('click', (e) => {
             const deleteBtn = e.target.closest('.delete-btn');
             const taskCard = e.target.closest('.task-item');
-            const checkbox = e.target.closest('.task-checkbox');
-            
-            if (deleteBtn) {
-                e.stopPropagation();
-                if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
-                    const id = deleteBtn.dataset.id;
-                    state.tasks = state.tasks.filter(t => t.id !== id);
-                    saveState();
-                    render();
-                }
-                return;
-            }
-
-            if(checkbox){
-                 e.stopPropagation();
-                 const task = state.tasks.find(t => t.id === checkbox.dataset.id);
-                 if (task) {
-                    task.completed = checkbox.checked;
-                    saveState();
-                    render();
-                 }
-                 return;
-            }
-
-            if (taskCard) {
-                const task = state.tasks.find(t => t.id === taskCard.dataset.id);
-                if (task) openTaskModal(task);
-            }
+            const checkboxContainer = e.target.closest('.custom-checkbox-container');
+            if (deleteBtn) { e.stopPropagation(); if (confirm('Tem certeza?')) { state.tasks = state.tasks.filter(t => t.id !== deleteBtn.dataset.id); saveState(); render(); } return; }
+            if (checkboxContainer) { e.stopPropagation(); const checkbox = checkboxContainer.querySelector('input'); const task = state.tasks.find(t => t.id === checkbox.dataset.id); if (task) { task.completed = checkbox.checked; saveState(); render(); } return; }
+            if (taskCard) { const task = state.tasks.find(t => t.id === taskCard.dataset.id); if (task) openTaskModal(task); }
         });
-        
         // Drag & Drop
-        let draggedItemId = null;
-        taskList.addEventListener('dragstart', (e) => {if (e.target.matches('.task-item')) {draggedItemId = e.target.dataset.id;setTimeout(() => e.target.classList.add('dragging'), 0);}});
-        taskList.addEventListener('dragend', (e) => {if(e.target.matches('.task-item')) e.target.classList.remove('dragging')});
-        taskList.addEventListener('dragover', (e) => e.preventDefault());
-        taskList.addEventListener('drop', (e) => {e.preventDefault();const dropTarget = e.target.closest('.task-item');if (dropTarget && draggedItemId !== dropTarget.dataset.id) {const draggedIndex = state.tasks.findIndex(t => t.id === draggedItemId);const targetIndex = state.tasks.findIndex(t => t.id === dropTarget.dataset.id);if(draggedIndex === -1 || targetIndex === -1) return;const [draggedItem] = state.tasks.splice(draggedIndex, 1);state.tasks.splice(targetIndex, 0, draggedItem);saveState();render();}});
+        let draggedItemId = null; taskList.addEventListener('dragstart', (e) => {if (e.target.matches('.task-item')) {draggedItemId = e.target.dataset.id;setTimeout(() => e.target.classList.add('dragging'), 0);}}); taskList.addEventListener('dragend', (e) => {if(e.target.matches('.task-item')) e.target.classList.remove('dragging')}); taskList.addEventListener('dragover', (e) => e.preventDefault()); taskList.addEventListener('drop', (e) => {e.preventDefault();const dropTarget = e.target.closest('.task-item');if (dropTarget && draggedItemId !== dropTarget.dataset.id) {const draggedIndex = state.tasks.findIndex(t => t.id === draggedItemId);const targetIndex = state.tasks.findIndex(t => t.id === dropTarget.dataset.id);if(draggedIndex === -1 || targetIndex === -1) return;const [draggedItem] = state.tasks.splice(draggedIndex, 1);state.tasks.splice(targetIndex, 0, draggedItem);saveState();render();}});
     }
     
     function attachNoteListeners(){
         const notesGrid = document.getElementById('notes-grid');
         if (!notesGrid) return;
-
         notesGrid.addEventListener('click', (e) => {
             const deleteBtn = e.target.closest('.delete-btn');
             const noteCard = e.target.closest('.note-card');
-
-            if(deleteBtn){
-                e.stopPropagation();
-                if(confirm('Tem certeza que deseja excluir esta nota?')){
-                    const id = deleteBtn.dataset.id;
-                    state.notes = state.notes.filter(n => n.id !== id);
-                    saveState();
-                    render();
-                }
-                return;
-            }
-
-            if(noteCard){
-                const note = state.notes.find(n => n.id === noteCard.dataset.id);
-                if(note) openNoteModal(note);
-            }
+            if(deleteBtn){ e.stopPropagation(); if(confirm('Tem certeza?')){ state.notes = state.notes.filter(n => n.id !== deleteBtn.dataset.id); saveState(); render(); } return; }
+            if(noteCard){ const note = state.notes.find(n => n.id === noteCard.dataset.id); if(note) openNoteModal(note); }
         });
     }
 
     function openTaskModal(task = null) {
-        modalContainer.innerHTML = `
-            <div class="modal-overlay">
-                <div class="modal-content">
-                    <form id="task-form">
-                        <div class="modal-header"><h2 class="modal-title">${task ? 'Editar Tarefa' : 'Nova Tarefa'}</h2><button type="button" class="modal-close-btn">&times;</button></div>
-                        <input type="hidden" id="taskId" value="${task ? task.id : ''}">
-                        <div class="form-group"><label for="taskTitle">Título</label><input type="text" id="taskTitle" class="form-control" value="${task ? task.title : ''}" required></div>
-                        <div class="form-group"><label for="taskDeadline">Prazo (Opcional)</label><input type="date" id="taskDeadline" class="form-control" value="${task ? (task.deadline || '') : ''}"></div>
-                        <div class="form-group"><label for="taskProgress">Progresso (0-100%)</label><input type="number" id="taskProgress" class="form-control" value="${task ? (task.progress || 0) : 0}" min="0" max="100"></div>
-                        <div class="form-group"><label for="taskPriority">Prioridade</label>
-                            <select id="taskPriority" class="form-control">
-                                <option value="1" ${task && task.priority == 1 ? 'selected' : ''}>P1 - Urgente</option>
-                                <option value="2" ${task && task.priority == 2 ? 'selected' : ''}>P2 - Alta</option>
-                                <option value="3" ${(task && task.priority == 3) || !task ? 'selected' : ''}>P3 - Média</option>
-                                <option value="4" ${task && task.priority == 4 ? 'selected' : ''}>P4 - Baixa</option>
-                            </select>
-                        </div>
-                        <div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div>
-                    </form>
-                </div>
-            </div>`;
-        
-        modalContainer.querySelector('form').addEventListener('submit', handleTaskSave);
-        modalContainer.querySelector('.modal-close-btn').addEventListener('click', closeModal);
-        modalContainer.querySelector('.btn-secondary').addEventListener('click', closeModal);
+        modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content"><form id="task-form"><div class="modal-header"><h2 class="modal-title">${task ? 'Editar Tarefa' : 'Nova Tarefa'}</h2><button type="button" class="modal-close-btn">&times;</button></div><input type="hidden" id="taskId" value="${task ? task.id : ''}"><div class="form-group"><label for="taskTitle">Título</label><input type="text" id="taskTitle" class="form-control" value="${task ? task.title : ''}" required></div><div class="form-group"><label for="taskDeadline">Prazo (Opcional)</label><input type="date" id="taskDeadline" class="form-control" value="${task ? (task.deadline || '') : ''}"></div><div class="form-group"><label for="taskProgress">Progresso (0-100%)</label><input type="number" id="taskProgress" class="form-control" value="${task ? (task.progress || 0) : 0}" min="0" max="100"></div><div class="form-group"><label for="taskPriority">Prioridade</label><select id="taskPriority" class="form-control"><option value="1" ${task && task.priority == 1 ? 'selected' : ''}>P1 - Urgente</option><option value="2" ${task && task.priority == 2 ? 'selected' : ''}>P2 - Alta</option><option value="3" ${(task && task.priority == 3) || !task ? 'selected' : ''}>P3 - Média</option><option value="4" ${task && task.priority == 4 ? 'selected' : ''}>P4 - Baixa</option></select></div><div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div></form></div></div>`;
+        const form = modalContainer.querySelector('form'); form.addEventListener('submit', handleTaskSave); form.querySelector('.modal-close-btn').addEventListener('click', closeModal); form.querySelector('.btn-secondary').addEventListener('click', closeModal);
     }
     
     function handleTaskSave(e) {
         e.preventDefault();
         const id = document.getElementById('taskId').value;
-        const taskData = {
-            title: document.getElementById('taskTitle').value.trim(),
-            deadline: document.getElementById('taskDeadline').value || null,
-            progress: parseInt(document.getElementById('taskProgress').value) || 0,
-            priority: document.getElementById('taskPriority').value
-        };
+        const taskData = { title: document.getElementById('taskTitle').value.trim(), deadline: document.getElementById('taskDeadline').value || null, progress: parseInt(document.getElementById('taskProgress').value) || 0, priority: document.getElementById('taskPriority').value };
         if (!taskData.title) return;
-
-        if (id) {
-            const task = state.tasks.find(t => t.id === id);
-            if(task) Object.assign(task, taskData);
-        } else {
-            const newTask = { id: `task-${Date.now()}`, completed: false, subtasks: [], ...taskData };
-            state.tasks.push(newTask);
-        }
-        saveState();
-        render();
-        closeModal();
+        if (id) { const task = state.tasks.find(t => t.id === id); if(task) Object.assign(task, taskData); } 
+        else { const newTask = { id: `task-${Date.now()}`, completed: false, subtasks: [], ...taskData }; state.tasks.push(newTask); }
+        saveState(); render(); closeModal();
     }
     
     function openNoteModal(note = null) {
         modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content"><form id="note-form"><div class="modal-header"><h2 class="modal-title">${note ? 'Editar Nota' : 'Nova Nota'}</h2><button type="button" class="modal-close-btn">&times;</button></div><input type="hidden" id="noteId" value="${note ? note.id : ''}"><div class="form-group"><label for="noteTitle">Título</label><input type="text" id="noteTitle" class="form-control" value="${note ? note.title : ''}" required></div><div class="form-group"><label for="noteContent">Conteúdo</label><textarea id="noteContent" class="form-control">${note ? note.content : ''}</textarea></div><div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div></form></div></div>`;
-        modalContainer.querySelector('form').addEventListener('submit', handleNoteSave);
-        modalContainer.querySelector('.modal-close-btn').addEventListener('click', closeModal);
-        modalContainer.querySelector('.btn-secondary').addEventListener('click', closeModal);
+        const form = modalContainer.querySelector('form'); form.addEventListener('submit', handleNoteSave); form.querySelector('.modal-close-btn').addEventListener('click', closeModal); form.querySelector('.btn-secondary').addEventListener('click', closeModal);
     }
 
     function handleNoteSave(e) {
@@ -305,17 +186,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = document.getElementById('noteId').value;
         const noteData = { title: document.getElementById('noteTitle').value.trim(), content: document.getElementById('noteContent').value.trim() };
         if(!noteData.title) return;
-
-        if (id) {
-            const note = state.notes.find(n => n.id === id);
-            if(note) Object.assign(note, noteData);
-        } else {
-            const newNote = { id: `note-${Date.now()}`, ...noteData };
-            state.notes.push(newNote);
-        }
-        saveState();
-        render();
-        closeModal();
+        if (id) { const note = state.notes.find(n => n.id === id); if(note) Object.assign(note, noteData); } 
+        else { const newNote = { id: `note-${Date.now()}`, ...noteData }; state.notes.push(newNote); }
+        saveState(); render(); closeModal();
     }
     
     // --- INICIALIZAÇÃO ---
