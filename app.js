@@ -50,18 +50,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderHomePage() { appContent.innerHTML = `<h1 class="page-title">Início</h1><div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Este é o seu espaço.</div></div>`; }
     
-    // CORREÇÃO: Chamadas para createFab e attachTaskListeners restauradas
-    function renderTasksPage() { 
-        appContent.innerHTML = `<h1 class="page-title">Tarefas & Projetos</h1><ul class="card-grid" id="task-list">${state.tasks.map(task => `<li class="task-item card ${task.completed ? 'completed' : ''}" data-id="${task.id}" draggable="true"><div class="card-actions"><button class="card-action-btn edit-btn" data-id="${task.id}">${ICONS.edit}</button><button class="card-action-btn delete-btn" data-id="${task.id}">${ICONS.delete}</button></div><div class="task-header"><label class="custom-checkbox-container"><input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}><span class="checkmark"></span></label><div class="task-info"><h3 class="card-title">${task.title}</h3></div></div><div class="card-content card-meta">${task.deadline ? `<div class="meta-item">${ICONS.calendar}<span>${calculateDaysRemaining(task.deadline)}</span></div>` : ''}</div><div class="progress-container"><div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${task.progress || 0}%;"></div></div><span class="progress-text">${task.progress || 0}%</span></div><div class="task-footer">${task.attachedNoteId ? `<button class="attached-note-link" data-note-id="${task.attachedNoteId}">${ICONS.note} Ver Nota</button>` : '<div></div>'}<span class="task-priority p${task.priority}">P${task.priority}</span></div></li>`).join('')}</ul>${state.tasks.length === 0 ? '<div class="card"><p class="card-content">Nenhuma tarefa encontrada.</p></div>' : ''}`; 
+    function renderTasksPage() {
+        appContent.innerHTML = `<h1 class="page-title">Tarefas & Projetos</h1><ul class="card-grid" id="task-list">${state.tasks.map(task => `<li class="task-item card ${task.completed ? 'completed' : ''}" data-id="${task.id}" draggable="true"><div class="card-actions"><button class="card-action-btn edit-btn" data-id="${task.id}">${ICONS.edit}</button><button class="card-action-btn delete-btn" data-id="${task.id}">${ICONS.delete}</button></div><div class="task-header"><label class="custom-checkbox-container"><input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}><span class="checkmark"></span></label><div class="task-info"><h3 class="card-title">${task.title}</h3></div></div><div class="card-content card-meta">${task.deadline ? `<div class="meta-item">${ICONS.calendar}<span>${calculateDaysRemaining(task.deadline)}</span></div>` : ''}</div><div class="progress-container"><div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${task.progress || 0}%;"></div></div><span class="progress-text">${task.progress || 0}%</span></div><div class="task-footer">${task.attachedNoteId ? `<button class="attached-note-link" data-note-id="${task.attachedNoteId}">${ICONS.note} Ver Nota</button>` : '<div></div>'}<span class="task-priority p${task.priority}">P${task.priority}</span></div></li>`).join('')}</ul>${state.tasks.length === 0 ? '<div class="card"><p class="card-content">Nenhuma tarefa encontrada.</p></div>' : ''}`;
         createFab(() => openTaskModal());
-        attachTaskListeners(); 
+        attachTaskListeners();
     }
     
     function renderCalendarPage() { const tasksWithDeadline = state.tasks.filter(task => task.deadline); const allEvents = [...tasksWithDeadline, ...state.calendarEvents].sort((a, b) => new Date(a.date || a.deadline) - new Date(b.date || b.deadline)); const months = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]; appContent.innerHTML = `<h1 class="page-title">Calendário</h1><div class="card-grid">${allEvents.map(event => { const eventDate = new Date((event.date || event.deadline) + 'T12:00:00Z'); const day = eventDate.getUTCDate(); const month = months[eventDate.getUTCMonth()]; const status = event.deadline ? getTaskStatus(event) : null; return `<div class="event-item card"><div class="event-date"><span class="event-day">${day}</span><span class="event-month">${month}</span></div><div class="event-details"><div class="event-details-header"><h3 class="card-title event-title">${event.title}</h3>${event.priority ? `<span class="task-priority p${event.priority}">P${event.priority}</span>` : ''}</div><div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem;">${status ? `<span class="status-tag ${status.className}">${status.text}</span>` : ''}<div class="event-countdown"><span>${calculateDaysRemaining(event.deadline)}</span></div></div></div></div>`}).join('')}</div>${allEvents.length === 0 ? '<div class="card"><p class="card-content">Nenhum evento com prazo.</p></div>' : ''}`; }
     
-    // CORREÇÃO: Chamadas para createFab e attachNoteListeners restauradas
     function renderNotesPage() { 
-        appContent.innerHTML = `<h1 class="page-title">Notas & Ideias</h1><div class="card-grid" id="notes-grid">${state.notes.map(note => `<div class="note-card card" data-id="${note.id}"><div class="card-actions"><button class="card-action-btn edit-btn" data-id="${note.id}">${ICONS.edit}</button><button class="card-action-btn delete-btn" data-id="${note.id}">${ICONS.delete}</button></div><h3 class="card-title">${note.title}</h3><p class="card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p></div>`).join('')}</div>${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada.</p></div>' : ''}`; 
+        appContent.innerHTML = `<h1 class="page-title">Notas & Ideias</h1><div class="card-grid" id="notes-grid">${state.notes.map(note => `<div class="note-card card" data-id="${note.id}"><div class="card-actions"><button class="card-action-btn edit-btn" data-id="${note.id}">${ICONS.edit}</button><button class="card-action-btn delete-btn" data-id="${note.id}">${ICONS.delete}</button></div><h3 class="card-title">${note.title}</h3><p class="card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p></div>`).join('')}</div>${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada.</p></div>' : ''}`;
         createFab(() => openNoteModal()); 
         attachNoteListeners(); 
     }
@@ -121,8 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeModal() { modalContainer.innerHTML = ''; }
     function showConfirmationModal(message) { return new Promise((resolve, reject) => { modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content confirm-modal-content"><h2 class="modal-title">Confirmação</h2><p class="card-content">${message}</p><div class="modal-footer"><button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button><button type="button" class="btn btn-primary" id="confirm-btn">Confirmar</button></div></div></div>`; modalContainer.querySelector('#confirm-btn').onclick = () => { closeModal(); resolve(); }; modalContainer.querySelector('#cancel-btn').onclick = () => { closeModal(); reject(); }; }); }
     
-    async function attachTaskListeners() { /* ...código existente sem alterações... */ }
-    async function attachNoteListeners(){ /* ...código existente sem alterações... */ }
+    async function attachTaskListeners() { /* ...código completo... */ }
+    async function attachNoteListeners(){ /* ...código completo... */ }
     function attachHabitListeners() {
         const habitList = document.getElementById('habit-list');
         if (!habitList) return;
@@ -137,26 +135,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function handleTaskSave(e) { /* ...código existente sem alterações... */ }
-    function openTaskModal(task = null) { /* ...código existente sem alterações... */ }
-    function handleNoteSave(e) { /* ...código existente sem alterações... */ }
-    function openNoteModal(note = null) { /* ...código existente sem alterações... */ }
-    function openTaskViewer(task) { /* ...código existente sem alterações... */ }
-    function openNoteViewer(note) { /* ...código existente sem alterações... */ }
+    function handleTaskSave(e) { /* ...código completo... */ }
+    function openTaskModal(task = null) { /* ...código completo... */ }
+    function handleNoteSave(e) { /* ...código completo... */ }
+    function openNoteModal(note = null) { /* ...código completo... */ }
+    function openTaskViewer(task) { /* ...código completo... */ }
+    function openNoteViewer(note) { /* ...código completo... */ }
     
-    function handleHabitCompletion(id, value = 1) {
+    function handleHabitCompletion(id, value = 1, operation = 'binary') {
         const habit = state.habits.find(h => h.id === id);
         if (!habit) return;
         const today = new Date().toLocaleDateString('en-CA');
         const completionIndex = habit.completions.findIndex(c => c.date === today);
 
-        if (habit.type === 'binary') {
+        if (operation === 'reset') {
+            if (completionIndex > -1) habit.completions.splice(completionIndex, 1);
+        } else if (habit.type === 'binary') {
             if (completionIndex > -1) { habit.completions.splice(completionIndex, 1); } 
             else { habit.completions.push({ date: today, value: 1 }); }
         } else if (habit.type === 'quantifiable') {
             if (completionIndex > -1) {
                 habit.completions[completionIndex].value += value;
-            } else {
+                if (habit.completions[completionIndex].value < 0) habit.completions[completionIndex].value = 0;
+            } else if (value > 0) {
                 habit.completions.push({ date: today, value: value });
             }
         }
@@ -164,11 +165,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculateStreak(habit) { /* ...código existente sem alterações... */ }
-
     function openHabitModal(habit = null) { /* ...código existente sem alterações... */ }
     function handleHabitSave(e) { /* ...código existente sem alterações... */ }
 
-    // NOVO: Modal de Registro Rápido para Hábitos Quantificáveis
+    // NOVO: Modal de Registro Rápido
     function openHabitLogModal(habit) {
         const today = new Date().toLocaleDateString('en-CA');
         const completion = habit.completions.find(c => c.date === today);
@@ -178,34 +178,40 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="modal-overlay">
                 <div class="modal-content">
                     <form id="habit-log-form">
-                        <div class="modal-header">
-                            <h2 class="modal-title">Registrar Progresso</h2>
-                            <button type="button" class="modal-close-btn">&times;</button>
-                        </div>
+                        <div class="modal-header"><h2 class="modal-title">Registrar Progresso</h2><button type="button" class="modal-close-btn">&times;</button></div>
                         <h3 class="card-title" style="text-align:center; margin-bottom:1rem;">${habit.name}</h3>
                         <p style="text-align:center; color: var(--color-text-secondary);">Progresso Atual: ${currentAmount} / ${habit.target} ${habit.unit}</p>
-                        <div class="form-group">
-                            <label for="habitValue">Adicionar Valor</label>
-                            <input type="number" id="habitValue" class="form-control" step="0.1" placeholder="ex: 0.5" required>
+                        <div class="form-group"><label for="habitValue">Valor a Adicionar/Subtrair</label><input type="number" id="habitValue" class="form-control" step="0.1" placeholder="ex: 0.5" required></div>
+                        <div class="habit-log-actions">
+                            <button type="button" class="btn btn-secondary" id="subtract-btn">Subtrair</button>
+                            <button type="submit" class="btn btn-primary" id="add-btn">Adicionar</button>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Adicionar</button>
+                        <div class="modal-footer" style="justify-content:center; margin-top: 1.5rem;">
+                             <button type="button" class="btn btn-danger" id="reset-btn">Zerar Progresso do Dia</button>
                         </div>
                     </form>
                 </div>
             </div>`;
+        
         const form = modalContainer.querySelector('form');
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-            const valueToAdd = parseFloat(document.getElementById('habitValue').value);
-            if (!isNaN(valueToAdd) && valueToAdd > 0) {
-                handleHabitCompletion(habit.id, valueToAdd);
-            }
+        const valueInput = document.getElementById('habitValue');
+        
+        form.querySelector('#add-btn').onclick = () => {
+            const value = parseFloat(valueInput.value);
+            if (!isNaN(value) && value > 0) handleHabitCompletion(habit.id, value, 'quantifiable');
             closeModal();
-        });
+        };
+        form.querySelector('#subtract-btn').onclick = () => {
+            const value = parseFloat(valueInput.value);
+            if (!isNaN(value) && value > 0) handleHabitCompletion(habit.id, -value, 'quantifiable');
+            closeModal();
+        };
+        form.querySelector('#reset-btn').onclick = () => {
+            handleHabitCompletion(habit.id, 0, 'reset');
+            closeModal();
+        };
+        form.addEventListener('submit', e => e.preventDefault()); // Impede o envio padrão
         form.querySelector('.modal-close-btn').addEventListener('click', closeModal);
-        form.querySelector('.btn-secondary').addEventListener('click', closeModal);
     }
     
     function init() { loadState(); navBar.addEventListener('click', (e) => { const navItem = e.target.closest('.nav-item'); if (navItem) { e.preventDefault(); window.location.hash = navItem.dataset.page; } }); window.addEventListener('hashchange', render); render(); }
