@@ -1,164 +1,289 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Seletores do DOM
-    const navButtons = document.querySelectorAll('.nav-btn');
-    const views = document.querySelectorAll('.view');
+    // --- ELEMENTOS DO DOM ---
+    const appContent = document.getElementById('app-content');
+    const navBar = document.getElementById('bottom-navbar');
     const modalContainer = document.getElementById('modal-container');
-    const closeModalBtn = document.getElementById('close-modal-btn');
-    const modalForm = document.getElementById('modal-form');
-    const addButtons = document.querySelectorAll('.add-btn');
-    const modalTitle = document.getElementById('modal-title');
-    const editIdInput = document.getElementById('edit-id');
-    const editTabInput = document.getElementById('edit-tab');
 
-    // "Banco de Dados" em memória
-    let db = {
-        notas: [],
-        tarefas: [],
-        calendario: [],
-        leituras: [],
-        habitos: []
+    // --- ESTADO DA APLICAÇÃO ---
+    let state = {
+        tasks: [],
+        notes: [],
+        calendarEvents: []
     };
 
-    // --- LÓGICA DE DADOS (LocalStorage) ---
+    // --- PERSISTÊNCIA (localStorage) ---
+    function saveState() {
+        localStorage.setItem('lifeOSState', JSON.stringify(state));
+    }
 
-    const saveData = () => {
-        localStorage.setItem('segundoCerebroDB', JSON.stringify(db));
-    };
-
-    const loadData = () => {
-        const localData = localStorage.getItem('segundoCerebroDB');
-        if (localData) {
-            db = JSON.parse(localData);
-        } else {
-            // Adiciona dados de exemplo se for o primeiro uso
-            db.notas.push({ id: Date.now(), titulo: 'Bem-vindo!', descricao: 'Clique no card para editar ou no "+" para criar uma nova nota.' });
+    function loadState() {
+        const savedState = localStorage.getItem('lifeOSState');
+        if (savedState) {
+            state = JSON.parse(savedState);
         }
-    };
+    }
 
-    // --- LÓGICA DE RENDERIZAÇÃO ---
+    // --- RENDERIZAÇÃO ---
+    function render() {
+        const currentPage = window.location.hash.replace('#', '') || 'home';
+        renderPage(currentPage);
+    }
 
-    const renderCards = (tab) => {
-        const grid = document.getElementById(`${tab}-grid`);
-        if (!grid) return;
-        
-        grid.innerHTML = ''; // Limpa a grid antes de renderizar
-        if (db[tab] && db[tab].length > 0) {
-            db[tab].forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.dataset.id = item.id;
-                card.dataset.tab = tab;
-                
-                card.innerHTML = `
-                    <h3>${item.titulo}</h3>
-                    <p>${item.descricao.substring(0, 100)}${item.descricao.length > 100 ? '...' : ''}</p>
-                `;
-                grid.appendChild(card);
-            });
+    function renderPage(page) {
+        appContent.innerHTML = '';
+        const oldFab = document.querySelector('.fab');
+        if (oldFab) oldFab.remove();
+
+        const pageRenderer = {
+            'tasks': renderTasksPage,
+            'notes': renderNotesPage,
+            'calendar': renderCalendarPage,
+        }[page];
+
+        if (pageRenderer) {
+            pageRenderer();
+        } else if (routes[page]) {
+            appContent.innerHTML = routes[page];
         } else {
-             if (tab !== 'configuracoes') {
-                grid.innerHTML = '<p class="config-placeholder">Nenhum item aqui. Clique em "+" para adicionar.</p>';
-            }
+            appContent.innerHTML = '<h1>Página não encontrada</h1>';
         }
-    };
-
-    const renderAllTabs = () => {
-        Object.keys(db).forEach(tab => renderCards(tab));
-    };
+        updateActiveNav(page);
+    }
     
-    // --- LÓGICA DE NAVEGAÇÃO E MODAL ---
+    function createFab(onClick) {
+        const fab = document.createElement('button');
+        fab.className = 'fab';
+        fab.textContent = '+';
+        fab.onclick = onClick;
+        document.body.appendChild(fab);
+    }
 
-    const switchView = (targetId) => {
-        views.forEach(view => view.classList.remove('active-view'));
-        document.getElementById(targetId)?.classList.add('active-view');
+    // --- MÓDULO DE TAREFAS ---
+    function renderTasksPage() {
+        const tasksHTML = `
+            <h1 class="page-title">✅ Tarefas & Projetos</h1>
+            <ul class="task-list" id="task-list">
+                ${state.tasks.map(task => `
+                    <li class="task-item card ${task.completed ? 'completed' : ''}" data-id="${task.id}" draggable="true">
+                        <div class="task-info">
+                            <input type="checkbox" class="task-checkbox" data-id="${task.id}" ${task.completed ? 'checked' : ''}>
+                            <span class="task-title">${task.title}</span>
+                        </div>
+                        <span class="task-priority p${task.priority}">P${task.priority}</span>
+                    </li>
+                `).join('') || '<p class="card-content">Nenhuma tarefa encontrada. Adicione uma nova!</p>'}
+            </ul>`;
+        appContent.innerHTML = tasksHTML;
+        createFab(() => openTaskModal());
         
-        navButtons.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.target === targetId);
-        });
-    };
-
-    const openModal = (mode = 'add', tab = null, id = null) => {
-        modalForm.reset();
-        if (mode === 'edit' && tab && id) {
-            const item = db[tab].find(i => i.id == id);
-            if (item) {
-                modalTitle.textContent = `Editar ${tab.charAt(0).toUpperCase() + tab.slice(1)}`;
-                document.getElementById('item-title').value = item.titulo;
-                document.getElementById('item-description').value = item.descricao;
-                editIdInput.value = id;
-                editTabInput.value = tab;
+        const taskList = document.getElementById('task-list');
+        taskList.addEventListener('change', (e) => {
+            if (e.target.matches('.task-checkbox')) {
+                const task = state.tasks.find(t => t.id === e.target.dataset.id);
+                task.completed = e.target.checked;
+                saveState();
+                render();
             }
-        } else {
-            modalTitle.textContent = `Novo em ${tab.charAt(0).toUpperCase() + tab.slice(1)}`;
-            editIdInput.value = '';
-            editTabInput.value = tab;
-        }
-        modalContainer.classList.remove('hidden');
-    };
-
-    const closeModal = () => {
-        modalContainer.classList.add('hidden');
-    };
-
-    // --- MANIPULADORES DE EVENTOS ---
-
-    navButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            switchView(button.dataset.target);
         });
-    });
-
-    addButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            openModal('add', button.dataset.tab);
+        
+        // Drag & Drop
+        let draggedItemId = null;
+        taskList.addEventListener('dragstart', (e) => {
+            if (e.target.matches('.task-item')) {
+                draggedItemId = e.target.dataset.id;
+                setTimeout(() => e.target.classList.add('dragging'), 0);
+            }
         });
-    });
+        taskList.addEventListener('dragend', (e) => e.target.classList.remove('dragging'));
+        taskList.addEventListener('dragover', (e) => e.preventDefault());
+        taskList.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const dropTarget = e.target.closest('.task-item');
+            if (dropTarget && draggedItemId !== dropTarget.dataset.id) {
+                const draggedIndex = state.tasks.findIndex(t => t.id === draggedItemId);
+                const targetIndex = state.tasks.findIndex(t => t.id === dropTarget.dataset.id);
+                const [draggedItem] = state.tasks.splice(draggedIndex, 1);
+                state.tasks.splice(targetIndex, 0, draggedItem);
+                saveState();
+                render();
+            }
+        });
+    }
 
-    document.addEventListener('click', (e) => {
-        const card = e.target.closest('.card');
-        if (card) {
-            const { id, tab } = card.dataset;
-            openModal('edit', tab, id);
-        }
-    });
-
-    modalForm.addEventListener('submit', (e) => {
+    function openTaskModal(task = null) {
+        const modalHTML = `
+            <div class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header"><h2 class="modal-title">${task ? 'Editar Tarefa' : 'Nova Tarefa'}</h2><button class="modal-close-btn">&times;</button></div>
+                    <form id="task-form">
+                        <input type="hidden" id="taskId" value="${task ? task.id : ''}">
+                        <div class="form-group"><label for="taskTitle">Título</label><input type="text" id="taskTitle" class="form-control" value="${task ? task.title : ''}" required></div>
+                        <div class="form-group"><label for="taskDeadline">Prazo (Opcional)</label><input type="date" id="taskDeadline" class="form-control" value="${task ? task.deadline : ''}"></div>
+                        <div class="form-group"><label for="taskPriority">Prioridade</label>
+                            <select id="taskPriority" class="form-control">
+                                <option value="1" ${task && task.priority == 1 ? 'selected' : ''}>P1 - Urgente</option>
+                                <option value="2" ${task && task.priority == 2 ? 'selected' : ''}>P2 - Alta</option>
+                                <option value="3" ${(task && task.priority == 3) || !task ? 'selected' : ''}>P3 - Média</option>
+                                <option value="4" ${task && task.priority == 4 ? 'selected' : ''}>P4 - Baixa</option>
+                            </select>
+                        </div>
+                        <div class="modal-footer"><button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div>
+                    </form>
+                </div>
+            </div>`;
+        modalContainer.innerHTML = modalHTML;
+        
+        modalContainer.querySelector('#task-form').addEventListener('submit', handleTaskSave);
+        modalContainer.querySelector('.modal-close-btn').addEventListener('click', closeModal);
+        modalContainer.querySelector('#cancel-btn').addEventListener('click', closeModal);
+    }
+    
+    function handleTaskSave(e) {
         e.preventDefault();
-        const id = editIdInput.value;
-        const tab = editTabInput.value;
-        const title = document.getElementById('item-title').value.trim();
-        const description = document.getElementById('item-description').value.trim();
-        
-        if (!title) return;
+        const id = document.getElementById('taskId').value;
+        const taskData = {
+            title: document.getElementById('taskTitle').value,
+            deadline: document.getElementById('taskDeadline').value,
+            priority: document.getElementById('taskPriority').value
+        };
 
-        if (id) { // Editando
-            const itemIndex = db[tab].findIndex(i => i.id == id);
-            if (itemIndex > -1) {
-                db[tab][itemIndex] = { ...db[tab][itemIndex], titulo: title, descricao: description };
-            }
-        } else { // Adicionando
-            db[tab].push({ id: Date.now(), titulo: title, descricao: description });
+        if (id) {
+            const task = state.tasks.find(t => t.id === id);
+            Object.assign(task, taskData);
+        } else {
+            const newTask = { id: `task-${Date.now()}`, completed: false, ...taskData };
+            state.tasks.push(newTask);
         }
-        
-        saveData();
-        renderCards(tab);
+        saveState();
+        render();
         closeModal();
-    });
+    }
 
-    closeModalBtn.addEventListener('click', closeModal);
-    modalContainer.addEventListener('click', (e) => {
-        if (e.target === modalContainer) {
-            closeModal();
+    // --- MÓDULO DE NOTAS ---
+    function renderNotesPage() {
+        const notesHTML = `
+            <h1 class="page-title">📓 Notas & Ideias</h1>
+            <div class="notes-grid">
+                ${state.notes.map(note => `
+                    <div class="note-card card" data-id="${note.id}">
+                        <h3 class="card-title">${note.title}</h3>
+                        <p class="note-card-content card-content">${note.content.substring(0, 150)}${note.content.length > 150 ? '...' : ''}</p>
+                    </div>
+                `).join('') || '<p class="card-content">Nenhuma nota encontrada. Adicione uma nova!</p>'}
+            </div>`;
+        appContent.innerHTML = notesHTML;
+        createFab(() => openNoteModal());
+    }
+
+    function openNoteModal(note = null) {
+        const modalHTML = `
+            <div class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header"><h2 class="modal-title">${note ? 'Editar Nota' : 'Nova Nota'}</h2><button class="modal-close-btn">&times;</button></div>
+                    <form id="note-form">
+                        <input type="hidden" id="noteId" value="${note ? note.id : ''}">
+                        <div class="form-group"><label for="noteTitle">Título</label><input type="text" id="noteTitle" class="form-control" value="${note ? note.title : ''}" required></div>
+                        <div class="form-group"><label for="noteContent">Conteúdo</label><textarea id="noteContent" class="form-control">${note ? note.content : ''}</textarea></div>
+                        <div class="modal-footer"><button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div>
+                    </form>
+                </div>
+            </div>`;
+        modalContainer.innerHTML = modalHTML;
+        
+        modalContainer.querySelector('#note-form').addEventListener('submit', handleNoteSave);
+        modalContainer.querySelector('.modal-close-btn').addEventListener('click', closeModal);
+        modalContainer.querySelector('#cancel-btn').addEventListener('click', closeModal);
+    }
+
+    function handleNoteSave(e) {
+        e.preventDefault();
+        const id = document.getElementById('noteId').value;
+        const noteData = {
+            title: document.getElementById('noteTitle').value,
+            content: document.getElementById('noteContent').value
+        };
+
+        if (id) {
+            const note = state.notes.find(n => n.id === id);
+            Object.assign(note, noteData);
+        } else {
+            const newNote = { id: `note-${Date.now()}`, ...noteData };
+            state.notes.push(newNote);
         }
-    });
+        saveState();
+        render();
+        closeModal();
+    }
+
+    // --- MÓDULO DE CALENDÁRIO ---
+    function renderCalendarPage() {
+        const tasksWithDeadline = state.tasks
+            .filter(task => task.deadline)
+            .map(task => ({
+                date: task.deadline,
+                title: task.title,
+                source: 'Tarefas'
+            }));
+            
+        // Futuramente, podemos unir com state.calendarEvents
+        const allEvents = [...tasksWithDeadline].sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        const months = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
+
+        const calendarHTML = `
+            <h1 class="page-title">📅 Calendário</h1>
+            <ul class="event-list">
+                ${allEvents.map(event => {
+                    const eventDate = new Date(event.date + 'T00:00:00-03:00'); // Ajusta para fuso horário local
+                    const day = eventDate.getDate();
+                    const month = months[eventDate.getMonth()];
+                    return `
+                    <li class="event-item card">
+                        <div class="event-date">
+                            <span class="event-day">${day}</span>
+                            <span class="event-month">${month}</span>
+                        </div>
+                        <div class="event-details">
+                            <p class="event-title">${event.title}</p>
+                            <span class="event-source">${event.source}</span>
+                        </div>
+                    </li>
+                `}).join('') || '<p class="card-content">Nenhum evento ou tarefa com prazo encontrados.</p>'}
+            </ul>`;
+        appContent.innerHTML = calendarHTML;
+    }
+
+    // --- MODAL & NAVEGAÇÃO ---
+    function closeModal() {
+        modalContainer.innerHTML = '';
+    }
+    
+    const routes = {
+        'home': '<h1>🏠 Início</h1><div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Seu dashboard central será construído aqui.</div></div>',
+        'settings': '<h1>⚙️ Ajustes</h1><div class="card"><div class="card-title">Tema</div><div class="card-content">Opções para alterar o tema (Light/Dark/Glass) estarão aqui.</div></div>'
+    };
+
+    function updateActiveNav(page) {
+        navBar.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.page === page);
+        });
+    }
+
+    function navigate(e) {
+        const navItem = e.target.closest('.nav-item');
+        if (navItem) {
+            e.preventDefault();
+            window.location.hash = navItem.dataset.page;
+        }
+    }
 
     // --- INICIALIZAÇÃO ---
-
-    const init = () => {
-        loadData();
-        switchView('notas'); // Aba inicial
-        renderAllTabs();
-    };
+    function init() {
+        loadState();
+        navBar.addEventListener('click', navigate);
+        window.addEventListener('hashchange', render);
+        render(); // Renderiza a página inicial
+    }
 
     init();
 });
