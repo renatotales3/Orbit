@@ -40,17 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function updateActiveNav(page) { navBar.querySelectorAll('.nav-item').forEach(item => { item.classList.toggle('active', item.dataset.page === page); }); }
 
-    // AJUSTE: Lógica de cálculo de data corrigida
     function calculateDaysRemaining(dateString) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Zera a hora do dia atual para uma comparação justa de datas
-
-        const deadline = new Date(dateString);
-        deadline.setHours(0, 0, 0, 0); // Zera a hora do prazo também
-        
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const deadline = new Date(dateString); deadline.setHours(0, 0, 0, 0);
         const diffTime = deadline - today;
         const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
         if (diffDays < 0) return 'Prazo encerrado';
         if (diffDays === 0) return 'Termina hoje';
         if (diffDays === 1) return 'Falta 1 dia';
@@ -77,20 +71,19 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <input type="checkbox" class="task-checkbox" data-id="${task.id}" ${task.completed ? 'checked' : ''}>
                                 <span class="checkmark"></span>
                             </label>
-                            <div class="task-info">
-                                <h3 class="card-title">${task.title}</h3>
-                            </div>
+                            <div class="task-info"><h3 class="card-title">${task.title}</h3></div>
                         </div>
                         <div class="card-content card-meta">
                             ${task.deadline ? `<div class="meta-item"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg><span>${calculateDaysRemaining(task.deadline)}</span></div>` : ''}
                         </div>
                         <div class="progress-container">
-                            <div class="progress-bar-container">
-                                <div class="progress-bar-fill" style="width: ${task.progress || 0}%;"></div>
-                            </div>
+                            <div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${task.progress || 0}%;"></div></div>
                             <span class="progress-text">${task.progress || 0}%</span>
                         </div>
-                        <span class="task-priority p${task.priority}">P${task.priority}</span>
+                        <div class="task-footer">
+                            ${task.attachedNoteId ? `<button class="attached-note-link" data-note-id="${task.attachedNoteId}"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg> Ver Nota</button>` : '<div></div>'}
+                            <span class="task-priority p${task.priority}">P${task.priority}</span>
+                        </div>
                     </li>
                 `).join('')}
             </ul>
@@ -106,10 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const months = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
         appContent.innerHTML = `<h1 class="page-title">Calendário</h1><div class="card-grid">${allEvents.map(event => { const eventDate = new Date((event.date || event.deadline) + 'T12:00:00Z'); const day = eventDate.getUTCDate(); const month = months[eventDate.getUTCMonth()]; const status = event.deadline ? getTaskStatus(event) : null; return `
         <div class="event-item card">
-            <div class="event-date">
-                <span class="event-day">${day}</span>
-                <span class="event-month">${month}</span>
-            </div>
+            <div class="event-date"><span class="event-day">${day}</span><span class="event-month">${month}</span></div>
             <div class="event-details">
                 <div class="event-details-header">
                     <h3 class="card-title event-title">${event.title}</h3>
@@ -117,9 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem;">
                     ${status ? `<span class="status-tag ${status.className}">${status.text}</span>` : ''}
-                    <div class="event-countdown">
-                        <span>${calculateDaysRemaining(event.deadline)}</span>
-                    </div>
+                    <div class="event-countdown"><span>${calculateDaysRemaining(event.deadline)}</span></div>
                 </div>
             </div>
         </div>
@@ -146,6 +134,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const deleteBtn = e.target.closest('.delete-btn');
             const taskCard = e.target.closest('.task-item');
             const checkboxContainer = e.target.closest('.custom-checkbox-container');
+            const noteLink = e.target.closest('.attached-note-link');
+
+            if (noteLink) {
+                e.stopPropagation();
+                window.location.hash = '#notes';
+                // Idealmente, aqui teríamos uma lógica para destacar a nota
+                return;
+            }
             if (deleteBtn) { e.stopPropagation(); try { await showConfirmationModal('Deseja realmente excluir esta tarefa?'); state.tasks = state.tasks.filter(t => t.id !== deleteBtn.dataset.id); saveState(); render(); } catch {} return; }
             if (checkboxContainer) { e.stopPropagation(); const checkbox = checkboxContainer.querySelector('input'); const task = state.tasks.find(t => t.id === checkbox.dataset.id); if (task) { task.completed = checkbox.checked; saveState(); render(); } return; }
             if (taskCard) { const task = state.tasks.find(t => t.id === taskCard.dataset.id); if (task) openTaskModal(task); }
@@ -165,14 +161,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openTaskModal(task = null) {
-        modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content"><form id="task-form"><div class="modal-header"><h2 class="modal-title">${task ? 'Editar Tarefa' : 'Nova Tarefa'}</h2><button type="button" class="modal-close-btn">&times;</button></div><input type="hidden" id="taskId" value="${task ? task.id : ''}"><div class="form-group"><label for="taskTitle">Título</label><input type="text" id="taskTitle" class="form-control" value="${task ? task.title : ''}" required></div><div class="form-group"><label for="taskDeadline">Prazo (Opcional)</label><input type="date" id="taskDeadline" class="form-control" value="${task ? (task.deadline || '') : ''}"></div><div class="form-group"><label for="taskProgress">Progresso (0-100%)</label><input type="number" id="taskProgress" class="form-control" value="${task ? (task.progress || 0) : 0}" min="0" max="100"></div><div class="form-group"><label for="taskPriority">Prioridade</label><select id="taskPriority" class="form-control"><option value="1" ${task && task.priority == 1 ? 'selected' : ''}>P1 - Urgente</option><option value="2" ${task && task.priority == 2 ? 'selected' : ''}>P2 - Alta</option><option value="3" ${(task && task.priority == 3) || !task ? 'selected' : ''}>P3 - Média</option><option value="4" ${task && task.priority == 4 ? 'selected' : ''}>P4 - Baixa</option></select></div><div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div></form></div></div>`;
+        const notesOptions = state.notes.map(note => `<option value="${note.id}" ${task && task.attachedNoteId === note.id ? 'selected' : ''}>${note.title}</option>`).join('');
+        modalContainer.innerHTML = `
+            <div class="modal-overlay">
+                <div class="modal-content">
+                    <form id="task-form">
+                        <div class="modal-header"><h2 class="modal-title">${task ? 'Editar Tarefa' : 'Nova Tarefa'}</h2><button type="button" class="modal-close-btn">&times;</button></div>
+                        <input type="hidden" id="taskId" value="${task ? task.id : ''}">
+                        <div class="form-group"><label for="taskTitle">Título</label><input type="text" id="taskTitle" class="form-control" value="${task ? task.title : ''}" required></div>
+                        <div class="form-group"><label for="taskDeadline">Prazo</label><input type="date" id="taskDeadline" class="form-control" value="${task ? (task.deadline || '') : ''}"></div>
+                        <div class="form-group"><label for="taskProgress">Progresso (%)</label><input type="number" id="taskProgress" class="form-control" value="${task ? (task.progress || 0) : 0}" min="0" max="100"></div>
+                        <div class="form-group"><label for="taskPriority">Prioridade</label><select id="taskPriority" class="form-control"><option value="1" ${task && task.priority == 1 ? 'selected' : ''}>P1 - Urgente</option><option value="2" ${task && task.priority == 2 ? 'selected' : ''}>P2 - Alta</option><option value="3" ${(task && task.priority == 3) || !task ? 'selected' : ''}>P3 - Média</option><option value="4" ${task && task.priority == 4 ? 'selected' : ''}>P4 - Baixa</option></select></div>
+                        <div class="form-group"><label for="attachedNoteId">Anexar Nota</label><select id="attachedNoteId" class="form-control"><option value="">Nenhuma</option>${notesOptions}</select></div>
+                        <div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div>
+                    </form>
+                </div>
+            </div>`;
         const form = modalContainer.querySelector('form'); form.addEventListener('submit', handleTaskSave); form.querySelector('.modal-close-btn').addEventListener('click', closeModal); form.querySelector('.btn-secondary').addEventListener('click', closeModal);
     }
     
     function handleTaskSave(e) {
         e.preventDefault();
         const id = document.getElementById('taskId').value;
-        const taskData = { title: document.getElementById('taskTitle').value.trim(), deadline: document.getElementById('taskDeadline').value || null, progress: parseInt(document.getElementById('taskProgress').value) || 0, priority: document.getElementById('taskPriority').value };
+        const taskData = { title: document.getElementById('taskTitle').value.trim(), deadline: document.getElementById('taskDeadline').value || null, progress: parseInt(document.getElementById('taskProgress').value) || 0, priority: document.getElementById('taskPriority').value, attachedNoteId: document.getElementById('attachedNoteId').value || null };
         if (!taskData.title) return;
         if (id) { const task = state.tasks.find(t => t.id === id); if(task) Object.assign(task, taskData); } 
         else { const newTask = { id: `task-${Date.now()}`, completed: false, subtasks: [], ...taskData }; state.tasks.push(newTask); }
@@ -180,14 +191,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function openNoteModal(note = null) {
-        modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content"><form id="note-form"><div class="modal-header"><h2 class="modal-title">${note ? 'Editar Nota' : 'Nova Nota'}</h2><button type="button" class="modal-close-btn">&times;</button></div><input type="hidden" id="noteId" value="${note ? note.id : ''}"><div class="form-group"><label for="noteTitle">Título</label><input type="text" id="noteTitle" class="form-control" value="${note ? note.title : ''}" required></div><div class="form-group"><label for="noteContent">Conteúdo</label><textarea id="noteContent" class="form-control">${note ? note.content : ''}</textarea></div><div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div></form></div></div>`;
+        modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content"><form id="note-form"><div class="modal-header"><h2 class="modal-title">${note ? 'Editar Nota' : 'Nova Nota'}</h2><button type="button" class="modal-close-btn">&times;</button></div><input type="hidden" id="noteId" value="${note ? note.id : ''}"><div class="form-group"><label for="noteTitle">Título</label><input type="text" id="noteTitle" class="form-control" value="${note ? note.title : ''}" required></div><div class="form-group"><label for="noteContent">Conteúdo</label><textarea id="noteContent" class="form-control">${note ? note.content : ''}</textarea></div><div class="form-group"><label for="noteLink">Link/Anexo (URL)</label><input type="url" id="noteLink" class="form-control" value="${note && note.link ? note.link : ''}" placeholder="https://..."></div><div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div></form></div></div>`;
         const form = modalContainer.querySelector('form'); form.addEventListener('submit', handleNoteSave); form.querySelector('.modal-close-btn').addEventListener('click', closeModal); form.querySelector('.btn-secondary').addEventListener('click', closeModal);
     }
 
     function handleNoteSave(e) {
         e.preventDefault();
         const id = document.getElementById('noteId').value;
-        const noteData = { title: document.getElementById('noteTitle').value.trim(), content: document.getElementById('noteContent').value.trim() };
+        const noteData = { title: document.getElementById('noteTitle').value.trim(), content: document.getElementById('noteContent').value.trim(), link: document.getElementById('noteLink').value.trim() || null };
         if(!noteData.title) return;
         if (id) { const note = state.notes.find(n => n.id === id); if(note) Object.assign(note, noteData); } 
         else { const newNote = { id: `note-${Date.now()}`, ...noteData }; state.notes.push(newNote); }
