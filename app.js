@@ -73,8 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const oldFab = document.querySelector('.fab');
         if (oldFab) oldFab.remove();
 
-        appContent.innerHTML = ''; // Limpa a tela antes de renderizar
-        renderer(); // Executa a função de renderização da página
+        appContent.innerHTML = '';
+        renderer();
         updateActiveNav(page);
     }
     
@@ -86,30 +86,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- FUNÇÕES DE RENDERIZAÇÃO DE PÁGINA ---
     function renderHomePage() {
-        appContent.innerHTML = `
-            <h1 class="page-title">Início</h1>
-            <div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Este é o seu espaço. Em breve, este painel será preenchido com insights sobre sua vida.</div></div>
-        `;
+        appContent.innerHTML = `<h1 class="page-title">Início</h1><div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Este é o seu espaço. Em breve, este painel será preenchido com insights sobre sua vida.</div></div>`;
     }
 
     function renderTasksPage() {
         appContent.innerHTML = `
             <h1 class="page-title">Tarefas & Projetos</h1>
             <ul class="card-grid" id="task-list">
-                ${state.tasks.map(task => `
+                ${state.tasks.map(task => {
+                    const subtasksInfo = task.subtasks && task.subtasks.length > 0
+                        ? `${task.subtasks.filter(st => st.done).length} de ${task.subtasks.length} concluídas`
+                        : '';
+                    const deadlineDate = task.deadline ? new Date(task.deadline + 'T12:00:00Z') : null;
+                    const formattedDeadline = deadlineDate ? deadlineDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+
+                    return `
                     <li class="task-item card ${task.completed ? 'completed' : ''}" data-id="${task.id}" draggable="true">
                         <button class="delete-btn" data-id="${task.id}">&times;</button>
                         <div class="task-header">
                            <div class="task-info">
                                 <input type="checkbox" class="task-checkbox" data-id="${task.id}" ${task.completed ? 'checked' : ''}>
-                                <h3 class="card-title task-title">${task.title}</h3>
+                                <h3 class="card-title">${task.title}</h3>
                             </div>
                         </div>
+                        
+                        <div class="card-content">
+                            <div class="card-meta">
+                                ${subtasksInfo ? `
+                                <div class="meta-item">
+                                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8.5 12H7v-2h3.5v2zm3.5 0h-2v-2h2v2zm0-4H7v-2h9v2zm0-4H7V7h9v2z"/></svg>
+                                    <span>${subtasksInfo}</span>
+                                </div>` : ''}
+
+                                ${formattedDeadline ? `
+                                <div class="meta-item">
+                                    <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+                                    <span>${formattedDeadline}</span>
+                                </div>` : ''}
+                            </div>
+                        </div>
+
+                        ${task.progress > 0 ? `
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" style="width: ${task.progress}%;"></div>
+                        </div>
+                        ` : ''}
+                        
                         <div class="task-footer">
                             <span class="task-priority p${task.priority}">P${task.priority}</span>
                         </div>
                     </li>
-                `).join('')}
+                    `;
+                }).join('')}
             </ul>
             ${state.tasks.length === 0 ? '<div class="card"><p class="card-content">Nenhuma tarefa encontrada. Adicione uma nova!</p></div>' : ''}
         `;
@@ -121,65 +149,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const tasksWithDeadline = state.tasks.filter(task => task.deadline);
         const allEvents = [...tasksWithDeadline, ...state.calendarEvents].sort((a, b) => new Date(a.date || a.deadline) - new Date(b.date || b.deadline));
         const months = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
-        appContent.innerHTML = `
-            <h1 class="page-title">Calendário</h1>
-            <div class="card-grid">
-                ${allEvents.map(event => {
-                    const eventDate = new Date((event.date || event.deadline) + 'T12:00:00Z');
-                    const day = eventDate.getUTCDate();
-                    const month = months[eventDate.getUTCMonth()];
-                    const source = event.deadline ? 'Tarefas' : 'Calendário';
-                    return `
-                    <div class="event-item card">
-                        <div class="event-date"><span class="event-day">${day}</span><span class="event-month">${month}</span></div>
-                        <div class="event-details"><p class="event-title">${event.title}</p><span class="event-source">${source}</span></div>
-                    </div>
-                    `;
-                }).join('')}
-            </div>
-            ${allEvents.length === 0 ? '<div class="card"><p class="card-content">Nenhum evento ou tarefa com prazo encontrados.</p></div>' : ''}
-        `;
+        appContent.innerHTML = `<h1 class="page-title">Calendário</h1><div class="card-grid">${allEvents.map(event => {const eventDate = new Date((event.date || event.deadline) + 'T12:00:00Z'); const day = eventDate.getUTCDate(); const month = months[eventDate.getUTCMonth()]; const source = event.deadline ? 'Tarefas' : 'Calendário'; return `<div class="event-item card"><div class="event-date"><span class="event-day">${day}</span><span class="event-month">${month}</span></div><div class="event-details"><p class="event-title">${event.title}</p><span class="event-source">${source}</span></div></div>`}).join('')}</div>${allEvents.length === 0 ? '<div class="card"><p class="card-content">Nenhum evento ou tarefa com prazo encontrados.</p></div>' : ''}`;
     }
 
     function renderNotesPage() {
-        appContent.innerHTML = `
-            <h1 class="page-title">Notas & Ideias</h1>
-            <div class="card-grid" id="notes-grid">
-                ${state.notes.map(note => `
-                    <div class="note-card card" data-id="${note.id}">
-                        <button class="delete-btn" data-id="${note.id}">&times;</button>
-                        <h3 class="card-title">${note.title}</h3>
-                        <p class="note-card-content card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p>
-                    </div>
-                `).join('')}
-            </div>
-            ${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada. Adicione uma nova!</p></div>' : ''}
-        `;
+        appContent.innerHTML = `<h1 class="page-title">Notas & Ideias</h1><div class="card-grid" id="notes-grid">${state.notes.map(note => `<div class="note-card card" data-id="${note.id}"><button class="delete-btn" data-id="${note.id}">&times;</button><h3 class="card-title">${note.title}</h3><p class="note-card-content card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p></div>`).join('')}</div>${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada. Adicione uma nova!</p></div>' : ''}`;
         createFab(() => openNoteModal());
         attachNoteListeners();
     }
 
     function renderSettingsPage() {
-        appContent.innerHTML = `
-            <h1 class="page-title">Ajustes</h1>
-            <div class="card"><div class="card-title">Em Breve</div><div class="card-content">Configurações de tema, importação/exportação e outras opções aparecerão aqui.</div></div>
-        `;
+        appContent.innerHTML = `<h1 class="page-title">Ajustes</h1><div class="card"><div class="card-title">Em Breve</div><div class="card-content">Configurações de tema, importação/exportação e outras opções aparecerão aqui.</div></div>`;
     }
 
     // --- LÓGICA DE EVENTOS & MODAIS ---
     function createFab(onClick) {
-        const fab = document.createElement('button');
-        fab.className = 'fab';
-        fab.textContent = '+';
-        fab.onclick = onClick;
-        document.body.appendChild(fab);
+        const fab = document.createElement('button');fab.className = 'fab';fab.textContent = '+';fab.onclick = onClick;document.body.appendChild(fab);
     }
     
     function closeModal() {
         modalContainer.innerHTML = '';
     }
     
-    // Anexa listeners para a lista de tarefas
     function attachTaskListeners() {
         const taskList = document.getElementById('task-list');
         if (!taskList) return;
@@ -190,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const checkbox = e.target.closest('.task-checkbox');
             
             if (deleteBtn) {
-                e.stopPropagation(); // Impede que o clique no botão de deletar abra o modal de edição
+                e.stopPropagation();
                 if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
                     const id = deleteBtn.dataset.id;
                     state.tasks = state.tasks.filter(t => t.id !== id);
@@ -217,34 +208,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Lógica de Drag & Drop (sem alterações)
+        // Drag & Drop
         let draggedItemId = null;
-        taskList.addEventListener('dragstart', (e) => {
-            if (e.target.matches('.task-item')) {
-                draggedItemId = e.target.dataset.id;
-                setTimeout(() => e.target.classList.add('dragging'), 0);
-            }
-        });
-        taskList.addEventListener('dragend', (e) => {
-            if(e.target.matches('.task-item')) e.target.classList.remove('dragging')
-        });
+        taskList.addEventListener('dragstart', (e) => {if (e.target.matches('.task-item')) {draggedItemId = e.target.dataset.id;setTimeout(() => e.target.classList.add('dragging'), 0);}});
+        taskList.addEventListener('dragend', (e) => {if(e.target.matches('.task-item')) e.target.classList.remove('dragging')});
         taskList.addEventListener('dragover', (e) => e.preventDefault());
-        taskList.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const dropTarget = e.target.closest('.task-item');
-            if (dropTarget && draggedItemId !== dropTarget.dataset.id) {
-                const draggedIndex = state.tasks.findIndex(t => t.id === draggedItemId);
-                const targetIndex = state.tasks.findIndex(t => t.id === dropTarget.dataset.id);
-                if(draggedIndex === -1 || targetIndex === -1) return;
-                const [draggedItem] = state.tasks.splice(draggedIndex, 1);
-                state.tasks.splice(targetIndex, 0, draggedItem);
-                saveState();
-                render();
-            }
-        });
+        taskList.addEventListener('drop', (e) => {e.preventDefault();const dropTarget = e.target.closest('.task-item');if (dropTarget && draggedItemId !== dropTarget.dataset.id) {const draggedIndex = state.tasks.findIndex(t => t.id === draggedItemId);const targetIndex = state.tasks.findIndex(t => t.id === dropTarget.dataset.id);if(draggedIndex === -1 || targetIndex === -1) return;const [draggedItem] = state.tasks.splice(draggedIndex, 1);state.tasks.splice(targetIndex, 0, draggedItem);saveState();render();}});
     }
     
-    // Anexa listeners para a lista de notas
     function attachNoteListeners(){
         const notesGrid = document.getElementById('notes-grid');
         if (!notesGrid) return;
@@ -271,7 +242,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Modal de Tarefas
     function openTaskModal(task = null) {
         modalContainer.innerHTML = `
             <div class="modal-overlay">
@@ -281,6 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="hidden" id="taskId" value="${task ? task.id : ''}">
                         <div class="form-group"><label for="taskTitle">Título</label><input type="text" id="taskTitle" class="form-control" value="${task ? task.title : ''}" required></div>
                         <div class="form-group"><label for="taskDeadline">Prazo (Opcional)</label><input type="date" id="taskDeadline" class="form-control" value="${task ? (task.deadline || '') : ''}"></div>
+                        <div class="form-group"><label for="taskProgress">Progresso (0-100%)</label><input type="number" id="taskProgress" class="form-control" value="${task ? (task.progress || 0) : 0}" min="0" max="100"></div>
                         <div class="form-group"><label for="taskPriority">Prioridade</label>
                             <select id="taskPriority" class="form-control">
                                 <option value="1" ${task && task.priority == 1 ? 'selected' : ''}>P1 - Urgente</option>
@@ -305,6 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const taskData = {
             title: document.getElementById('taskTitle').value.trim(),
             deadline: document.getElementById('taskDeadline').value || null,
+            progress: parseInt(document.getElementById('taskProgress').value) || 0,
             priority: document.getElementById('taskPriority').value
         };
         if (!taskData.title) return;
@@ -313,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const task = state.tasks.find(t => t.id === id);
             if(task) Object.assign(task, taskData);
         } else {
-            const newTask = { id: `task-${Date.now()}`, completed: false, ...taskData };
+            const newTask = { id: `task-${Date.now()}`, completed: false, subtasks: [], ...taskData };
             state.tasks.push(newTask);
         }
         saveState();
@@ -321,21 +293,8 @@ document.addEventListener('DOMContentLoaded', () => {
         closeModal();
     }
     
-    // Modal de Notas
     function openNoteModal(note = null) {
-        modalContainer.innerHTML = `
-            <div class="modal-overlay">
-                <div class="modal-content">
-                    <form id="note-form">
-                        <div class="modal-header"><h2 class="modal-title">${note ? 'Editar Nota' : 'Nova Nota'}</h2><button type="button" class="modal-close-btn">&times;</button></div>
-                        <input type="hidden" id="noteId" value="${note ? note.id : ''}">
-                        <div class="form-group"><label for="noteTitle">Título</label><input type="text" id="noteTitle" class="form-control" value="${note ? note.title : ''}" required></div>
-                        <div class="form-group"><label for="noteContent">Conteúdo</label><textarea id="noteContent" class="form-control">${note ? note.content : ''}</textarea></div>
-                        <div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div>
-                    </form>
-                </div>
-            </div>`;
-        
+        modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content"><form id="note-form"><div class="modal-header"><h2 class="modal-title">${note ? 'Editar Nota' : 'Nova Nota'}</h2><button type="button" class="modal-close-btn">&times;</button></div><input type="hidden" id="noteId" value="${note ? note.id : ''}"><div class="form-group"><label for="noteTitle">Título</label><input type="text" id="noteTitle" class="form-control" value="${note ? note.title : ''}" required></div><div class="form-group"><label for="noteContent">Conteúdo</label><textarea id="noteContent" class="form-control">${note ? note.content : ''}</textarea></div><div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div></form></div></div>`;
         modalContainer.querySelector('form').addEventListener('submit', handleNoteSave);
         modalContainer.querySelector('.modal-close-btn').addEventListener('click', closeModal);
         modalContainer.querySelector('.btn-secondary').addEventListener('click', closeModal);
@@ -344,10 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleNoteSave(e) {
         e.preventDefault();
         const id = document.getElementById('noteId').value;
-        const noteData = {
-            title: document.getElementById('noteTitle').value.trim(),
-            content: document.getElementById('noteContent').value.trim()
-        };
+        const noteData = { title: document.getElementById('noteTitle').value.trim(), content: document.getElementById('noteContent').value.trim() };
         if(!noteData.title) return;
 
         if (id) {
@@ -365,18 +321,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- INICIALIZAÇÃO ---
     function init() {
         loadState();
-        
-        navBar.addEventListener('click', (e) => {
-            const navItem = e.target.closest('.nav-item');
-            if (navItem) {
-                e.preventDefault();
-                window.location.hash = navItem.dataset.page;
-            }
-        });
-        
+        navBar.addEventListener('click', (e) => { const navItem = e.target.closest('.nav-item'); if (navItem) { e.preventDefault(); window.location.hash = navItem.dataset.page; } });
         window.addEventListener('hashchange', render);
-        
-        render(); // Renderiza a página inicial
+        render();
     }
 
     init();
