@@ -46,9 +46,10 @@ body { font-family: var(--font-main); background: var(--color-background); color
 .card.highlight { animation: highlight-pulse 1.5s ease-out; }
 @keyframes highlight-pulse { 0% { box-shadow: 0 0 0 0 var(--color-accent); } 50% { box-shadow: 0 0 15px 5px rgba(255, 90, 95, 0.5); } 100% { box-shadow: 0 0 0 0 rgba(255, 90, 95, 0); } }
 .card-actions { position: absolute; top: 1rem; right: 1rem; display: flex; gap: 0.5rem; }
-.card-action-btn { width: 28px; height: 28px; background: var(--color-background); color: var(--color-text-secondary); border: 1px solid var(--color-border-subtle); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.card-action-btn { width: 28px; height: 28px; background: var(--color-background); color: var(--color-text-secondary); border: 1px solid var(--color-border-subtle); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; opacity: 0.6; }
 .card-action-btn svg { width: 16px; height: 16px; stroke: currentColor; }
 .card-action-btn:hover { background-color: #f0f0f0; color: var(--color-text-primary); }
+@media (hover: hover) { .card-action-btn { opacity: 0; } .card:hover .card-action-btn { opacity: 1; } }
 
 /* --- 5. COMPONENTES UNIFICADOS --- */
 .item-header { display: flex; align-items: center; gap: 1rem; }
@@ -60,7 +61,7 @@ body { font-family: var(--font-main); background: var(--color-background); color
 .checkmark:after { content: ""; position: absolute; display: none; }
 .custom-checkbox-container input:checked ~ .checkmark:after { display: block; }
 .custom-checkbox-container .checkmark:after { left: 6px; top: 3px; width: 5px; height: 10px; border: solid white; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); }
-.card-meta { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem; color: var(--color-text-secondary); flex-grow: 1; }
+.card-meta { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem; color: var(--color-text-secondary); }
 .meta-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; font-weight: 500; }
 .meta-item svg { width: 14px; height: 14px; stroke: currentColor; }
 .item-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
@@ -85,8 +86,11 @@ body { font-family: var(--font-main); background: var(--color-background); color
 .day-square { width: 16px; height: 16px; background-color: var(--color-border-subtle); border-radius: 3px; }
 .day-square.completed { background-color: var(--color-status-done); opacity: 0.7; }
 .day-square.today { border: 1px solid var(--color-text-secondary); }
+.quant-action { display: flex; align-items: baseline; gap: 0.5rem; cursor: pointer; }
+.quant-progress { font-size: 1.1rem; font-weight: 600; color: var(--color-text-primary); }
+.quant-target { font-size: 0.8rem; color: var(--color-text-secondary); }
 
-.event-date{display:flex;flex-direction:column;align-items:center;justify-content:center;background-color:var(--color-background);border-radius:10px;padding:.8rem;text-align:center;width:65px;height:65px;flex-shrink:0}.event-day{font-size:1.8rem;font-weight:700;color:var(--color-accent);line-height:1}.event-month{font-size:.8rem;text-transform:uppercase;margin-top:2px}.event-details{display:flex;flex-direction:column;flex-grow:1;gap:.5rem}.event-details-header{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}.event-details .event-title{font-weight:600;color:var(--color-text-primary)}.event-countdown{font-size:.85rem;color:var(--color-text-secondary);display:flex;align-items:center;gap:.5rem}
+.event-date{display:flex;flex-direction:column;align-items:center;justify-content:center;background-color:var(--color-background);border-radius:10px;padding:.8rem;text-align:center;width:65px;height:65px;flex-shrink:0}.event-day{font-size:1.8rem;font-weight:700;color:var(--color-accent);line-height:1}.event-month{font-size:.8rem;text-transform:uppercase;margin-top:2px}.event-details{display:flex;flex-direction:column;flex-grow:1;gap:.5rem}.event-details-header{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}.event-details .event-title{font-weight:600;color:var(--color-text-primary)}.event-footer{display: flex; align-items: center; gap: 0.75rem; margin-top: auto; padding-top: 0.5rem;}
 
 /* --- 6. MODAL (Redesenhado) --- */
 .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.1);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;animation:fadeIn .3s forwards}@keyframes fadeIn{to{opacity:1}}
