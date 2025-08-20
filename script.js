@@ -19,7 +19,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadState() {
         const savedState = localStorage.getItem('lifeOSState');
         if (savedState) {
-            state = JSON.parse(savedState);
+            try {
+                const parsedState = JSON.parse(savedState);
+                // Garante que o estado carregado tenha as chaves esperadas
+                state = {
+                    tasks: [],
+                    notes: [],
+                    calendarEvents: [],
+                    ...parsedState
+                };
+            } catch (e) {
+                console.error("Erro ao carregar o estado, resetando para o padrão.", e);
+                // O estado permanece o padrão, permitindo que o app inicie de forma limpa
+            }
         }
     }
 
@@ -71,43 +83,48 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <span class="task-priority p${task.priority}">P${task.priority}</span>
                     </li>
-                `).join('') || '<p class="card-content">Nenhuma tarefa encontrada. Adicione uma nova!</p>'}
-            </ul>`;
+                `).join('')}
+            </ul>
+            ${state.tasks.length === 0 ? '<p class="card-content">Nenhuma tarefa encontrada. Adicione uma nova!</p>' : ''}
+        `;
         appContent.innerHTML = tasksHTML;
         createFab(() => openTaskModal());
         
         const taskList = document.getElementById('task-list');
-        taskList.addEventListener('change', (e) => {
-            if (e.target.matches('.task-checkbox')) {
-                const task = state.tasks.find(t => t.id === e.target.dataset.id);
-                task.completed = e.target.checked;
-                saveState();
-                render();
-            }
-        });
-        
-        // Drag & Drop
-        let draggedItemId = null;
-        taskList.addEventListener('dragstart', (e) => {
-            if (e.target.matches('.task-item')) {
-                draggedItemId = e.target.dataset.id;
-                setTimeout(() => e.target.classList.add('dragging'), 0);
-            }
-        });
-        taskList.addEventListener('dragend', (e) => e.target.classList.remove('dragging'));
-        taskList.addEventListener('dragover', (e) => e.preventDefault());
-        taskList.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const dropTarget = e.target.closest('.task-item');
-            if (dropTarget && draggedItemId !== dropTarget.dataset.id) {
-                const draggedIndex = state.tasks.findIndex(t => t.id === draggedItemId);
-                const targetIndex = state.tasks.findIndex(t => t.id === dropTarget.dataset.id);
-                const [draggedItem] = state.tasks.splice(draggedIndex, 1);
-                state.tasks.splice(targetIndex, 0, draggedItem);
-                saveState();
-                render();
-            }
-        });
+        // *** CORREÇÃO: Adicionar listeners apenas se a lista existir ***
+        if (taskList && state.tasks.length > 0) {
+            taskList.addEventListener('change', (e) => {
+                if (e.target.matches('.task-checkbox')) {
+                    const task = state.tasks.find(t => t.id === e.target.dataset.id);
+                    task.completed = e.target.checked;
+                    saveState();
+                    render();
+                }
+            });
+            
+            // Lógica de Drag & Drop
+            let draggedItemId = null;
+            taskList.addEventListener('dragstart', (e) => {
+                if (e.target.matches('.task-item')) {
+                    draggedItemId = e.target.dataset.id;
+                    setTimeout(() => e.target.classList.add('dragging'), 0);
+                }
+            });
+            taskList.addEventListener('dragend', (e) => e.target.classList.remove('dragging'));
+            taskList.addEventListener('dragover', (e) => e.preventDefault());
+            taskList.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const dropTarget = e.target.closest('.task-item');
+                if (dropTarget && draggedItemId !== dropTarget.dataset.id) {
+                    const draggedIndex = state.tasks.findIndex(t => t.id === draggedItemId);
+                    const targetIndex = state.tasks.findIndex(t => t.id === dropTarget.dataset.id);
+                    const [draggedItem] = state.tasks.splice(draggedIndex, 1);
+                    state.tasks.splice(targetIndex, 0, draggedItem);
+                    saveState();
+                    render();
+                }
+            });
+        }
     }
 
     function openTaskModal(task = null) {
@@ -169,8 +186,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h3 class="card-title">${note.title}</h3>
                         <p class="note-card-content card-content">${note.content.substring(0, 150)}${note.content.length > 150 ? '...' : ''}</p>
                     </div>
-                `).join('') || '<p class="card-content">Nenhuma nota encontrada. Adicione uma nova!</p>'}
-            </div>`;
+                `).join('')}
+            </div>
+             ${state.notes.length === 0 ? '<p class="card-content">Nenhuma nota encontrada. Adicione uma nova!</p>' : ''}`;
         appContent.innerHTML = notesHTML;
         createFab(() => openNoteModal());
     }
@@ -225,7 +243,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 source: 'Tarefas'
             }));
             
-        // Futuramente, podemos unir com state.calendarEvents
         const allEvents = [...tasksWithDeadline].sort((a, b) => new Date(a.date) - new Date(b.date));
         
         const months = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
@@ -234,9 +251,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <h1 class="page-title">📅 Calendário</h1>
             <ul class="event-list">
                 ${allEvents.map(event => {
-                    const eventDate = new Date(event.date + 'T00:00:00-03:00'); // Ajusta para fuso horário local
-                    const day = eventDate.getDate();
-                    const month = months[eventDate.getMonth()];
+                    const eventDate = new Date(event.date + 'T12:00:00Z'); // Usar UTC para evitar problemas de fuso
+                    const day = eventDate.getUTCDate();
+                    const month = months[eventDate.getUTCMonth()];
                     return `
                     <li class="event-item card">
                         <div class="event-date">
@@ -248,8 +265,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="event-source">${event.source}</span>
                         </div>
                     </li>
-                `}).join('') || '<p class="card-content">Nenhum evento ou tarefa com prazo encontrados.</p>'}
-            </ul>`;
+                `}).join('')}
+            </ul>
+            ${allEvents.length === 0 ? '<p class="card-content">Nenhum evento ou tarefa com prazo encontrados.</p>' : ''}`;
         appContent.innerHTML = calendarHTML;
     }
 
