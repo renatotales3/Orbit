@@ -6,7 +6,6 @@ window.addEventListener('error', function (event) {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- ELEMENTOS DO DOM ---
     const appContent = document.getElementById('app-content');
     const navBar = document.getElementById('bottom-navbar');
     const modalContainer = document.getElementById('modal-container');
@@ -14,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let state = {};
 
-    // --- PERSISTÊNCIA ---
     function saveState() { try { localStorage.setItem('lifeOSState', JSON.stringify(state)); } catch (e) { console.error("Erro ao salvar o estado:", e); } }
     function loadState() {
         let savedState = null;
@@ -30,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else { state = defaultState; }
     }
 
-    // --- ROTEAMENTO E RENDERIZAÇÃO ---
     const routes = { 'home': renderHomePage, 'tasks': renderTasksPage, 'calendar': renderCalendarPage, 'notes': renderNotesPage, 'settings': renderSettingsPage };
     function render() {
         const page = window.location.hash.replace('#', '') || 'home';
@@ -43,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function updateActiveNav(page) { navBar.querySelectorAll('.nav-item').forEach(item => { item.classList.toggle('active', item.dataset.page === page); }); }
 
-    // --- FUNÇÕES HELPER ---
     function calculateDaysRemaining(dateString) {
         const today = new Date();
         const deadline = new Date(dateString + 'T23:59:59');
@@ -56,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return `Faltam ${diffDays} dias`;
     }
 
-    // --- FUNÇÕES DE RENDERIZAÇÃO DE PÁGINA ---
     function renderHomePage() { appContent.innerHTML = `<h1 class="page-title">Início</h1><div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Este é o seu espaço. Em breve, este painel será preenchido com insights sobre sua vida.</div></div>`; }
 
     function renderTasksPage() {
@@ -120,9 +115,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderNotesPage() { appContent.innerHTML = `<h1 class="page-title">Notas & Ideias</h1><div class="card-grid" id="notes-grid">${state.notes.map(note => `<div class="note-card card" data-id="${note.id}"><button class="delete-btn" data-id="${note.id}">&times;</button><h3 class="card-title">${note.title}</h3><p class="card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p></div>`).join('')}</div>${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada. Adicione uma nova!</p></div>' : ''}`; createFab(() => openNoteModal()); attachNoteListeners(); }
-    function renderSettingsPage() { appContent.innerHTML = `<h1 class="page-title">Ajustes</h1><div class="card"><div class="card-title">Em Breve</div><div class="card-content">Configurações de tema, importação/exportação e outras opções aparecerão aqui.</div></div>`; }
+    
+    function renderSettingsPage() {
+        appContent.innerHTML = `
+            <h1 class="page-title">Ajustes</h1>
+            <div class="card">
+                <div class="card-title">LifeOS</div>
+                <div class="card-content">Versão 1.2</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Em Breve</div>
+                <div class="card-content">Configurações de tema, importação/exportação e outras opções aparecerão aqui.</div>
+            </div>
+        `;
+    }
 
-    // --- MODAIS E EVENTOS ---
     function createFab(onClick) { const fab = document.createElement('button');fab.className = 'fab';fab.textContent = '+';fab.onclick = onClick;document.body.appendChild(fab); }
     function closeModal() { modalContainer.innerHTML = ''; }
 
@@ -139,7 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 </div>`;
-            
             modalContainer.querySelector('#confirm-btn').onclick = () => { closeModal(); resolve(); };
             modalContainer.querySelector('#cancel-btn').onclick = () => { closeModal(); reject(); };
         });
@@ -152,27 +158,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const deleteBtn = e.target.closest('.delete-btn');
             const taskCard = e.target.closest('.task-item');
             const checkboxContainer = e.target.closest('.custom-checkbox-container');
-
             if (deleteBtn) {
                 e.stopPropagation();
-                try {
-                    await showConfirmationModal('Deseja realmente excluir esta tarefa?');
-                    state.tasks = state.tasks.filter(t => t.id !== deleteBtn.dataset.id);
-                    saveState();
-                    render();
-                } catch { /* Ação cancelada */ }
+                try { await showConfirmationModal('Deseja realmente excluir esta tarefa?'); state.tasks = state.tasks.filter(t => t.id !== deleteBtn.dataset.id); saveState(); render(); } catch { /* Ação cancelada */ }
                 return;
             }
-            if (checkboxContainer) { 
-                e.stopPropagation(); 
-                const checkbox = checkboxContainer.querySelector('input'); 
-                const task = state.tasks.find(t => t.id === checkbox.dataset.id); 
-                if (task) { task.completed = checkbox.checked; saveState(); render(); } 
-                return; 
-            }
+            if (checkboxContainer) { e.stopPropagation(); const checkbox = checkboxContainer.querySelector('input'); const task = state.tasks.find(t => t.id === checkbox.dataset.id); if (task) { task.completed = checkbox.checked; saveState(); render(); } return; }
             if (taskCard) { const task = state.tasks.find(t => t.id === taskCard.dataset.id); if (task) openTaskModal(task); }
         });
-        // Drag & Drop
         let draggedItemId = null; taskList.addEventListener('dragstart', (e) => {if (e.target.matches('.task-item')) {draggedItemId = e.target.dataset.id;setTimeout(() => e.target.classList.add('dragging'), 0);}}); taskList.addEventListener('dragend', (e) => {if(e.target.matches('.task-item')) e.target.classList.remove('dragging')}); taskList.addEventListener('dragover', (e) => e.preventDefault()); taskList.addEventListener('drop', (e) => {e.preventDefault();const dropTarget = e.target.closest('.task-item');if (dropTarget && draggedItemId !== dropTarget.dataset.id) {const draggedIndex = state.tasks.findIndex(t => t.id === draggedItemId);const targetIndex = state.tasks.findIndex(t => t.id === dropTarget.dataset.id);if(draggedIndex === -1 || targetIndex === -1) return;const [draggedItem] = state.tasks.splice(draggedIndex, 1);state.tasks.splice(targetIndex, 0, draggedItem);saveState();render();}});
     }
     
@@ -184,12 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const noteCard = e.target.closest('.note-card');
             if(deleteBtn){
                 e.stopPropagation();
-                try {
-                    await showConfirmationModal('Deseja realmente excluir esta nota?');
-                    state.notes = state.notes.filter(n => n.id !== deleteBtn.dataset.id);
-                    saveState();
-                    render();
-                } catch { /* Ação cancelada */ }
+                try { await showConfirmationModal('Deseja realmente excluir esta nota?'); state.notes = state.notes.filter(n => n.id !== deleteBtn.dataset.id); saveState(); render(); } catch { /* Ação cancelada */ }
                 return;
             }
             if(noteCard){ const note = state.notes.find(n => n.id === noteCard.dataset.id); if(note) openNoteModal(note); }
@@ -226,7 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
         saveState(); render(); closeModal();
     }
     
-    // --- INICIALIZAÇÃO ---
     function init() { loadState(); navBar.addEventListener('click', (e) => { const navItem = e.target.closest('.nav-item'); if (navItem) { e.preventDefault(); window.location.hash = navItem.dataset.page; } }); window.addEventListener('hashchange', render); render(); }
 
     init();
