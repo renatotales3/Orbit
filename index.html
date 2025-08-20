@@ -1,100 +1,43 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Segundo Cérebro</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+    <title>LifeOS - Seu Segundo Cérebro</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
 </head>
-<body>
+<body class="theme-glass">
 
-    <main id="app-container">
-        <section id="notas" class="view active-view">
-            <header class="view-header">
-                <h1>Notas & Ideias</h1>
-                <button class="add-btn" data-tab="notas">+</button>
-            </header>
-            <div class="card-grid" id="notas-grid"></div>
-        </section>
+    <main id="app-content" class="content-area">
+        </main>
 
-        <section id="tarefas" class="view">
-            <header class="view-header">
-                <h1>Tarefas & Projetos</h1>
-                <button class="add-btn" data-tab="tarefas">+</button>
-            </header>
-            <div class="card-grid" id="tarefas-grid"></div>
-        </section>
-
-        <section id="calendario" class="view">
-            <header class="view-header">
-                <h1>Calendário</h1>
-                 <button class="add-btn" data-tab="calendario">+</button>
-            </header>
-            <div class="card-grid" id="calendario-grid"></div>
-        </section>
-        
-        <section id="leituras" class="view">
-             <header class="view-header">
-                <h1>Leituras & Referências</h1>
-                 <button class="add-btn" data-tab="leituras">+</button>
-            </header>
-            <div class="card-grid" id="leituras-grid"></div>
-        </section>
-
-        <section id="habitos" class="view">
-             <header class="view-header">
-                <h1>Hábitos & Rotina</h1>
-                 <button class="add-btn" data-tab="habitos">+</button>
-            </header>
-            <div class="card-grid" id="habitos-grid"></div>
-        </section>
-        
-        <section id="configuracoes" class="view">
-             <header class="view-header">
-                <h1>Configurações</h1>
-            </header>
-            <div class="card-grid" id="configuracoes-grid">
-                <p class="config-placeholder">Opções e customizações futuras aparecerão aqui.</p>
-            </div>
-        </section>
-    </main>
-
-    <nav class="navbar">
-        <button class="nav-btn active" data-target="notas"><i class="ph-bold ph-note-pencil"></i></button>
-        <button class="nav-btn" data-target="tarefas"><i class="ph-bold ph-check-square-offset"></i></button>
-        <button class="nav-btn" data-target="calendario"><i class="ph-bold ph-calendar-blank"></i></button>
-        <button class="nav-btn" data-target="leituras"><i class="ph-bold ph-book-open-text"></i></button>
-        <button class="nav-btn" data-target="habitos"><i class="ph-bold ph-leaf"></i></button>
-        <button class="nav-btn" data-target="configuracoes"><i class="ph-bold ph-gear"></i></button>
+    <div id="modal-container">
+        </div>
+    
+    <nav id="bottom-navbar" class="bottom-navbar">
+        <a href="#home" class="nav-item active" data-page="home">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span class="nav-text">Início</span>
+        </a>
+        <a href="#tasks" class="nav-item" data-page="tasks">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+            <span class="nav-text">Tarefas</span>
+        </a>
+        <a href="#calendar" class="nav-item" data-page="calendar">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+            <span class="nav-text">Calendário</span>
+        </a>
+        <a href="#notes" class="nav-item" data-page="notes">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+            <span class="nav-text">Notas</span>
+        </a>
+        <a href="#settings" class="nav-item" data-page="settings">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69-.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12-.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59-1.69-.98l2.49 1c.23-.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+            <span class="nav-text">Ajustes</span>
+        </a>
     </nav>
 
-    <div id="modal-container" class="hidden">
-        <div class="modal-content">
-            <h2 id="modal-title">Novo Item</h2>
-            <form id="modal-form">
-                <input type="hidden" id="edit-id">
-                <input type="hidden" id="edit-tab">
-                <div class="form-group">
-                    <label for="item-title">Título</label>
-                    <input type="text" id="item-title" required>
-                </div>
-                <div class="form-group">
-                    <label for="item-description">Descrição</label>
-                    <textarea id="item-description" rows="4"></textarea>
-                </div>
-                <button type="submit" class="save-btn">Salvar</button>
-            </form>
-            <button id="close-modal-btn">&times;</button>
-        </div>
-    </div>
-
-    <script src="script.js" defer></script>
+    <script src="app.js"></script>
 </body>
 </html>
