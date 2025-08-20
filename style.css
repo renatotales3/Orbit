@@ -51,9 +51,9 @@ body { font-family: var(--font-main); background: var(--color-background); color
 .card-action-btn svg { width: 16px; height: 16px; stroke: currentColor; }
 .card-action-btn:hover { background-color: #f0f0f0; color: var(--color-text-primary); }
 
-/* --- 5. MÓDULO DE TAREFAS --- */
-.task-item.completed .card-title { text-decoration: line-through; color: var(--color-text-secondary); }
-.task-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+/* --- 5. MÓDULOS (ESTILO UNIFICADO) --- */
+.task-item.completed .card-title, .habit-item.completed .card-title { text-decoration: line-through; color: var(--color-text-secondary); }
+.item-header { display: flex; align-items: center; gap: 1rem; }
 .custom-checkbox-container { display: block; position: relative; cursor: pointer; user-select: none; padding-left: 28px; height: 24px; }
 .custom-checkbox-container input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
 .checkmark { position: absolute; top: 2px; left: 0; height: 20px; width: 20px; background-color: #fff; border: 1.5px solid #b0b0b0; border-radius: 6px; transition: all 0.2s; }
@@ -69,12 +69,22 @@ body { font-family: var(--font-main); background: var(--color-background); color
 .progress-bar-container { background-color: var(--color-border-subtle); border-radius: 4px; height: 6px; flex-grow: 1; overflow: hidden; }
 .progress-bar-fill { background-color: var(--color-text-primary); height: 100%; border-radius: 4px; transition: width 0.3s ease-in-out; }
 .progress-text { font-size: 0.8rem; color: var(--color-text-secondary); font-weight: 500; }
-.task-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.item-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
 .attached-note-link { background: none; border: none; padding: 0; cursor: pointer; color: var(--color-text-secondary); display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; transition: color .2s ease; }
 .attached-note-link:hover { color: var(--color-text-primary); }
 .attached-note-link svg { width: 14px; height: 14px; stroke: currentColor; }
-.task-priority { font-size:.8rem;padding:.2rem .5rem;border-radius:8px;color:var(--color-text-primary); border: 1px solid transparent; }
-.task-priority.p1{background-color:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2); color: #991B1B;} .task-priority.p2{background-color:rgba(245,158,11,.1);border-color:rgba(245,158,11,.2); color: #9A3412;} .task-priority.p3{background-color:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2); color: #047857;} .task-priority.p4{background-color:#f3f4f6;border-color:#e5e7eb; color: #4B5563;}
+.tag { font-size:.8rem;padding:.2rem .5rem;border-radius:8px;color:var(--color-text-primary); border: 1px solid transparent; }
+.tag.p1{background-color:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2); color: #991B1B;} .tag.p2{background-color:rgba(245,158,11,.1);border-color:rgba(245,158,11,.2); color: #9A3412;} .tag.p3{background-color:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2); color: #047857;} .tag.p4{background-color:#f3f4f6;border-color:#e5e7eb; color: #4B5563;}
+.tag.status-done { background-color: rgba(0,138,5,.1); border-color: rgba(0,138,5,.2); color: #006D03; }
+.tag.status-progress { background-color: rgba(245,158,11,.1); border-color: rgba(245,158,11,.2); color: #B45309; }
+.tag.status-pending { background-color: rgba(239,68,68,.1); border-color: rgba(239,68,68,.2); color: #B91C1C; }
+
+.habit-item, .event-item { cursor: default; } .habit-item:hover, .event-item:hover { transform: none; box-shadow: var(--shadow-soft); }
+.habit-streak { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--color-text-secondary); margin-top: 0.25rem; margin-bottom: 1rem; }
+.mini-heatmap { display: flex; gap: 4px; }
+.day-square { width: 16px; height: 16px; background-color: var(--color-border-subtle); border-radius: 3px; }
+.day-square.completed { background-color: var(--color-status-done); opacity: 0.7; }
+.day-square.today { border: 1px solid var(--color-text-secondary); }
 
 /* --- 6. MODAL (Redesenhado) --- */
 .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.1);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;animation:fadeIn .3s forwards}@keyframes fadeIn{to{opacity:1}}
@@ -83,28 +93,6 @@ body { font-family: var(--font-main); background: var(--color-background); color
 .confirm-modal-content .modal-footer { justify-content: center; } .confirm-modal-content .btn { flex-grow: 1; } .confirm-modal-content .card-content { text-align: center; font-size: 1.05rem; margin-top: 1rem; color: var(--color-text-secondary); }
 .form-control option { background: var(--color-surface); color: var(--color-text-primary); }
 .viewer-content { padding: 0.5rem; } .viewer-text { white-space: pre-wrap; word-wrap: break-word; line-height: 1.6; } .viewer-link { display: block; margin-top: 1.5rem; padding: 1rem; background-color: var(--color-background); border: 1px solid var(--color-border-subtle); border-radius: 10px; color: var(--color-accent); text-decoration: none; font-weight: 500; transition: background-color 0.2s; } .viewer-link:hover { background-color: #f0f0f0; }
-
-/* --- MÓDULOS (Estilos aplicados) --- */
-.event-item, .habit-item { cursor: default; } .event-item:hover, .habit-item:hover { transform: none; box-shadow: var(--shadow-soft); }
-.event-date{display:flex;flex-direction:column;align-items:center;justify-content:center;background-color:var(--color-background);border-radius:10px;padding:.8rem;text-align:center;width:65px;height:65px;flex-shrink:0}.event-day{font-size:1.8rem;font-weight:700;color:var(--color-accent);line-height:1}.event-month{font-size:.8rem;text-transform:uppercase;margin-top:2px}.event-details{display:flex;flex-direction:column;flex-grow:1;gap:.5rem}.event-details-header{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}.event-details .event-title{font-weight:600;color:var(--color-text-primary)}.event-countdown{font-size:.85rem;color:var(--color-text-secondary);display:flex;align-items:center;gap:.5rem}
-.status-tag { font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 8px; color: var(--color-text-primary); display: inline-block; width: fit-content; border: 1px solid transparent; }
-.status-tag.status-done { background-color: rgba(0,138,5,.1); border-color: rgba(0,138,5,.2); color: #006D03; }
-.status-tag.status-progress { background-color: rgba(245,158,11,.1); border-color: rgba(245,158,11,.2); color: #B45309; }
-.status-tag.status-pending { background-color: rgba(239,68,68,.1); border-color: rgba(239,68,68,.2); color: #B91C1C; }
-
-.habit-details { flex-grow: 1; }
-.habit-streak { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--color-text-secondary); margin-top: 0.25rem; margin-bottom: 1rem; }
-.mini-heatmap { display: flex; gap: 4px; }
-.day-square { width: 16px; height: 16px; background-color: var(--color-border-subtle); border-radius: 3px; }
-.day-square.completed { background-color: var(--color-status-done); opacity: 0.7; }
-.day-square.today { border: 1px solid var(--color-text-secondary); }
-.habit-action { text-align: center; flex-shrink: 0; width: 80px; }
-.binary-btn { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid #b0b0b0; background-color: transparent; color: var(--color-text-secondary); font-size: 1.2rem; cursor: pointer; transition: all 0.2s; }
-.binary-btn.completed { background-color: var(--color-status-done); border-color: var(--color-status-done); color: white; }
-.binary-btn:hover { border-color: var(--color-text-primary); }
-.quant-action { cursor: pointer; }
-.quant-progress { font-size: 1.2rem; font-weight: 600; color: var(--color-text-primary); }
-.quant-target { font-size: 0.8rem; color: var(--color-text-secondary); }
 .day-selector { display: flex; justify-content: space-between; gap: 0.5rem; }
 .day-toggle { flex: 1; padding: 0.75rem 0; border: 1px solid var(--color-border-subtle); background: var(--color-surface); color: var(--color-text-secondary); border-radius: 8px; cursor: pointer; text-align: center; transition: all .2s; }
 .day-toggle.selected { background-color: var(--color-text-primary); border-color: var(--color-text-primary); color: white; }
