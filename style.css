@@ -103,7 +103,7 @@ body { font-family: var(--font-main); background: linear-gradient(135deg, var(--
     justify-content: space-between;
     align-items: center;
     gap: 1.5rem;
-    cursor: default; /* Clicar no card não faz nada, apenas na ação */
+    cursor: default;
 }
 .habit-item:hover { transform: none; box-shadow: var(--shadow-soft); }
 .habit-details { flex-grow: 1; }
@@ -112,7 +112,7 @@ body { font-family: var(--font-main); background: linear-gradient(135deg, var(--
 .day-square { width: 16px; height: 16px; background-color: rgba(120, 120, 128, 0.12); border-radius: 3px; }
 .day-square.completed { background-color: var(--color-status-done); }
 .day-square.today { border: 1px solid var(--color-text-secondary); }
-.habit-action { text-align: center; flex-shrink: 0; width: 80px; /* Largura fixa para a zona de ação */ }
+.habit-action { text-align: center; flex-shrink: 0; width: 80px; }
 .binary-btn {
     width: 40px; height: 40px;
     border-radius: 50%;
@@ -128,3 +128,4 @@ body { font-family: var(--font-main); background: linear-gradient(135deg, var(--
 .day-selector { display: flex; justify-content: space-between; gap: 0.5rem; }
 .day-toggle { flex: 1; padding: 0.75rem 0; border: 1px solid var(--color-border); background: transparent; color: var(--color-text-secondary); border-radius: 8px; cursor: pointer; text-align: center; }
 .day-toggle.selected { background-color: var(--color-accent); border-color: var(--color-accent); color: white; }
+.form-group.hidden { display: none; }
