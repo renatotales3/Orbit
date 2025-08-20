@@ -54,25 +54,38 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderNotesPage() { appContent.innerHTML = `<h1 class="page-title">Notas & Ideias</h1><div class="card-grid" id="notes-grid">${state.notes.map(note => `<div class="note-card card" data-id="${note.id}"><div class="card-actions"><button class="card-action-btn edit-btn">${ICONS.edit}</button><button class="card-action-btn delete-btn">${ICONS.delete}</button></div><h3 class="card-title">${note.title}</h3><p class="card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p></div>`).join('')}</div>${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada.</p></div>' : ''}`; createFab(() => openNoteModal()); attachNoteListeners(); }
     function renderSettingsPage() { appContent.innerHTML = `<h1 class="page-title">Ajustes</h1><div class="card"><div class="card-title">LifeOS</div><div class="card-content">Versão 1.4</div></div>`; }
     
+    // RENDERER DE HÁBITOS (REESCRITO)
     function renderHabitsPage() {
         const today = new Date();
-        const todayStr = today.toLocaleDateString('en-CA');
         const dayOfWeek = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'][today.getDay()];
-
         const habitsForToday = state.habits.filter(h => h.frequency.includes(dayOfWeek));
 
         appContent.innerHTML = `
             <h1 class="page-title">Hábitos & Rotinas</h1>
             <div class="card-grid" id="habit-list">
                 ${habitsForToday.map(habit => {
+                    const todayStr = new Date().toLocaleDateString('en-CA');
                     const completion = habit.completions.find(c => c.date === todayStr);
                     const isCompleted = !!completion;
                     const streak = calculateStreak(habit);
+                    
+                    // Lógica do Mini-Heatmap
+                    let heatmapHTML = '';
+                    for (let i = 6; i >= 0; i--) {
+                        const date = new Date();
+                        date.setDate(date.getDate() - i);
+                        const dateStr = date.toLocaleDateString('en-CA');
+                        const completed = habit.completions.some(c => c.date === dateStr);
+                        const isToday = i === 0;
+                        heatmapHTML += `<div class="day-square ${completed ? 'completed' : ''} ${isToday ? 'today' : ''}"></div>`;
+                    }
+
                     return `
                     <div class="habit-item card" data-id="${habit.id}">
-                        <div class="habit-info">
+                        <div class="habit-details">
                             <h3 class="card-title">${habit.name}</h3>
                             <div class="habit-streak">🔥 ${streak} dia(s)</div>
+                            <div class="mini-heatmap">${heatmapHTML}</div>
                         </div>
                         <div class="habit-action">
                             <button class="complete-btn ${isCompleted ? 'completed' : ''}" data-id="${habit.id}">✓</button>
@@ -81,8 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                 }).join('')}
             </ul>
-             ${state.habits.length === 0 ? '<div class="card"><p class="card-content">Nenhum hábito criado. Comece a construir uma rotina!</p></div>' : ''}
-             ${state.habits.length > 0 && habitsForToday.length === 0 ? '<div class="card"><p class="card-content">Nenhum hábito para hoje. Aproveite o seu dia de descanso!</p></div>' : ''}
+             ${state.habits.length === 0 ? '<div class="card"><p class="card-content">Nenhum hábito criado. Comece uma nova rotina!</p></div>' : ''}
+             ${state.habits.length > 0 && habitsForToday.length === 0 ? '<div class="card"><p class="card-content">Nenhum hábito para hoje. Aproveite o seu dia!</p></div>' : ''}
         `;
         createFab(() => openHabitModal());
         attachHabitListeners();
@@ -98,9 +111,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const habitList = document.getElementById('habit-list');
         if (!habitList) return;
         habitList.addEventListener('click', e => {
-            if (e.target.closest('.complete-btn')) {
-                const id = e.target.closest('.complete-btn').dataset.id;
-                handleHabitCompletion(id);
+            const completeBtn = e.target.closest('.complete-btn');
+            if (completeBtn) {
+                handleHabitCompletion(completeBtn.dataset.id);
+            } else if (e.target.closest('.habit-item')) {
+                // Futuramente abriria um viewer/editor para o hábito
             }
         });
     }
@@ -129,28 +144,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function calculateStreak(habit) {
         if (!habit.completions || habit.completions.length === 0) return 0;
-        const sortedDates = habit.completions.map(c => new Date(c.date + "T12:00:00Z")).sort((a, b) => b - a);
+        const completionDates = new Set(habit.completions.map(c => c.date));
         let streak = 0;
-        const today = new Date(); today.setHours(0, 0, 0, 0);
-        const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+        let currentDate = new Date();
         
-        if (sortedDates[0].getTime() !== today.getTime() && sortedDates[0].getTime() !== yesterday.getTime()) {
-            return 0;
-        }
-        
-        if (sortedDates[0].getTime() === today.getTime() || sortedDates[0].getTime() === yesterday.getTime()) {
-            streak = 1;
+        // Verifica se o hábito foi feito hoje ou ontem para começar a contagem
+        if (!completionDates.has(currentDate.toLocaleDateString('en-CA'))) {
+            currentDate.setDate(currentDate.getDate() - 1); // Se não fez hoje, começa a contar de ontem
         }
 
-        for (let i = 0; i < sortedDates.length - 1; i++) {
-            const current = sortedDates[i];
-            const next = sortedDates[i + 1];
-            const diff = (current.getTime() - next.getTime()) / (1000 * 3600 * 24);
-            if (diff === 1) { // Simplificado - idealmente consideraria a frequência
-                streak++;
-            } else {
-                break;
-            }
+        while (completionDates.has(currentDate.toLocaleDateString('en-CA'))) {
+            streak++;
+            currentDate.setDate(currentDate.getDate() - 1);
         }
         return streak;
     }
@@ -164,76 +169,39 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="modal-overlay">
             <div class="modal-content">
                 <form id="habit-form">
-                    <div class="modal-header">
-                        <h2 class="modal-title">${habit ? 'Editar Hábito' : 'Novo Hábito'}</h2>
-                        <button type="button" class="modal-close-btn">&times;</button>
-                    </div>
+                    <div class="modal-header"><h2 class="modal-title">${habit ? 'Editar Hábito' : 'Novo Hábito'}</h2><button type="button" class="modal-close-btn">&times;</button></div>
                     <input type="hidden" id="habitId" value="${habit ? habit.id : ''}">
-                    <div class="form-group">
-                        <label for="habitName">Nome do Hábito</label>
-                        <input type="text" id="habitName" class="form-control" value="${habit ? habit.name : ''}" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Frequência</label>
-                        <div class="day-selector">
-                            ${days.map((day, index) => `
-                                <button type="button" class="day-toggle ${selectedDays.includes(day) ? 'selected' : ''}" data-day="${day}">${dayLabels[index]}</button>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Salvar</button>
-                    </div>
+                    <div class="form-group"><label for="habitName">Nome do Hábito</label><input type="text" id="habitName" class="form-control" value="${habit ? habit.name : ''}" required></div>
+                    <div class="form-group"><label>Frequência</label><div class="day-selector">${days.map((day, index) => `<button type="button" class="day-toggle ${selectedDays.includes(day) ? 'selected' : ''}" data-day="${day}">${dayLabels[index]}</button>`).join('')}</div></div>
+                    <div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div>
                 </form>
             </div>
         </div>`;
         const form = modalContainer.querySelector('form');
-        form.querySelector('.day-selector').addEventListener('click', e => {
-            if (e.target.matches('.day-toggle')) { e.target.classList.toggle('selected'); }
-        });
+        form.querySelector('.day-selector').addEventListener('click', e => { if (e.target.matches('.day-toggle')) { e.target.classList.toggle('selected'); } });
         form.addEventListener('submit', handleHabitSave);
         form.querySelector('.modal-close-btn').addEventListener('click', closeModal);
         form.querySelector('.btn-secondary').addEventListener('click', closeModal);
     }
 
-    // *** CORREÇÃO APLICADA AQUI ***
     function handleHabitSave(e) {
         e.preventDefault();
         const id = document.getElementById('habitId').value;
         const name = document.getElementById('habitName').value.trim();
         const frequency = [...document.querySelectorAll('.day-toggle.selected')].map(btn => btn.dataset.day);
 
-        if (!name || frequency.length === 0) {
-            alert('Por favor, preencha o nome e selecione pelo menos um dia da semana.');
-            return;
-        }
+        if (!name || frequency.length === 0) { alert('Por favor, preencha o nome e selecione pelo menos um dia da semana.'); return; }
 
         if (id) {
-            // Lógica de Edição
             const existingHabit = state.habits.find(h => h.id === id);
-            if (existingHabit) {
-                existingHabit.name = name;
-                existingHabit.frequency = frequency;
-                // Outras propriedades como 'type' seriam atualizadas aqui no futuro
-            }
+            if (existingHabit) { existingHabit.name = name; existingHabit.frequency = frequency; }
         } else {
-            // Lógica de Criação
-            const newHabit = {
-                id: `habit-${Date.now()}`,
-                name: name,
-                frequency: frequency,
-                type: 'binary', // Por enquanto, todos são binários
-                completions: []
-            };
+            const newHabit = { id: `habit-${Date.now()}`, name: name, frequency: frequency, type: 'binary', completions: [] };
             state.habits.push(newHabit);
         }
-        saveState();
-        render();
-        closeModal();
+        saveState(); render(); closeModal();
     }
     
     function init() { loadState(); navBar.addEventListener('click', (e) => { const navItem = e.target.closest('.nav-item'); if (navItem) { e.preventDefault(); window.location.hash = navItem.dataset.page; } }); window.addEventListener('hashchange', render); render(); }
-
     init();
 });
