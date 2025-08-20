@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function updateActiveNav(page) {
         navBar.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.toggle('active', item.dataset.page === page || '');
+            item.classList.toggle('active', item.dataset.page === page);
         });
     }
 
@@ -95,14 +95,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderTasksPage() {
         appContent.innerHTML = `
             <h1 class="page-title">Tarefas & Projetos</h1>
-            <ul class="task-list" id="task-list">
+            <ul class="card-grid" id="task-list">
                 ${state.tasks.map(task => `
                     <li class="task-item card ${task.completed ? 'completed' : ''}" data-id="${task.id}" draggable="true">
-                        <div class="task-info">
-                            <input type="checkbox" class="task-checkbox" data-id="${task.id}" ${task.completed ? 'checked' : ''}>
-                            <span class="task-title">${task.title}</span>
+                        <button class="delete-btn" data-id="${task.id}">&times;</button>
+                        <div class="task-header">
+                           <div class="task-info">
+                                <input type="checkbox" class="task-checkbox" data-id="${task.id}" ${task.completed ? 'checked' : ''}>
+                                <h3 class="card-title task-title">${task.title}</h3>
+                            </div>
                         </div>
-                        <span class="task-priority p${task.priority}">P${task.priority}</span>
+                        <div class="task-footer">
+                            <span class="task-priority p${task.priority}">P${task.priority}</span>
+                        </div>
                     </li>
                 `).join('')}
             </ul>
@@ -118,20 +123,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const months = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
         appContent.innerHTML = `
             <h1 class="page-title">Calendário</h1>
-            <ul class="event-list">
+            <div class="card-grid">
                 ${allEvents.map(event => {
                     const eventDate = new Date((event.date || event.deadline) + 'T12:00:00Z');
                     const day = eventDate.getUTCDate();
                     const month = months[eventDate.getUTCMonth()];
                     const source = event.deadline ? 'Tarefas' : 'Calendário';
                     return `
-                    <li class="event-item card">
+                    <div class="event-item card">
                         <div class="event-date"><span class="event-day">${day}</span><span class="event-month">${month}</span></div>
                         <div class="event-details"><p class="event-title">${event.title}</p><span class="event-source">${source}</span></div>
-                    </li>
+                    </div>
                     `;
                 }).join('')}
-            </ul>
+            </div>
             ${allEvents.length === 0 ? '<div class="card"><p class="card-content">Nenhum evento ou tarefa com prazo encontrados.</p></div>' : ''}
         `;
     }
@@ -139,17 +144,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderNotesPage() {
         appContent.innerHTML = `
             <h1 class="page-title">Notas & Ideias</h1>
-            <div class="notes-grid">
+            <div class="card-grid" id="notes-grid">
                 ${state.notes.map(note => `
                     <div class="note-card card" data-id="${note.id}">
+                        <button class="delete-btn" data-id="${note.id}">&times;</button>
                         <h3 class="card-title">${note.title}</h3>
-                        <p class="note-card-content card-content">${note.content.substring(0, 150)}${note.content.length > 150 ? '...' : ''}</p>
+                        <p class="note-card-content card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p>
                     </div>
                 `).join('')}
             </div>
             ${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada. Adicione uma nova!</p></div>' : ''}
         `;
         createFab(() => openNoteModal());
+        attachNoteListeners();
     }
 
     function renderSettingsPage() {
@@ -178,16 +185,39 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!taskList) return;
 
         taskList.addEventListener('click', (e) => {
-            if (e.target.matches('.task-checkbox')) {
-                const task = state.tasks.find(t => t.id === e.target.dataset.id);
-                if (task) {
-                    task.completed = e.target.checked;
+            const deleteBtn = e.target.closest('.delete-btn');
+            const taskCard = e.target.closest('.task-item');
+            const checkbox = e.target.closest('.task-checkbox');
+            
+            if (deleteBtn) {
+                e.stopPropagation(); // Impede que o clique no botão de deletar abra o modal de edição
+                if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+                    const id = deleteBtn.dataset.id;
+                    state.tasks = state.tasks.filter(t => t.id !== id);
                     saveState();
                     render();
                 }
+                return;
+            }
+
+            if(checkbox){
+                 e.stopPropagation();
+                 const task = state.tasks.find(t => t.id === checkbox.dataset.id);
+                 if (task) {
+                    task.completed = checkbox.checked;
+                    saveState();
+                    render();
+                 }
+                 return;
+            }
+
+            if (taskCard) {
+                const task = state.tasks.find(t => t.id === taskCard.dataset.id);
+                if (task) openTaskModal(task);
             }
         });
         
+        // Lógica de Drag & Drop (sem alterações)
         let draggedItemId = null;
         taskList.addEventListener('dragstart', (e) => {
             if (e.target.matches('.task-item')) {
@@ -210,6 +240,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.tasks.splice(targetIndex, 0, draggedItem);
                 saveState();
                 render();
+            }
+        });
+    }
+    
+    // Anexa listeners para a lista de notas
+    function attachNoteListeners(){
+        const notesGrid = document.getElementById('notes-grid');
+        if (!notesGrid) return;
+
+        notesGrid.addEventListener('click', (e) => {
+            const deleteBtn = e.target.closest('.delete-btn');
+            const noteCard = e.target.closest('.note-card');
+
+            if(deleteBtn){
+                e.stopPropagation();
+                if(confirm('Tem certeza que deseja excluir esta nota?')){
+                    const id = deleteBtn.dataset.id;
+                    state.notes = state.notes.filter(n => n.id !== id);
+                    saveState();
+                    render();
+                }
+                return;
+            }
+
+            if(noteCard){
+                const note = state.notes.find(n => n.id === noteCard.dataset.id);
+                if(note) openNoteModal(note);
             }
         });
     }
