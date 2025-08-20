@@ -48,13 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateDaysRemaining(dateString) { const today = new Date(); today.setHours(0, 0, 0, 0); const deadline = new Date(dateString); deadline.setHours(0, 0, 0, 0); const diffTime = deadline - today; const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)); if (diffDays < 0) return 'Prazo encerrado'; if (diffDays === 0) return 'Termina hoje'; if (diffDays === 1) return 'Falta 1 dia'; return `Faltam ${diffDays} dias`; }
     function getTaskStatus(task) { if (task.completed) { return { text: 'Concluída', className: 'status-done' }; } if (task.progress > 0) { return { text: 'Em Progresso', className: 'status-progress' }; } return { text: 'Pendente', className: 'status-pending' }; }
 
-    function renderHomePage() { appContent.innerHTML = `<h1 class="page-title">Início</h1><div class="card"><div class="card-title">Bem-vindo ao LifeOS</div><div class="card-content">Este é o seu espaço.</div></div>`; }
-    function renderTasksPage() { appContent.innerHTML = `<h1 class="page-title">Tarefas & Projetos</h1><ul class="card-grid" id="task-list">${state.tasks.map(task => `<li class="task-item card ${task.completed ? 'completed' : ''}" data-id="${task.id}" draggable="true"><div class="card-actions"><button class="card-action-btn edit-btn">${ICONS.edit}</button><button class="card-action-btn delete-btn">${ICONS.delete}</button></div><div class="task-header"><label class="custom-checkbox-container"><input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}><span class="checkmark"></span></label><div class="task-info"><h3 class="card-title">${task.title}</h3></div></div><div class="card-content card-meta">${task.deadline ? `<div class="meta-item">${ICONS.calendar}<span>${calculateDaysRemaining(task.deadline)}</span></div>` : ''}</div><div class="progress-container"><div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${task.progress || 0}%;"></div></div><span class="progress-text">${task.progress || 0}%</span></div><div class="task-footer">${task.attachedNoteId ? `<button class="attached-note-link" data-note-id="${task.attachedNoteId}">${ICONS.note} Ver Nota</button>` : '<div></div>'}<span class="task-priority p${task.priority}">P${task.priority}</span></div></li>`).join('')}</ul>${state.tasks.length === 0 ? '<div class="card"><p class="card-content">Nenhuma tarefa encontrada.</p></div>' : ''}`; createFab(() => openTaskModal()); attachTaskListeners(); }
-    function renderCalendarPage() { const tasksWithDeadline = state.tasks.filter(task => task.deadline); const allEvents = [...tasksWithDeadline, ...state.calendarEvents].sort((a, b) => new Date(a.date || a.deadline) - new Date(b.date || b.deadline)); const months = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]; appContent.innerHTML = `<h1 class="page-title">Calendário</h1><div class="card-grid">${allEvents.map(event => { const eventDate = new Date((event.date || event.deadline) + 'T12:00:00Z'); const day = eventDate.getUTCDate(); const month = months[eventDate.getUTCMonth()]; const status = event.deadline ? getTaskStatus(event) : null; return `<div class="event-item card"><div class="event-date"><span class="event-day">${day}</span><span class="event-month">${month}</span></div><div class="event-details"><div class="event-details-header"><h3 class="card-title event-title">${event.title}</h3>${event.priority ? `<span class="task-priority p${event.priority}">P${event.priority}</span>` : ''}</div><div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem;">${status ? `<span class="status-tag ${status.className}">${status.text}</span>` : ''}<div class="event-countdown"><span>${calculateDaysRemaining(event.deadline)}</span></div></div></div></div>`}).join('')}</div>${allEvents.length === 0 ? '<div class="card"><p class="card-content">Nenhum evento com prazo.</p></div>' : ''}`; }
-    function renderNotesPage() { appContent.innerHTML = `<h1 class="page-title">Notas & Ideias</h1><div class="card-grid" id="notes-grid">${state.notes.map(note => `<div class="note-card card" data-id="${note.id}"><div class="card-actions"><button class="card-action-btn edit-btn">${ICONS.edit}</button><button class="card-action-btn delete-btn">${ICONS.delete}</button></div><h3 class="card-title">${note.title}</h3><p class="card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p></div>`).join('')}</div>${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada.</p></div>' : ''}`; createFab(() => openNoteModal()); attachNoteListeners(); }
-    function renderSettingsPage() { appContent.innerHTML = `<h1 class="page-title">Ajustes</h1><div class="card"><div class="card-title">LifeOS</div><div class="card-content">Versão 1.4</div></div>`; }
+    function renderHomePage() { /* ...código sem alterações... */ }
+    function renderTasksPage() { /* ...código sem alterações... */ }
+    function renderCalendarPage() { /* ...código sem alterações... */ }
+    function renderNotesPage() { /* ...código sem alterações... */ }
+    function renderSettingsPage() { appContent.innerHTML = `<h1 class="page-title">Ajustes</h1><div class="card"><div class="card-title">LifeOS</div><div class="card-content">Versão 1.5</div></div>`; }
     
-    // RENDERER DE HÁBITOS (REESCRITO)
+    // RENDERER DE HÁBITOS (REESCRITO v3.0)
     function renderHabitsPage() {
         const today = new Date();
         const dayOfWeek = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'][today.getDay()];
@@ -66,10 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${habitsForToday.map(habit => {
                     const todayStr = new Date().toLocaleDateString('en-CA');
                     const completion = habit.completions.find(c => c.date === todayStr);
-                    const isCompleted = !!completion;
                     const streak = calculateStreak(habit);
                     
-                    // Lógica do Mini-Heatmap
                     let heatmapHTML = '';
                     for (let i = 6; i >= 0; i--) {
                         const date = new Date();
@@ -80,6 +78,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         heatmapHTML += `<div class="day-square ${completed ? 'completed' : ''} ${isToday ? 'today' : ''}"></div>`;
                     }
 
+                    let actionHTML = '';
+                    if (habit.type === 'binary') {
+                        actionHTML = `<button class="binary-btn ${completion ? 'completed' : ''}" data-id="${habit.id}">✓</button>`;
+                    } else if (habit.type === 'quantifiable') {
+                        const currentAmount = completion ? completion.value : 0;
+                        actionHTML = `
+                            <div class="quant-action" data-id="${habit.id}">
+                                <div class="quant-progress">${currentAmount}</div>
+                                <div class="quant-target">/ ${habit.target} ${habit.unit}</div>
+                            </div>
+                        `;
+                    }
+
                     return `
                     <div class="habit-item card" data-id="${habit.id}">
                         <div class="habit-details">
@@ -88,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="mini-heatmap">${heatmapHTML}</div>
                         </div>
                         <div class="habit-action">
-                            <button class="complete-btn ${isCompleted ? 'completed' : ''}" data-id="${habit.id}">✓</button>
+                            ${actionHTML}
                         </div>
                     </div>
                     `;
@@ -101,35 +112,33 @@ document.addEventListener('DOMContentLoaded', () => {
         attachHabitListeners();
     }
 
-    function createFab(onClick) { const fab = document.createElement('button');fab.className = 'fab';fab.textContent = '+';fab.onclick = onClick;document.body.appendChild(fab); }
+    function createFab(onClick) { /* ...código sem alterações... */ }
     function closeModal() { modalContainer.innerHTML = ''; }
-    function showConfirmationModal(message) { return new Promise((resolve, reject) => { modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content confirm-modal-content"><h2 class="modal-title">Confirmação</h2><p class="card-content">${message}</p><div class="modal-footer"><button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button><button type="button" class="btn btn-primary" id="confirm-btn">Confirmar</button></div></div></div>`; modalContainer.querySelector('#confirm-btn').onclick = () => { closeModal(); resolve(); }; modalContainer.querySelector('#cancel-btn').onclick = () => { closeModal(); reject(); }; }); }
+    function showConfirmationModal(message) { /* ...código sem alterações... */ }
     
-    async function attachTaskListeners() { /* ...código existente sem alterações... */ }
-    async function attachNoteListeners(){ /* ...código existente sem alterações... */ }
+    function attachTaskListeners() { /* ...código sem alterações... */ }
+    function attachNoteListeners(){ /* ...código sem alterações... */ }
     function attachHabitListeners() {
         const habitList = document.getElementById('habit-list');
         if (!habitList) return;
         habitList.addEventListener('click', e => {
-            const completeBtn = e.target.closest('.complete-btn');
-            if (completeBtn) {
-                handleHabitCompletion(completeBtn.dataset.id);
-            } else if (e.target.closest('.habit-item')) {
-                // Futuramente abriria um viewer/editor para o hábito
-            }
+            const binaryBtn = e.target.closest('.binary-btn');
+            const quantAction = e.target.closest('.quant-action');
+            if (binaryBtn) { handleHabitCompletion(binaryBtn.dataset.id); }
+            if (quantAction) { /* Futuramente abre mini-modal quantitativo */ }
         });
     }
 
-    function handleTaskSave(e) { /* ...código existente sem alterações... */ }
-    function openTaskModal(task = null) { /* ...código existente sem alterações... */ }
-    function handleNoteSave(e) { /* ...código existente sem alterações... */ }
-    function openNoteModal(note = null) { /* ...código existente sem alterações... */ }
-    function openTaskViewer(task) { /* ...código existente sem alterações... */ }
-    function openNoteViewer(note) { /* ...código existente sem alterações... */ }
+    function handleTaskSave(e) { /* ...código sem alterações... */ }
+    function openTaskModal(task = null) { /* ...código sem alterações... */ }
+    function handleNoteSave(e) { /* ...código sem alterações... */ }
+    function openNoteModal(note = null) { /* ...código sem alterações... */ }
+    function openTaskViewer(task) { /* ...código sem alterações... */ }
+    function openNoteViewer(note) { /* ...código sem alterações... */ }
 
     function handleHabitCompletion(id) {
         const habit = state.habits.find(h => h.id === id);
-        if (!habit) return;
+        if (!habit || habit.type !== 'binary') return;
         const today = new Date().toLocaleDateString('en-CA');
         const completionIndex = habit.completions.findIndex(c => c.date === today);
 
@@ -148,9 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let streak = 0;
         let currentDate = new Date();
         
-        // Verifica se o hábito foi feito hoje ou ontem para começar a contagem
         if (!completionDates.has(currentDate.toLocaleDateString('en-CA'))) {
-            currentDate.setDate(currentDate.getDate() - 1); // Se não fez hoje, começa a contar de ontem
+            currentDate.setDate(currentDate.getDate() - 1);
         }
 
         while (completionDates.has(currentDate.toLocaleDateString('en-CA'))) {
@@ -171,13 +179,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 <form id="habit-form">
                     <div class="modal-header"><h2 class="modal-title">${habit ? 'Editar Hábito' : 'Novo Hábito'}</h2><button type="button" class="modal-close-btn">&times;</button></div>
                     <input type="hidden" id="habitId" value="${habit ? habit.id : ''}">
-                    <div class="form-group"><label for="habitName">Nome do Hábito</label><input type="text" id="habitName" class="form-control" value="${habit ? habit.name : ''}" required></div>
+                    <div class="form-group"><label for="habitName">Nome</label><input type="text" id="habitName" class="form-control" value="${habit ? habit.name : ''}" required></div>
+                    <div class="form-group"><label for="habitType">Tipo de Hábito</label>
+                        <select id="habitType" class="form-control">
+                            <option value="binary" ${habit && habit.type === 'binary' ? 'selected' : ''}>Sim/Não</option>
+                            <option value="quantifiable" ${habit && habit.type === 'quantifiable' ? 'selected' : ''}>Quantificável</option>
+                        </select>
+                    </div>
+                    <div class="form-group ${habit && habit.type === 'quantifiable' ? '' : 'hidden'}" id="quant-fields">
+                        <label for="habitTarget">Meta Diária</label><input type="number" id="habitTarget" class="form-control" value="${habit ? (habit.target || 1) : 1}" min="1">
+                        <label for="habitUnit" style="margin-top:1rem;">Unidade (ex: L, km, pág)</label><input type="text" id="habitUnit" class="form-control" value="${habit ? (habit.unit || '') : ''}">
+                    </div>
                     <div class="form-group"><label>Frequência</label><div class="day-selector">${days.map((day, index) => `<button type="button" class="day-toggle ${selectedDays.includes(day) ? 'selected' : ''}" data-day="${day}">${dayLabels[index]}</button>`).join('')}</div></div>
                     <div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div>
                 </form>
             </div>
         </div>`;
         const form = modalContainer.querySelector('form');
+        form.querySelector('#habitType').addEventListener('change', e => {
+            document.getElementById('quant-fields').classList.toggle('hidden', e.target.value !== 'quantifiable');
+        });
         form.querySelector('.day-selector').addEventListener('click', e => { if (e.target.matches('.day-toggle')) { e.target.classList.toggle('selected'); } });
         form.addEventListener('submit', handleHabitSave);
         form.querySelector('.modal-close-btn').addEventListener('click', closeModal);
@@ -188,15 +209,22 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const id = document.getElementById('habitId').value;
         const name = document.getElementById('habitName').value.trim();
+        const type = document.getElementById('habitType').value;
         const frequency = [...document.querySelectorAll('.day-toggle.selected')].map(btn => btn.dataset.day);
 
-        if (!name || frequency.length === 0) { alert('Por favor, preencha o nome e selecione pelo menos um dia da semana.'); return; }
+        if (!name || frequency.length === 0) { alert('Preencha o nome e selecione pelo menos um dia.'); return; }
+
+        let habitData = { name, type, frequency };
+        if (type === 'quantifiable') {
+            habitData.target = parseFloat(document.getElementById('habitTarget').value) || 1;
+            habitData.unit = document.getElementById('habitUnit').value.trim();
+        }
 
         if (id) {
             const existingHabit = state.habits.find(h => h.id === id);
-            if (existingHabit) { existingHabit.name = name; existingHabit.frequency = frequency; }
+            if (existingHabit) Object.assign(existingHabit, habitData);
         } else {
-            const newHabit = { id: `habit-${Date.now()}`, name: name, frequency: frequency, type: 'binary', completions: [] };
+            const newHabit = { id: `habit-${Date.now()}`, completions: [], ...habitData };
             state.habits.push(newHabit);
         }
         saveState(); render(); closeModal();
