@@ -180,10 +180,13 @@ document.addEventListener('DOMContentLoaded', () => {
             motivation: document.getElementById('goal-motivation-input').value,
             categories: selectedCategories,
             targetDate: document.getElementById('goal-date-input').value,
-            subtasks: (goalForm.dataset.mode === 'edit') ? goals[goalForm.dataset.index].subtasks : []
+            subtasks: (goalForm.dataset.mode === 'edit' && goalForm.dataset.index != null) ? goals[goalForm.dataset.index].subtasks : []
         };
-        if (goalForm.dataset.mode === 'add') goals.push(goalData);
-        else goals[goalForm.dataset.index] = goalData;
+        if (goalForm.dataset.mode === 'add') {
+            goals.push(goalData);
+        } else if (goalForm.dataset.mode === 'edit') {
+            goals[goalForm.dataset.index] = goalData;
+        }
         saveGoals();
         renderGoals();
         closeGoalModal();
@@ -246,4 +249,4 @@ document.addEventListener('DOMContentLoaded', () => {
         switchTab(loadFromLocalStorage('activeTab', 'inicio'));
     };
     initApp();
-});
+});```
