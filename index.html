@@ -7,7 +7,7 @@
     <!-- Google Fonts (Poppins) e Ícones (Boxicons) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <!-- Nosso CSS -->
     <link rel="stylesheet" href="style.css">
@@ -26,7 +26,37 @@
         <!-- Seção de Foco -->
         <section id="foco" class="page">
             <h1>Foco</h1>
-            <p>Gerencie suas tarefas e metas.</p>
+            <!-- APP DE TAREFAS -->
+            <div class="todo-app">
+                <header class="todo-header">
+                    <input type="text" id="task-input" placeholder="Qual a sua próxima tarefa?">
+                    <button id="add-task-btn" aria-label="Adicionar Tarefa">
+                        <i class='bx bx-plus'></i>
+                    </button>
+                </header>
+                <ul id="task-list"></ul>
+            </div>
+            
+            <!-- TIMER POMODORO COMEÇA AQUI -->
+            <div class="pomodoro-timer">
+                <div class="timer-display-container">
+                    <h2 id="timer-display">25:00</h2>
+                </div>
+                <p id="timer-status">Hora de Focar!</p>
+                <div class="pomodoro-controls">
+                    <button id="start-btn" class="pomodoro-btn" aria-label="Iniciar timer">
+                        <i class='bx bx-play'></i>
+                    </button>
+                    <button id="pause-btn" class="pomodoro-btn" aria-label="Pausar timer">
+                        <i class='bx bx-pause'></i>
+                    </button>
+                    <button id="reset-btn" class="pomodoro-btn" aria-label="Reiniciar timer">
+                        <i class='bx bx-reset'></i>
+                    </button>
+                </div>
+            </div>
+            <!-- TIMER POMODORO TERMINA AQUI -->
+
         </section>
 
         <!-- Seção de Finanças -->
