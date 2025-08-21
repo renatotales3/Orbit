@@ -52,9 +52,7 @@ body {
     display: block; /* Mostra apenas a aba ativa */
 }
 
-/* NOVO: Espaçamento e estilo para o título da página */
 .page h1 {
-    margin-bottom: 2rem; /* Adiciona um espaço abaixo dos títulos */
     font-weight: 600; /* Deixa o título com um pouco mais de destaque */
 }
 
@@ -113,6 +111,7 @@ body {
     box-shadow: 
         -6px -6px 12px var(--shadow-light),
         6px 6px 12px var(--shadow-dark);
+    margin-top: 1.5rem; /* NOVO: Adiciona espaço ACIMA do card */
 }
 
 .toggle-button {
