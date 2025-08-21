@@ -4,113 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Life OS</title>
-    <!-- Google Fonts (Poppins) e Ícones (Boxicons) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <!-- Nosso CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Onde o conteúdo de cada aba será exibido -->
     <main class="content">
         
-        <!-- Seção do Dashboard (Início) -->
         <section id="inicio" class="page active">
             <h1>Dashboard</h1>
             <p>Em breve, seus insights diários estarão aqui.</p>
         </section>
 
-        <!-- Seção de Foco -->
         <section id="foco" class="page">
             <h1>Foco</h1>
             <!-- APP DE TAREFAS -->
             <div class="todo-app">
                 <header class="todo-header">
-                    <input type="text" id="task-input" placeholder="Qual a sua próxima tarefa?">
-                    <button id="add-task-btn" aria-label="Adicionar Tarefa">
-                        <i class='bx bx-plus'></i>
-                    </button>
+                    <input type="text" id="task-input" placeholder="Adicione uma tarefa rápida...">
+                    <button id="add-task-btn" aria-label="Adicionar Tarefa"><i class='bx bx-plus'></i></button>
                 </header>
                 <ul id="task-list"></ul>
             </div>
             
-            <!-- TIMER POMODORO COMEÇA AQUI -->
+            <!-- TIMER POMODORO -->
             <div class="pomodoro-timer">
-                <div class="timer-display-container">
-                    <h2 id="timer-display">25:00</h2>
-                </div>
+                <div class="timer-display-container"><h2 id="timer-display">25:00</h2></div>
                 <p id="timer-status">Hora de Focar!</p>
                 <div class="pomodoro-controls">
-                    <button id="start-btn" class="pomodoro-btn" aria-label="Iniciar timer">
-                        <i class='bx bx-play'></i>
-                    </button>
-                    <button id="pause-btn" class="pomodoro-btn" aria-label="Pausar timer">
-                        <i class='bx bx-pause'></i>
-                    </button>
-                    <button id="reset-btn" class="pomodoro-btn" aria-label="Reiniciar timer">
-                        <i class='bx bx-reset'></i>
-                    </button>
+                    <button id="start-btn" class="pomodoro-btn" aria-label="Iniciar timer"><i class='bx bx-play'></i></button>
+                    <button id="pause-btn" class="pomodoro-btn" aria-label="Pausar timer"><i class='bx bx-pause'></i></button>
+                    <button id="reset-btn" class="pomodoro-btn" aria-label="Reiniciar timer"><i class='bx bx-reset'></i></button>
                 </div>
             </div>
-            <!-- TIMER POMODORO TERMINA AQUI -->
 
+            <!-- MÓDULO DE METAS COMEÇA AQUI -->
+            <div class="goals-app">
+                <header class="goals-header">
+                    <h2>Minhas Metas</h2>
+                    <button id="add-goal-modal-btn" class="soft-button">
+                        <i class='bx bx-plus'></i> Nova Meta
+                    </button>
+                </header>
+                <ul id="goals-list"></ul>
+            </div>
+            <!-- MÓDULO DE METAS TERMINA AQUI -->
         </section>
 
-        <!-- Seção de Finanças -->
-        <section id="financas" class="page">
-            <h1>Finanças</h1>
-            <p>Seu controle financeiro completo.</p>
-        </section>
+        <section id="financas" class="page"><h1>Finanças</h1><p>Seu controle financeiro completo.</p></section>
+        <section id="bem-estar" class="page"><h1>Bem-estar</h1><p>Acompanhe seus hábitos e rotinas.</p></section>
 
-        <!-- Seção de Bem-estar -->
-        <section id="bem-estar" class="page">
-            <h1>Bem-estar</h1>
-            <p>Acompanhe seus hábitos e rotinas.</p>
-        </section>
-
-        <!-- Seção de Ajustes -->
         <section id="ajustes" class="page">
             <h1>Ajustes</h1>
             <div class="setting-item">
                 <span>Tema Escuro</span>
-                <button id="theme-toggle" class="toggle-button">
-                    <div class="toggle-circle"></div>
-                </button>
+                <button id="theme-toggle" class="toggle-button"><div class="toggle-circle"></div></button>
             </div>
         </section>
 
     </main>
 
-    <!-- Menu de Navegação Inferior -->
+    <!-- MODAL PARA ADICIONAR METAS -->
+    <div id="goal-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h3>Criar Nova Meta</h3>
+            <form id="goal-form">
+                <input type="text" id="goal-title-input" placeholder="Título da Meta (ex: Aprender a Investir)" required>
+                <textarea id="goal-motivation-input" placeholder="Minha motivação (O porquê...)"></textarea>
+                <select id="goal-category-input" required>
+                    <option value="" disabled selected>Selecione a categoria</option>
+                    <option value="Pessoal">Pessoal</option>
+                    <option value="Profissional">Profissional</option>
+                    <option value="Acadêmica">Acadêmica</option>
+                    <option value="Saúde">Saúde</option>
+                    <option value="Finanças">Finanças</option>
+                </select>
+                <label for="goal-date-input">Data Alvo:</label>
+                <input type="date" id="goal-date-input">
+                <div class="modal-actions">
+                    <button type="button" id="cancel-goal-btn" class="soft-button gray">Cancelar</button>
+                    <button type="submit" class="soft-button">Salvar Meta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <footer class="bottom-nav">
         <nav>
-            <button class="nav-button active" data-target="inicio">
-                <i class='bx bxs-dashboard'></i>
-                <span>Início</span>
-            </button>
-            <button class="nav-button" data-target="foco">
-                <i class='bx bx-target-lock'></i>
-                <span>Foco</span>
-            </button>
-            <button class="nav-button" data-target="financas">
-                <i class='bx bx-wallet'></i>
-                <span>Finanças</span>
-            </button>
-            <button class="nav-button" data-target="bem-estar">
-                <i class='bx bx-heart'></i>
-                <span>Bem-estar</span>
-            </button>
-            <button class="nav-button" data-target="ajustes">
-                <i class='bx bx-cog'></i>
-                <span>Ajustes</span>
-            </button>
+            <button class="nav-button active" data-target="inicio"><i class='bx bxs-dashboard'></i><span>Início</span></button>
+            <button class="nav-button" data-target="foco"><i class='bx bx-target-lock'></i><span>Foco</span></button>
+            <button class="nav-button" data-target="financas"><i class='bx bx-wallet'></i><span>Finanças</span></button>
+            <button class="nav-button" data-target="bem-estar"><i class='bx bx-heart'></i><span>Bem-estar</span></button>
+            <button class="nav-button" data-target="ajustes"><i class='bx bx-cog'></i><span>Ajustes</span></button>
         </nav>
     </footer>
 
-    <!-- Nosso JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
