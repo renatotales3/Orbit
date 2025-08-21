@@ -17,8 +17,8 @@
     --soft-shadow-inset-sharp: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
 }
 
-body { background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-.content { flex-grow: 1; padding: 2rem; overflow-y: auto; padding-bottom: 100px; }
+body { background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; height: 100vh; /* overflow: hidden; -> REMOVIDO PARA PERMITIR SCROLL */ }
+.content { flex-grow: 1; padding: 2rem; overflow-y: auto; padding-bottom: 100px; } /* SCROLL APLICADO AQUI */
 .page { display: none; }
 .page.active { display: block; }
 .page h1 { font-weight: 600; margin-bottom: 1.5rem; }
@@ -62,7 +62,7 @@ body { background-color: var(--bg-color); color: var(--text-color); display: fle
 :root[data-theme="dark"] #add-task-btn { background-color: var(--component-bg); color: var(--primary-color); }
 .priority-selector-wrapper { position: relative; }
 .priority-btn { width: 50px; height: 50px; padding: 0; font-size: 20px; }
-.priority-indicator-btn { color: transparent; background-clip: text; -webkit-background-clip: text; }
+.priority-indicator-btn { font-size: 16px; color: transparent; background-clip: text; -webkit-background-clip: text; }
 .priority-picker { position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); width: 150px; background-color: var(--component-bg); border-radius: 12px; box-shadow: var(--soft-shadow-sharp); padding: 0.5rem; z-index: 20; display: flex; flex-direction: column; gap: 0.5rem; }
 .priority-picker.hidden { display: none; }
 .priority-option { background: none; border: none; color: var(--text-color); padding: 0.75rem; border-radius: 8px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; width: 100%; }
@@ -73,6 +73,8 @@ body { background-color: var(--bg-color); color: var(--text-color); display: fle
 .task-item-content span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .priority-tag { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 8px; color: white; flex-shrink: 0; }
 .task-item.completed span { text-decoration: line-through; opacity: 0.6; }
+.task-item-buttons { display: flex; align-items: center; }
+.task-item-buttons button { background: none; border: none; font-size: 22px; cursor: pointer; margin-left: 10px; color: var(--icon-color); }
 
 /* Cores de Prioridade */
 .priority-1, .priority-tag-1 { background-color: #dc3545; }
