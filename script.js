@@ -1,162 +1,255 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- LÓGICA PARA TROCA DE ABAS ---
-    const navButtons = document.querySelectorAll('.nav-button');
+    // --- ELEMENTOS GERAIS ---
     const pages = document.querySelectorAll('.page');
+    const navButtons = document.querySelectorAll('.nav-button');
+    const htmlElement = document.documentElement;
+
+    // --- FUNÇÕES DE PERSISTÊNCIA (localStorage) ---
+
+    // Salva o estado geral do app (tema e aba ativa)
+    const saveAppState = (key, value) => {
+        localStorage.setItem(key, value);
+    };
+
+    // Carrega o estado geral do app
+    const loadAppState = () => {
+        // Carrega o tema
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+
+        // Carrega a última aba ativa
+        const savedTab = localStorage.getItem('activeTab') || 'inicio';
+        switchTab(savedTab);
+    };
+
+    // --- LÓGICA PARA TROCA DE ABAS ---
+
+    const switchTab = (targetId) => {
+        const targetPage = document.getElementById(targetId);
+        if (targetPage) {
+            pages.forEach(page => page.classList.remove('active'));
+            navButtons.forEach(btn => btn.classList.remove('active'));
+
+            targetPage.classList.add('active');
+            const activeButton = document.querySelector(`.nav-button[data-target="${targetId}"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+        }
+    };
+
     navButtons.forEach(button => {
         button.addEventListener('click', () => {
             const targetId = button.dataset.target;
-            const targetPage = document.getElementById(targetId);
-            navButtons.forEach(btn => btn.classList.remove('active'));
-            pages.forEach(page => page.classList.remove('active'));
-            button.classList.add('active');
-            targetPage.classList.add('active');
+            switchTab(targetId);
+            saveAppState('activeTab', targetId); // Salva a aba ativa
         });
     });
 
     // --- LÓGICA PARA TROCA DE TEMA ---
+
     const themeToggle = document.getElementById('theme-toggle');
-    const htmlElement = document.documentElement;
     const applyTheme = (theme) => {
         htmlElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
     };
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    applyTheme(savedTheme);
+
     themeToggle.addEventListener('click', () => {
         const currentTheme = htmlElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'light' ? 'dark' : 'light';
         applyTheme(newTheme);
+        saveAppState('theme', newTheme); // Salva o tema
     });
 
-    // --- LÓGICA: GERENCIADOR DE TAREFAS (TO-DO LIST) ---
+    // --- LÓGICA: GERENCIADOR DE TAREFAS (COM PERSISTÊNCIA) ---
+
     const taskInput = document.getElementById('task-input');
     const addTaskBtn = document.getElementById('add-task-btn');
     const taskList = document.getElementById('task-list');
-    const createTaskElement = (taskText) => {
-        const li = document.createElement('li'); li.className = 'task-item';
-        const span = document.createElement('span'); span.textContent = taskText;
-        const divButtons = document.createElement('div'); divButtons.className = 'task-item-buttons';
-        const completeBtn = document.createElement('button'); completeBtn.className = 'complete-btn'; completeBtn.innerHTML = `<i class='bx bx-check-circle'></i>`;
-        const deleteBtn = document.createElement('button'); deleteBtn.className = 'delete-btn'; deleteBtn.innerHTML = `<i class='bx bxs-trash'></i>`;
-        divButtons.appendChild(completeBtn); divButtons.appendChild(deleteBtn);
-        li.appendChild(span); li.appendChild(divButtons);
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    // Salva as tarefas no localStorage
+    const saveTasks = () => {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    };
+
+    // Renderiza as tarefas na tela
+    const renderTasks = () => {
+        taskList.innerHTML = ""; // Limpa a lista antes de renderizar
+        tasks.forEach((task, index) => {
+            const taskElement = createTaskElement(task.text, task.completed, index);
+            taskList.appendChild(taskElement);
+        });
+    };
+
+    const createTaskElement = (taskText, isCompleted, index) => {
+        const li = document.createElement('li');
+        li.className = `task-item ${isCompleted ? 'completed' : ''}`;
+        li.dataset.index = index;
+
+        const span = document.createElement('span');
+        span.textContent = taskText;
+
+        const divButtons = document.createElement('div');
+        divButtons.className = 'task-item-buttons';
+        
+        const completeBtn = document.createElement('button');
+        completeBtn.className = 'complete-btn';
+        completeBtn.innerHTML = `<i class='bx bx-check-circle'></i>`;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.innerHTML = `<i class='bx bxs-trash'></i>`;
+        
+        divButtons.appendChild(completeBtn);
+        divButtons.appendChild(deleteBtn);
+        li.appendChild(span);
+        li.appendChild(divButtons);
         return li;
     };
+
     const addTask = () => {
         const taskText = taskInput.value.trim();
-        if (taskText === "") { alert("Por favor, digite uma tarefa."); return; }
-        const taskElement = createTaskElement(taskText);
-        taskList.appendChild(taskElement);
+        if (taskText === "") { return; }
+        tasks.push({ text: taskText, completed: false });
+        saveTasks();
+        renderTasks();
         taskInput.value = "";
     };
+
     addTaskBtn.addEventListener('click', addTask);
-    taskInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') { addTask(); } });
+    taskInput.addEventListener('keypress', (event) => { if (event.key === 'Enter') addTask(); });
+
     taskList.addEventListener('click', (event) => {
-        const clickedElement = event.target;
-        if (clickedElement.closest('.complete-btn')) { clickedElement.closest('.task-item').classList.toggle('completed'); }
-        if (clickedElement.closest('.delete-btn')) {
-            const taskItem = clickedElement.closest('.task-item');
-            taskItem.style.opacity = '0';
-            setTimeout(() => { taskItem.remove(); }, 300);
+        const clickedElement = event.target.closest('.task-item');
+        if (!clickedElement) return;
+
+        const index = parseInt(clickedElement.dataset.index);
+
+        if (event.target.closest('.complete-btn')) {
+            tasks[index].completed = !tasks[index].completed;
         }
+
+        if (event.target.closest('.delete-btn')) {
+            tasks.splice(index, 1);
+        }
+
+        saveTasks();
+        renderTasks();
     });
 
-    // --- NOVA LÓGICA: POMODORO TIMER ---
+    // --- LÓGICA: POMODORO TIMER (COM PERSISTÊNCIA) ---
+
     const timerDisplay = document.getElementById('timer-display');
     const timerStatus = document.getElementById('timer-status');
     const startBtn = document.getElementById('start-btn');
     const pauseBtn = document.getElementById('pause-btn');
     const resetBtn = document.getElementById('reset-btn');
 
-    // Constantes de tempo em minutos
-    const FOCUS_TIME = 25;
-    const SHORT_BREAK_TIME = 5;
-    const LONG_BREAK_TIME = 15;
+    const FOCUS_TIME = 25 * 60;
+    const SHORT_BREAK_TIME = 5 * 60;
+    const LONG_BREAK_TIME = 15 * 60;
 
-    let timer; // Variável para o setInterval
+    let timer;
     let totalSeconds;
-    let isPaused = true;
-    let currentCycle = 'focus'; // 'focus', 'shortBreak', 'longBreak'
-    let pomodoroCount = 0;
+    let currentCycle = localStorage.getItem('pomodoro_currentCycle') || 'focus';
+    let pomodoroCount = parseInt(localStorage.getItem('pomodoro_pomodoroCount')) || 0;
 
-    // Função para atualizar o display do timer
     const updateDisplay = () => {
         const minutes = Math.floor(totalSeconds / 60);
         const seconds = totalSeconds % 60;
         timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        document.title = `${timerDisplay.textContent} - Life OS`; // Atualiza o título da página
     };
-
-    // Função para trocar de ciclo
+    
     const switchCycle = () => {
         if (currentCycle === 'focus') {
             pomodoroCount++;
-            if (pomodoroCount % 4 === 0) {
-                currentCycle = 'longBreak';
-                totalSeconds = LONG_BREAK_TIME * 60;
-                timerStatus.textContent = "Pausa Longa";
-            } else {
-                currentCycle = 'shortBreak';
-                totalSeconds = SHORT_BREAK_TIME * 60;
-                timerStatus.textContent = "Pausa Curta";
-            }
+            localStorage.setItem('pomodoro_pomodoroCount', pomodoroCount);
+            currentCycle = (pomodoroCount % 4 === 0) ? 'longBreak' : 'shortBreak';
         } else {
             currentCycle = 'focus';
-            totalSeconds = FOCUS_TIME * 60;
-            timerStatus.textContent = "Hora de Focar!";
+        }
+        localStorage.setItem('pomodoro_currentCycle', currentCycle);
+        resetTimer(false); // Reinicia para o novo ciclo sem perguntar
+    };
+
+    const countdown = () => {
+        const endTime = parseInt(localStorage.getItem('pomodoro_endTime'));
+        if (!endTime) return;
+
+        totalSeconds = Math.round((endTime - Date.now()) / 1000);
+
+        if (totalSeconds <= 0) {
+            clearInterval(timer);
+            localStorage.removeItem('pomodoro_endTime');
+            switchCycle();
+            return;
         }
         updateDisplay();
     };
 
-    // Função principal do timer que roda a cada segundo
-    const countdown = () => {
-        if (isPaused) return;
-
-        if (totalSeconds > 0) {
-            totalSeconds--;
-            updateDisplay();
-        } else {
-            clearInterval(timer);
-            isPaused = true;
-            // Alerta sonoro (opcional, requer um arquivo de áudio)
-            // new Audio('notification.mp3').play();
-            switchCycle();
-        }
-    };
-
-    // Funções dos botões
     const startTimer = () => {
-        if (isPaused) {
-            isPaused = false;
-            timer = setInterval(countdown, 1000);
+        const isPaused = localStorage.getItem('pomodoro_isPaused') === 'true';
+        let remainingSecondsOnPause = parseInt(localStorage.getItem('pomodoro_remainingSecondsOnPause'));
+
+        if (isPaused && remainingSecondsOnPause > 0) {
+            totalSeconds = remainingSecondsOnPause;
         }
+        
+        const endTime = Date.now() + totalSeconds * 1000;
+        localStorage.setItem('pomodoro_endTime', endTime);
+        localStorage.setItem('pomodoro_isPaused', 'false');
+        localStorage.removeItem('pomodoro_remainingSecondsOnPause');
+
+        countdown(); // Chamada imediata para evitar delay de 1s
+        timer = setInterval(countdown, 1000);
     };
 
     const pauseTimer = () => {
-        isPaused = true;
         clearInterval(timer);
+        localStorage.setItem('pomodoro_isPaused', 'true');
+        localStorage.setItem('pomodoro_remainingSecondsOnPause', totalSeconds);
+        localStorage.removeItem('pomodoro_endTime');
     };
 
-    const resetTimer = () => {
-        pauseTimer(); // Para o timer
-        // Reseta para o início do ciclo atual
-        if (currentCycle === 'focus') totalSeconds = FOCUS_TIME * 60;
-        else if (currentCycle === 'shortBreak') totalSeconds = SHORT_BREAK_TIME * 60;
-        else totalSeconds = LONG_BREAK_TIME * 60;
+    const resetTimer = (isManualReset = true) => {
+        pauseTimer();
+        switch (currentCycle) {
+            case 'focus': totalSeconds = FOCUS_TIME; timerStatus.textContent = "Hora de Focar!"; break;
+            case 'shortBreak': totalSeconds = SHORT_BREAK_TIME; timerStatus.textContent = "Pausa Curta"; break;
+            case 'longBreak': totalSeconds = LONG_BREAK_TIME; timerStatus.textContent = "Pausa Longa"; break;
+        }
+        if(isManualReset) {
+            localStorage.setItem('pomodoro_remainingSecondsOnPause', totalSeconds);
+        }
         updateDisplay();
     };
-    
-    // Configuração inicial do timer
-    const initializeTimer = () => {
-        totalSeconds = FOCUS_TIME * 60;
+
+    const initPomodoro = () => {
+        const isPaused = localStorage.getItem('pomodoro_isPaused') !== 'false'; // Default to paused
+        const endTime = parseInt(localStorage.getItem('pomodoro_endTime'));
+
+        if (!isPaused && endTime) {
+            // Se não estava pausado e tem um tempo final, continue
+            startTimer();
+        } else {
+            // Se estava pausado ou é a primeira vez
+            totalSeconds = parseInt(localStorage.getItem('pomodoro_remainingSecondsOnPause'));
+            if (isNaN(totalSeconds) || totalSeconds <= 0) {
+                // Se não há tempo salvo, resete para o ciclo atual
+                resetTimer(false);
+            }
+        }
         updateDisplay();
     };
-    
-    // Adiciona os eventos aos botões
+
     startBtn.addEventListener('click', startTimer);
     pauseBtn.addEventListener('click', pauseTimer);
-    resetBtn.addEventListener('click', resetTimer);
+    resetBtn.addEventListener('click', () => resetTimer(true));
 
-    // Inicia o estado visual do timer ao carregar a página
-    initializeTimer();
+    // --- INICIALIZAÇÃO DO APLICATIVO ---
+    loadAppState();
+    renderTasks();
+    initPomodoro();
 });
