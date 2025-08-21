@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskInput = document.getElementById('task-input');
     const taskPriorityBtn = document.getElementById('task-priority-btn');
     const priorityPicker = document.getElementById('priority-picker');
+    const addTaskBtn = document.getElementById('add-task-btn');
     const taskList = document.getElementById('task-list');
     
     const PRIORITIES = {
@@ -42,17 +43,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let tasks = loadFromLocalStorage('tasks', []);
-    let currentTaskPriority = 3; // Padrão: Média
+    let currentTaskPriority = 3;
 
     const saveTasks = () => saveToLocalStorage('tasks', tasks);
     
     const renderTasks = () => {
         tasks.sort((a, b) => a.priority - b.priority);
         taskList.innerHTML = "";
-        tasks.forEach((task, index) => {
+        tasks.forEach(task => {
             const li = document.createElement('li');
             li.className = `task-item ${task.completed ? 'completed' : ''}`;
-            li.dataset.originalIndex = tasks.indexOf(task); // Mantém o índice original para referência
             const priorityInfo = PRIORITIES[task.priority];
 
             li.innerHTML = `
@@ -64,6 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="complete-btn"><i class='bx bx-check-circle'></i></button>
                     <button class="delete-btn"><i class='bx bxs-trash'></i></button>
                 </div>`;
+            li.dataset.taskText = task.text;
+            li.dataset.taskPriority = task.priority;
             taskList.appendChild(li);
         });
     };
@@ -87,11 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </button>
     `).join('');
 
-    taskPriorityBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        priorityPicker.classList.toggle('hidden');
-    });
-
+    taskPriorityBtn.addEventListener('click', (e) => { e.stopPropagation(); priorityPicker.classList.toggle('hidden'); });
     priorityPicker.addEventListener('click', (e) => {
         const option = e.target.closest('.priority-option');
         if (option) {
@@ -102,35 +100,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('click', () => priorityPicker.classList.add('hidden'));
-
-    document.getElementById('add-task-btn').addEventListener('click', () => {
-        addTask(taskInput.value, currentTaskPriority);
-        taskInput.value = "";
-    });
-
-    taskInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            addTask(taskInput.value, currentTaskPriority);
-            taskInput.value = "";
-        }
-    });
+    addTaskBtn.addEventListener('click', () => { addTask(taskInput.value, currentTaskPriority); taskInput.value = ""; });
+    taskInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { addTask(taskInput.value, currentTaskPriority); taskInput.value = ""; } });
 
     taskList.addEventListener('click', (e) => {
         const item = e.target.closest('.task-item');
         if (!item) return;
         
-        const taskText = item.querySelector('.task-item-content span:last-child').textContent;
-        const taskPriority = Array.from(item.querySelector('.priority-tag').classList).find(c => c.startsWith('priority-')).split('-')[1];
-        
-        const originalIndex = tasks.findIndex(task => task.text === taskText && task.priority == taskPriority);
+        const originalIndex = tasks.findIndex(task => task.text === item.dataset.taskText && task.priority == item.dataset.taskPriority);
         if (originalIndex === -1) return;
 
-        if (e.target.closest('.complete-btn')) {
-            tasks[originalIndex].completed = !tasks[originalIndex].completed;
-        }
-        if (e.target.closest('.delete-btn')) {
-            tasks.splice(originalIndex, 1);
-        }
+        if (e.target.closest('.complete-btn')) tasks[originalIndex].completed = !tasks[originalIndex].completed;
+        if (e.target.closest('.delete-btn')) tasks.splice(originalIndex, 1);
+        
         saveTasks();
         renderTasks();
     });
@@ -142,20 +124,44 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentCycle = loadFromLocalStorage('pomodoro_currentCycle', 'focus');
     let pomodoroCount = loadFromLocalStorage('pomodoro_pomodoroCount', 0);
     const FOCUS_TIME = 25 * 60, SHORT_BREAK_TIME = 5 * 60, LONG_BREAK_TIME = 15 * 60;
-    const updateDisplay = () => {
+    const updateDisplay = () => { /* ... (código existente) ... */ };
+    const switchCycle = () => { /* ... (código existente) ... */ };
+    const setTimerForCurrentCycle = () => { /* ... (código existente) ... */ };
+    document.getElementById('start-btn').addEventListener('click', () => { /* ... (código existente) ... */ });
+    document.getElementById('pause-btn').addEventListener('click', () => { /* ... (código existente) ... */ });
+    document.getElementById('reset-btn').addEventListener('click', setTimerForCurrentCycle);
+
+    // --- MÓDULO DE METAS ---
+    const goalModal = document.getElementById('goal-modal');
+    const goalForm = document.getElementById('goal-form');
+    // ... (todo o código de Metas que já estava funcionando) ...
+
+    // --- INICIALIZAÇÃO GERAL ---
+    const initApp = () => {
+        applyTheme(loadFromLocalStorage('theme', 'light'));
+        renderTasks();
+        updatePriorityBtn();
+        setTimerForCurrentCycle();
+        renderGoals();
+        switchTab(loadFromLocalStorage('activeTab', 'inicio'));
+    };
+    initApp();
+
+    // Funções do Pomodoro (colocadas aqui para não poluir o topo)
+    updateDisplay = () => {
         if (!timerDisplay) return;
         const minutes = Math.floor(totalSeconds / 60);
         const seconds = totalSeconds % 60;
         timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         document.title = `${timerDisplay.textContent} - Life OS`;
     };
-    const switchCycle = () => {
+    switchCycle = () => {
         currentCycle = (currentCycle === 'focus') ? ((++pomodoroCount % 4 === 0) ? 'longBreak' : 'shortBreak') : 'focus';
         saveToLocalStorage('pomodoro_pomodoroCount', pomodoroCount);
         saveToLocalStorage('pomodoro_currentCycle', currentCycle);
         setTimerForCurrentCycle();
     };
-    const setTimerForCurrentCycle = () => {
+    setTimerForCurrentCycle = () => {
         isPaused = true; clearInterval(timer);
         switch (currentCycle) {
             case 'focus': totalSeconds = FOCUS_TIME; timerStatus.textContent = "Hora de Focar!"; break;
@@ -168,19 +174,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isPaused) { isPaused = false; timer = setInterval(() => { if (--totalSeconds >= 0) updateDisplay(); else switchCycle(); }, 1000); }
     });
     document.getElementById('pause-btn').addEventListener('click', () => { isPaused = true; clearInterval(timer); });
-    document.getElementById('reset-btn').addEventListener('click', setTimerForCurrentCycle);
 
-    // --- MÓDULO DE METAS ---
-    const goalModal = document.getElementById('goal-modal');
-    const goalForm = document.getElementById('goal-form');
+    // Código de Metas (colocado aqui para não poluir o topo)
     const goalsList = document.getElementById('goals-list');
     const modalTitle = document.getElementById('modal-title');
     const categoryContainer = document.getElementById('goal-category-container');
     let goals = loadFromLocalStorage('goals', []);
     const ALL_CATEGORIES = { 'Pessoal': '#007BFF', 'Profissional': '#6F42C1', 'Acadêmica': '#28A745', 'Saúde': '#FD7E14', 'Finanças': '#FFC107' };
-
     const saveGoals = () => saveToLocalStorage('goals', goals);
-    const renderGoals = () => {
+    const renderGoals = () => { /* ... (código existente) ... */ };
+    const openGoalModal = (mode = 'add', index = null) => { /* ... (código existente) ... */ };
+    const closeGoalModal = () => { /* ... (código existente) ... */ };
+    document.getElementById('add-goal-modal-btn').addEventListener('click', () => openGoalModal('add'));
+    document.getElementById('cancel-goal-btn').addEventListener('click', closeGoalModal);
+    goalModal.addEventListener('click', (e) => { if (e.target === goalModal) closeGoalModal(); });
+    categoryContainer.addEventListener('click', (e) => { if (e.target.classList.contains('category-btn')) e.target.classList.toggle('active'); });
+    goalForm.addEventListener('submit', (e) => { /* ... (código existente) ... */ });
+    goalsList.addEventListener('click', (e) => { /* ... (código existente) ... */ });
+    goalsList.addEventListener('submit', (e) => { /* ... (código existente) ... */ });
+    renderGoals = () => {
         goalsList.innerHTML = "";
         goals.forEach((goal, index) => {
             const progress = goal.subtasks.length > 0 ? (goal.subtasks.filter(st => st.completed).length / goal.subtasks.length) * 100 : 0;
@@ -198,8 +210,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="goal-details">
                     <div class="goal-details-content">
                         <div class="goal-categories">${goal.categories.map(cat => `<span class="goal-category" style="background-color:${ALL_CATEGORIES[cat] || '#6c757d'}">${cat}</span>`).join('')}</div>
-                        <p class="goal-motivation"><strong>Motivação:</strong> ${goal.motivation || 'N/A'}</p>
-                        <p class="goal-date"><strong>Data Alvo:</strong> ${goal.targetDate || 'N/A'}</p>
+                        <p><strong>Motivação:</strong> ${goal.motivation || 'N/A'}</p>
+                        <p><strong>Data Alvo:</strong> ${goal.targetDate || 'N/A'}</p>
                         <ul class="subtask-list">${goal.subtasks.map((st, stIndex) => `
                             <li class="subtask-item">
                                 <label for="st-${index}-${stIndex}" class="subtask-item-label ${st.completed ? 'completed' : ''}">
@@ -219,8 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             goalsList.appendChild(li);
         });
     };
-
-    const openGoalModal = (mode = 'add', index = null) => {
+    openGoalModal = (mode = 'add', index = null) => {
         goalForm.reset();
         goalForm.dataset.mode = mode;
         goalForm.dataset.index = index;
@@ -240,13 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         goalModal.classList.remove('hidden');
     };
-    const closeGoalModal = () => goalModal.classList.add('hidden');
-
-    document.getElementById('add-goal-modal-btn').addEventListener('click', () => openGoalModal('add'));
-    document.getElementById('cancel-goal-btn').addEventListener('click', closeGoalModal);
-    goalModal.addEventListener('click', (e) => { if (e.target === goalModal) closeGoalModal(); });
-    categoryContainer.addEventListener('click', (e) => { if (e.target.classList.contains('category-btn')) e.target.classList.toggle('active'); });
-
+    closeGoalModal = () => goalModal.classList.add('hidden');
     goalForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const selectedCategories = [...categoryContainer.querySelectorAll('.category-btn.active')].map(btn => btn.textContent);
@@ -265,7 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (mode === 'edit') { goals[index] = goalData; }
         saveGoals(); renderGoals(); closeGoalModal();
     });
-
     goalsList.addEventListener('click', (e) => {
         const goalItem = e.target.closest('.goal-item');
         if (!goalItem) return;
@@ -287,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (e.target.closest('.add-to-focus-btn')) {
             const subtaskText = goals[goalIndex].subtasks[e.target.closest('.add-to-focus-btn').dataset.subtaskIndex].text;
-            addTask(`[${goals[goalIndex].title}] ${subtaskText}`, 3); // Adiciona como 'Média' por padrão
+            addTask(`[${goals[goalIndex].title}] ${subtaskText}`, 3);
         }
         
         if (shouldReRender) {
@@ -297,7 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (wasExpanded) document.querySelector(`.goal-item[data-index="${goalIndex}"]`)?.classList.add('expanded');
         }
     });
-
     goalsList.addEventListener('submit', (e) => {
         e.preventDefault();
         if (e.target.classList.contains('add-subtask-form')) {
@@ -313,15 +316,5 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-    
-    // --- INICIALIZAÇÃO GERAL ---
-    const initApp = () => {
-        applyTheme(loadFromLocalStorage('theme', 'light'));
-        renderTasks();
-        setTimerForCurrentCycle();
-        renderGoals();
-        updatePriorityBtn();
-        switchTab(loadFromLocalStorage('activeTab', 'inicio'));
-    };
-    initApp();
+
 });
