@@ -130,8 +130,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <ul class="subtask-list">${goal.subtasks.map((st, stIndex) => `
                             <li class="subtask-item">
-                                <div><input type="checkbox" id="st-${index}-${stIndex}" data-subtask-index="${stIndex}" ${st.completed ? 'checked' : ''}><label for="st-${index}-${stIndex}" class="${st.completed ? 'completed' : ''}">${st.text}</label></div>
-                                <div class="subtask-actions"><button class="add-to-focus-btn" data-subtask-index="${stIndex}" title="Adicionar ao Foco do Dia"><i class='bx bx-list-plus'></i></button><button class="delete-subtask-btn" data-subtask-index="${stIndex}" title="Excluir Subtarefa"><i class='bx bxs-trash'></i></button></div>
+                                <input type="checkbox" id="st-${index}-${stIndex}" data-subtask-index="${stIndex}" ${st.completed ? 'checked' : ''}>
+                                <label for="st-${index}-${stIndex}" class="subtask-item-label ${st.completed ? 'completed' : ''}">
+                                    <span class="custom-checkbox"></span>
+                                    ${st.text}
+                                </label>
+                                <div class="subtask-actions">
+                                    <button class="add-to-focus-btn" data-subtask-index="${stIndex}" title="Adicionar ao Foco do Dia"><i class='bx bx-list-plus'></i></button>
+                                    <button class="delete-subtask-btn" data-subtask-index="${stIndex}" title="Excluir Subtarefa"><i class='bx bxs-trash'></i></button>
+                                </div>
                             </li>`).join('')}
                         </ul>
                         <form class="add-subtask-form"><input type="text" class="soft-input subtask-input" placeholder="Novo passo..."><button type="submit" class="soft-button add-subtask-btn"><i class='bx bx-plus'></i></button></form>
@@ -171,21 +178,27 @@ document.addEventListener('DOMContentLoaded', () => {
     goalForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const selectedCategories = [...categoryContainer.querySelectorAll('.category-btn.active')].map(btn => btn.textContent);
+        if (document.getElementById('goal-title-input').value.trim() === '') {
+            alert("O título da meta é obrigatório.");
+            return;
+        }
         if (selectedCategories.length === 0) {
             alert("Por favor, selecione ao menos uma categoria.");
             return;
         }
+        const mode = goalForm.dataset.mode;
+        const index = goalForm.dataset.index;
         const goalData = {
             title: document.getElementById('goal-title-input').value,
             motivation: document.getElementById('goal-motivation-input').value,
             categories: selectedCategories,
             targetDate: document.getElementById('goal-date-input').value,
-            subtasks: (goalForm.dataset.mode === 'edit' && goalForm.dataset.index != null) ? goals[goalForm.dataset.index].subtasks : []
+            subtasks: (mode === 'edit' && goals[index]) ? goals[index].subtasks : []
         };
-        if (goalForm.dataset.mode === 'add') {
+        if (mode === 'add') {
             goals.push(goalData);
-        } else if (goalForm.dataset.mode === 'edit') {
-            goals[goalForm.dataset.index] = goalData;
+        } else if (mode === 'edit') {
+            goals[index] = goalData;
         }
         saveGoals();
         renderGoals();
@@ -202,10 +215,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.closest('.edit-goal-btn')) openGoalModal('edit', goalIndex);
         if (e.target.closest('.delete-goal-btn')) { goals.splice(goalIndex, 1); shouldReRender = true; }
         
-        if (e.target.closest('input[type="checkbox"]')) {
-            const checkbox = e.target;
-            goals[goalIndex].subtasks[checkbox.dataset.subtaskIndex].completed = checkbox.checked;
-            shouldReRender = true;
+        if (e.target.closest('.subtask-item-label') || e.target.closest('.custom-checkbox')) {
+            const checkbox = goalItem.querySelector(`input[id^="st-${goalIndex}-"][data-subtask-index="${e.target.closest('.subtask-item').querySelector('input').dataset.subtaskIndex}"]`);
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                goals[goalIndex].subtasks[checkbox.dataset.subtaskIndex].completed = checkbox.checked;
+                shouldReRender = true;
+            }
         }
         if (e.target.closest('.delete-subtask-btn')) {
             goals[goalIndex].subtasks.splice(e.target.closest('.delete-subtask-btn').dataset.subtaskIndex, 1);
@@ -249,4 +265,4 @@ document.addEventListener('DOMContentLoaded', () => {
         switchTab(loadFromLocalStorage('activeTab', 'inicio'));
     };
     initApp();
-});```
+});
