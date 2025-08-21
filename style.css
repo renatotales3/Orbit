@@ -52,6 +52,13 @@ body {
     display: block; /* Mostra apenas a aba ativa */
 }
 
+/* NOVO: Espaçamento e estilo para o título da página */
+.page h1 {
+    margin-bottom: 2rem; /* Adiciona um espaço abaixo dos títulos */
+    font-weight: 600; /* Deixa o título com um pouco mais de destaque */
+}
+
+
 /* --- Menu de Navegação Inferior --- */
 .bottom-nav {
     position: fixed;
