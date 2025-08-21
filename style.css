@@ -25,7 +25,7 @@ body { background-color: var(--bg-color); color: var(--text-color); display: fle
 /* --- Títulos das Páginas com Ícone --- */
 .page-title { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
 .title-icon { width: 40px; height: 40px; }
-.page-title h1, .page h1 { font-weight: 600; margin-bottom: 0; } /* Reseta margem do h1 dentro do flex */
+.page-title h1, .page h1 { font-weight: 600; margin-bottom: 0; }
 
 /* --- Componentes Genéricos --- */
 .soft-button { background-color: var(--component-bg); border: none; padding: 10px 20px; border-radius: 12px; color: var(--text-color); font-weight: 500; cursor: pointer; box-shadow: var(--soft-shadow-sharp); transition: all 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -116,7 +116,7 @@ body { background-color: var(--bg-color); color: var(--text-color); display: fle
 .custom-checkbox { width: 20px; height: 20px; background-color: var(--bg-color); border-radius: 6px; box-shadow: var(--soft-shadow-inset-sharp); margin-right: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0; }
 .custom-checkbox::after { content: '\ea4c'; font-family: 'boxicons'; font-size: 20px; color: var(--text-color); opacity: 0; transform: scale(0.5); transition: all 0.2s ease; }
 .subtask-item input[type="checkbox"]:checked + .subtask-item-label .custom-checkbox { box-shadow: var(--soft-shadow-sharp); }
-.subtask-item input[type="checkbox"]:checked + .subtask-item-label .custom-checkbox::after { opacity: 1; transform: scale(1); } /* CORREÇÃO FINAL */
+.subtask-item input[type="checkbox"]:checked + .subtask-item-label .custom-checkbox::after { opacity: 1; transform: scale(1); }
 .subtask-actions { display: flex; align-items: center; gap: 8px; }
 .subtask-actions button { background: none; border: none; color: var(--icon-color); font-size: 20px; cursor: pointer; }
 .subtask-actions button i { font-size: inherit; }
@@ -129,4 +129,4 @@ body { background-color: var(--bg-color); color: var(--text-color); display: fle
 .category-container { display: flex; flex-wrap: wrap; gap: 10px; }
 .category-btn { background-color: var(--bg-color); color: var(--text-color); padding: 8px 12px; border-radius: 10px; border: none; cursor: pointer; box-shadow: var(--soft-shadow-sharp); transition: all 0.2s ease; font-size: 0.9rem; }
 .category-btn.active { box-shadow: var(--soft-shadow-inset-sharp); }
-.modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; }```
