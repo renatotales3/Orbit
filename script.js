@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const li = document.createElement('li');
             li.className = `task-item ${task.completed ? 'completed' : ''}`;
             const priorityInfo = PRIORITIES[task.priority];
-
             li.innerHTML = `
                 <div class="task-item-content">
                     <span class="priority-tag ${priorityInfo.colorClass}">${priorityInfo.name}</span>
@@ -120,48 +119,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- MÓDULO POMODORO ---
     const timerDisplay = document.getElementById('timer-display');
     const timerStatus = document.getElementById('timer-status');
+    const startBtn = document.getElementById('start-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+    const resetBtn = document.getElementById('reset-btn');
     let timer, totalSeconds, isPaused = true;
     let currentCycle = loadFromLocalStorage('pomodoro_currentCycle', 'focus');
     let pomodoroCount = loadFromLocalStorage('pomodoro_pomodoroCount', 0);
     const FOCUS_TIME = 25 * 60, SHORT_BREAK_TIME = 5 * 60, LONG_BREAK_TIME = 15 * 60;
-    const updateDisplay = () => { /* ... (código existente) ... */ };
-    const switchCycle = () => { /* ... (código existente) ... */ };
-    const setTimerForCurrentCycle = () => { /* ... (código existente) ... */ };
-    document.getElementById('start-btn').addEventListener('click', () => { /* ... (código existente) ... */ });
-    document.getElementById('pause-btn').addEventListener('click', () => { /* ... (código existente) ... */ });
-    document.getElementById('reset-btn').addEventListener('click', setTimerForCurrentCycle);
-
-    // --- MÓDULO DE METAS ---
-    const goalModal = document.getElementById('goal-modal');
-    const goalForm = document.getElementById('goal-form');
-    // ... (todo o código de Metas que já estava funcionando) ...
-
-    // --- INICIALIZAÇÃO GERAL ---
-    const initApp = () => {
-        applyTheme(loadFromLocalStorage('theme', 'light'));
-        renderTasks();
-        updatePriorityBtn();
-        setTimerForCurrentCycle();
-        renderGoals();
-        switchTab(loadFromLocalStorage('activeTab', 'inicio'));
-    };
-    initApp();
-
-    // Funções do Pomodoro (colocadas aqui para não poluir o topo)
-    updateDisplay = () => {
+    
+    const updateDisplay = () => {
         if (!timerDisplay) return;
         const minutes = Math.floor(totalSeconds / 60);
         const seconds = totalSeconds % 60;
         timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         document.title = `${timerDisplay.textContent} - Life OS`;
     };
-    switchCycle = () => {
+    const switchCycle = () => {
         currentCycle = (currentCycle === 'focus') ? ((++pomodoroCount % 4 === 0) ? 'longBreak' : 'shortBreak') : 'focus';
         saveToLocalStorage('pomodoro_pomodoroCount', pomodoroCount);
         saveToLocalStorage('pomodoro_currentCycle', currentCycle);
         setTimerForCurrentCycle();
     };
-    setTimerForCurrentCycle = () => {
+    const setTimerForCurrentCycle = () => {
         isPaused = true; clearInterval(timer);
         switch (currentCycle) {
             case 'focus': totalSeconds = FOCUS_TIME; timerStatus.textContent = "Hora de Focar!"; break;
@@ -170,29 +149,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateDisplay();
     };
-    document.getElementById('start-btn').addEventListener('click', () => {
-        if (isPaused) { isPaused = false; timer = setInterval(() => { if (--totalSeconds >= 0) updateDisplay(); else switchCycle(); }, 1000); }
-    });
-    document.getElementById('pause-btn').addEventListener('click', () => { isPaused = true; clearInterval(timer); });
+    startBtn.addEventListener('click', () => { if (isPaused) { isPaused = false; timer = setInterval(() => { if (--totalSeconds >= 0) updateDisplay(); else switchCycle(); }, 1000); } });
+    pauseBtn.addEventListener('click', () => { isPaused = true; clearInterval(timer); });
+    resetBtn.addEventListener('click', setTimerForCurrentCycle);
 
-    // Código de Metas (colocado aqui para não poluir o topo)
+    // --- MÓDULO DE METAS ---
+    const goalModal = document.getElementById('goal-modal');
+    const goalForm = document.getElementById('goal-form');
     const goalsList = document.getElementById('goals-list');
     const modalTitle = document.getElementById('modal-title');
+    const addGoalModalBtn = document.getElementById('add-goal-modal-btn');
     const categoryContainer = document.getElementById('goal-category-container');
     let goals = loadFromLocalStorage('goals', []);
     const ALL_CATEGORIES = { 'Pessoal': '#007BFF', 'Profissional': '#6F42C1', 'Acadêmica': '#28A745', 'Saúde': '#FD7E14', 'Finanças': '#FFC107' };
     const saveGoals = () => saveToLocalStorage('goals', goals);
-    const renderGoals = () => { /* ... (código existente) ... */ };
-    const openGoalModal = (mode = 'add', index = null) => { /* ... (código existente) ... */ };
-    const closeGoalModal = () => { /* ... (código existente) ... */ };
-    document.getElementById('add-goal-modal-btn').addEventListener('click', () => openGoalModal('add'));
-    document.getElementById('cancel-goal-btn').addEventListener('click', closeGoalModal);
-    goalModal.addEventListener('click', (e) => { if (e.target === goalModal) closeGoalModal(); });
-    categoryContainer.addEventListener('click', (e) => { if (e.target.classList.contains('category-btn')) e.target.classList.toggle('active'); });
-    goalForm.addEventListener('submit', (e) => { /* ... (código existente) ... */ });
-    goalsList.addEventListener('click', (e) => { /* ... (código existente) ... */ });
-    goalsList.addEventListener('submit', (e) => { /* ... (código existente) ... */ });
-    renderGoals = () => {
+    const renderGoals = () => {
         goalsList.innerHTML = "";
         goals.forEach((goal, index) => {
             const progress = goal.subtasks.length > 0 ? (goal.subtasks.filter(st => st.completed).length / goal.subtasks.length) * 100 : 0;
@@ -231,12 +202,11 @@ document.addEventListener('DOMContentLoaded', () => {
             goalsList.appendChild(li);
         });
     };
-    openGoalModal = (mode = 'add', index = null) => {
+    const openGoalModal = (mode = 'add', index = null) => {
         goalForm.reset();
         goalForm.dataset.mode = mode;
         goalForm.dataset.index = index;
         categoryContainer.innerHTML = Object.keys(ALL_CATEGORIES).map(cat => `<button type="button" class="category-btn">${cat}</button>`).join('');
-        
         if (mode === 'edit' && index !== null) {
             modalTitle.textContent = "Editar Meta";
             const goal = goals[index];
@@ -251,7 +221,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         goalModal.classList.remove('hidden');
     };
-    closeGoalModal = () => goalModal.classList.add('hidden');
+    const closeGoalModal = () => goalModal.classList.add('hidden');
+    addGoalModalBtn.addEventListener('click', () => openGoalModal('add'));
+    document.getElementById('cancel-goal-btn').addEventListener('click', closeGoalModal);
+    goalModal.addEventListener('click', (e) => { if (e.target === goalModal) closeGoalModal(); });
+    categoryContainer.addEventListener('click', (e) => { if (e.target.classList.contains('category-btn')) e.target.classList.toggle('active'); });
+    goalForm.addEventListener('submit', (e) => { e.preventDefault(); /* ... (código existente) ... */ });
+    goalsList.addEventListener('click', (e) => { /* ... (código existente) ... */ });
+    goalsList.addEventListener('submit', (e) => { /* ... (código existente) ... */ });
+    
+    // --- INICIALIZAÇÃO GERAL ---
+    const initApp = () => {
+        applyTheme(loadFromLocalStorage('theme', 'light'));
+        renderTasks();
+        updatePriorityBtn();
+        setTimerForCurrentCycle();
+        renderGoals();
+        switchTab(loadFromLocalStorage('activeTab', 'inicio'));
+    };
+    initApp();
+    
+    // Funções de Metas (para evitar duplicação)
     goalForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const selectedCategories = [...categoryContainer.querySelectorAll('.category-btn.active')].map(btn => btn.textContent);
@@ -260,10 +250,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const mode = goalForm.dataset.mode;
         const index = goalForm.dataset.index;
         const goalData = {
-            title: document.getElementById('goal-title-input').value,
-            motivation: document.getElementById('goal-motivation-input').value,
-            categories: selectedCategories,
-            targetDate: document.getElementById('goal-date-input').value,
+            title: document.getElementById('goal-title-input').value, motivation: document.getElementById('goal-motivation-input').value,
+            categories: selectedCategories, targetDate: document.getElementById('goal-date-input').value,
             subtasks: (mode === 'edit' && goals[index]) ? goals[index].subtasks : []
         };
         if (mode === 'add') { goals.push(goalData); } 
@@ -275,29 +263,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!goalItem) return;
         const goalIndex = parseInt(goalItem.dataset.index);
         let shouldReRender = false;
-
         if (e.target.closest('.goal-header') || e.target.closest('.goal-progress')) goalItem.classList.toggle('expanded');
         if (e.target.closest('.edit-goal-btn')) openGoalModal('edit', goalIndex);
         if (e.target.closest('.delete-goal-btn')) { goals.splice(goalIndex, 1); shouldReRender = true; }
-        
-        if (e.target.closest('input[type="checkbox"]')) {
-            const checkbox = e.target;
-            goals[goalIndex].subtasks[checkbox.dataset.subtaskIndex].completed = checkbox.checked;
-            shouldReRender = true;
+        if (e.target.closest('.subtask-item-label') || e.target.closest('.custom-checkbox')) {
+            const subtaskItem = e.target.closest('.subtask-item');
+            if(subtaskItem){
+                const checkbox = subtaskItem.querySelector('input[type="checkbox"]');
+                const subtaskIndex = checkbox.dataset.subtaskIndex;
+                if (e.target.nodeName !== 'INPUT') checkbox.checked = !checkbox.checked;
+                goals[goalIndex].subtasks[subtaskIndex].completed = checkbox.checked;
+                shouldReRender = true;
+            }
         }
-        if (e.target.closest('.delete-subtask-btn')) {
-            goals[goalIndex].subtasks.splice(e.target.closest('.delete-subtask-btn').dataset.subtaskIndex, 1);
-            shouldReRender = true;
-        }
+        if (e.target.closest('.delete-subtask-btn')) { goals[goalIndex].subtasks.splice(e.target.closest('.delete-subtask-btn').dataset.subtaskIndex, 1); shouldReRender = true; }
         if (e.target.closest('.add-to-focus-btn')) {
             const subtaskText = goals[goalIndex].subtasks[e.target.closest('.add-to-focus-btn').dataset.subtaskIndex].text;
             addTask(`[${goals[goalIndex].title}] ${subtaskText}`, 3);
         }
-        
         if (shouldReRender) {
             const wasExpanded = goalItem.classList.contains('expanded');
-            saveGoals();
-            renderGoals();
+            saveGoals(); renderGoals();
             if (wasExpanded) document.querySelector(`.goal-item[data-index="${goalIndex}"]`)?.classList.add('expanded');
         }
     });
@@ -310,11 +296,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const subtaskText = subtaskInput.value.trim();
             if (subtaskText) {
                 goals[goalIndex].subtasks.push({ text: subtaskText, completed: false });
-                saveGoals();
-                renderGoals();
+                saveGoals(); renderGoals();
                 document.querySelector(`.goal-item[data-index="${goalIndex}"]`)?.classList.add('expanded');
             }
         }
     });
-
 });
