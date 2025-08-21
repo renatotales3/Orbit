@@ -1,60 +1,263 @@
-window.addEventListener('error', function (event) {
-    console.error('ERRO GLOBAL CAPTURADO:', event.error);
-    document.body.innerHTML = `<div style="padding: 24px; color: #1a1a1a;">Ocorreu um erro crítico. Recarregue a página.</div>`;
-});
-
+// Aguarda o DOM estar completamente carregado para executar o script
 document.addEventListener('DOMContentLoaded', () => {
 
-    const appContent = document.getElementById('app-content');
-    const navBar = document.getElementById('bottom-navbar');
-    const modalContainer = document.getElementById('modal-container');
-    if (!appContent || !navBar || !modalContainer) { console.error('Elementos essenciais do DOM não foram encontrados.'); return; }
-
-    const ICONS = {
-        home: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
-        tasks: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
-        habits: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`,
-        calendar: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
-        notes: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
-        settings: `<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
-        edit: `<svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>`,
-        delete: `<svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`
+    // =================================================================
+    // 1. ESTADO DA APLICAÇÃO E PERSISTÊNCIA
+    // =================================================================
+    let state = {
+        tasks: [],
+        notes: [],
     };
-    let state = {};
 
-    function setupNavbar() { const navItems = [ { id: 'home', icon: ICONS.home, text: 'Início' }, { id: 'tasks', icon: ICONS.tasks, text: 'Tarefas' }, { id: 'habits', icon: ICONS.habits, text: 'Hábitos' }, { id: 'calendar', icon: ICONS.calendar, text: 'Calendário' }, { id: 'notes', icon: ICONS.notes, text: 'Notas' }, { id: 'settings', icon: ICONS.settings, text: 'Ajustes' } ]; navBar.innerHTML = navItems.map(item => `<a href="#${item.id}" class="nav-item" data-page="${item.id}">${item.icon}<span class="nav-text">${item.text}</span></a>`).join(''); }
-    function loadState() { let savedState = null; try { savedState = localStorage.getItem('lifeOSState'); } catch (e) { console.error("Erro ao ler o localStorage:", e); } const defaultState = { tasks: [], notes: [], calendarEvents: [], habits: [], pendingHighlightNoteId: null }; if (savedState) { try { const parsedState = JSON.parse(savedState); state = { ...defaultState, ...parsedState }; } catch (e) { console.error("Erro ao interpretar o estado salvo.", e); state = defaultState; } } else { state = defaultState; } }
-    function saveState() { try { localStorage.setItem('lifeOSState', JSON.stringify(state)); } catch (e) { console.error("Erro ao salvar o estado:", e); } }
-    const routes = { 'home': renderHomePage, 'tasks': renderTasksPage, 'habits': renderHabitsPage, 'calendar': renderCalendarPage, 'notes': renderNotesPage, 'settings': renderSettingsPage };
-    function render() { const page = window.location.hash.replace('#', '') || 'home'; const renderer = routes[page] || routes['home']; const oldFab = document.querySelector('.fab'); if (oldFab) oldFab.remove(); appContent.innerHTML = ''; renderer(); updateActiveNav(page); if (page === 'notes' && state.pendingHighlightNoteId) { highlightNote(state.pendingHighlightNoteId); state.pendingHighlightNoteId = null; saveState(); } }
-    function updateActiveNav(page) { navBar.querySelectorAll('.nav-item').forEach(item => { item.classList.toggle('active', item.dataset.page === page); }); }
-    function highlightNote(noteId) { setTimeout(() => { const noteCard = document.querySelector(`.note-card[data-id="${noteId}"]`); if (noteCard) { noteCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); noteCard.classList.add('highlight'); setTimeout(() => noteCard.classList.remove('highlight'), 2000); } }, 100); }
-    function calculateDaysRemaining(dateString) { const today = new Date(); today.setHours(0, 0, 0, 0); const deadline = new Date(dateString); deadline.setHours(0, 0, 0, 0); const diffTime = deadline - today; const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)); if (diffDays < 0) return 'Prazo encerrado'; if (diffDays === 0) return 'Termina hoje'; if (diffDays === 1) return 'Falta 1 dia'; return `Faltam ${diffDays} dias`; }
-    function getTaskStatus(task) { if (task.completed) { return { text: 'Concluída', className: 'status-done' }; } if (task.progress > 0) { return { text: 'Em Progresso', className: 'status-progress' }; } return { text: 'Pendente', className: 'status-pending' }; }
-    function renderHomePage() { appContent.innerHTML = `<h1 class="page-title">Início</h1><div class="card"><div class="card-content">Bem-vindo ao LifeOS!</div></div>`; }
-    function renderTasksPage() { appContent.innerHTML = `<h1 class="page-title">Tarefas & Projetos</h1><ul class="card-grid" id="task-list">${state.tasks.map(task => `<li class="task-item card ${task.completed ? 'completed' : ''}" data-id="${task.id}"><div class="card-actions"><button class="card-action-btn edit-btn" data-id="${task.id}">${ICONS.edit}</button><button class="card-action-btn delete-btn" data-id="${task.id}">${ICONS.delete}</button></div><div class="item-header"><label class="custom-checkbox-container"><input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}><span class="checkmark"></span></label><h3 class="card-title">${task.title}</h3></div><div class="card-content" style="flex-grow: 1;"></div><div class="progress-container"><div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${task.progress || 0}%;"></div></div><span class="progress-text">${task.progress || 0}%</span></div><div class="item-footer"><div class="meta-item">${task.attachedNoteId ? `<button class="attached-note-link" data-note-id="${task.attachedNoteId}">📝 Ver Nota</button>` : ''}</div><span class="tag p${task.priority}">P${task.priority}</span></div></li>`).join('')}</ul>${state.tasks.length === 0 ? '<div class="card"><p class="card-content">Nenhuma tarefa encontrada.</p></div>' : ''}`; createFab(() => openTaskModal()); attachTaskListeners(); }
-    function renderCalendarPage() { const tasksWithDeadline = state.tasks.filter(task => task.deadline); const allEvents = [...tasksWithDeadline, ...state.calendarEvents].sort((a, b) => new Date(a.date || a.deadline) - new Date(b.date || b.deadline)); const months = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]; appContent.innerHTML = `<h1 class="page-title">Calendário</h1><div class="card-grid">${allEvents.map(event => { const eventDate = new Date((event.date || event.deadline) + 'T12:00:00Z'); const day = eventDate.getUTCDate(); const month = months[eventDate.getUTCMonth()]; const status = event.deadline ? getTaskStatus(event) : null; return `<div class="event-item card" data-id="${event.id}"><div class="event-date"><span class="event-day">${day}</span><span class="event-month">${month}</span></div><div class="event-details"><div class="event-details-header"><h3 class="card-title event-title">${event.title}</h3>${event.priority ? `<span class="tag p${event.priority}">P${event.priority}</span>` : ''}</div><div class="item-footer" style="padding-top:0.5rem">${status ? `<span class="tag ${status.className}">${status.text}</span>` : ''}<div class="meta-item"><span>${calculateDaysRemaining(event.deadline)}</span></div></div></div></div>`}).join('')}</div>${allEvents.length === 0 ? '<div class="card"><p class="card-content">Nenhum evento com prazo.</p></div>' : ''}`; }
-    function renderNotesPage() { appContent.innerHTML = `<h1 class="page-title">Notas & Ideias</h1><div class="card-grid" id="notes-grid">${state.notes.map(note => `<div class="note-card card" data-id="${note.id}"><div class="card-actions"><button class="card-action-btn edit-btn" data-id="${note.id}">${ICONS.edit}</button><button class="card-action-btn delete-btn" data-id="${note.id}">${ICONS.delete}</button></div><h3 class="card-title">${note.title}</h3><p class="card-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</p></div>`).join('')}</div>${state.notes.length === 0 ? '<div class="card"><p class="card-content">Nenhuma nota encontrada.</p></div>' : ''}`; createFab(() => openNoteModal()); attachNoteListeners(); }
-    function renderSettingsPage() { appContent.innerHTML = `<h1 class="page-title">Ajustes</h1><div class="card"><div class="card-title">LifeOS</div><div class="card-content">Versão 2.2 (Unificação)</div></div>`; }
-    function renderHabitsPage() { const today = new Date(); const dayOfWeek = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'][today.getDay()]; const habitsForToday = state.habits.filter(h => h.frequency.includes(dayOfWeek)); appContent.innerHTML = `<h1 class="page-title">Hábitos & Rotinas</h1><div class="card-grid" id="habit-list">${habitsForToday.map(habit => { const todayStr = new Date().toLocaleDateString('en-CA'); const completion = habit.completions.find(c => c.date === todayStr); const streak = calculateStreak(habit); let heatmapHTML = ''; const dayLabels = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']; for (let i = 6; i >= 0; i--) { const date = new Date(); date.setDate(date.getDate() - i); const dateStr = date.toLocaleDateString('en-CA'); const dayCompletion = habit.completions.find(c => c.date === dateStr); const isCompleted = dayCompletion && dayCompletion.value > 0; const isToday = i === 0; heatmapHTML += `<div class="heatmap-col"><div class="day-square ${isCompleted ? 'completed' : ''} ${isToday ? 'today' : ''}"></div><div class="day-label">${dayLabels[date.getDay()]}</div></div>`; } const isCompleted = !!completion; return `<div class="habit-item card" data-id="${habit.id}"><div class="card-actions"><button class="card-action-btn edit-btn" data-id="${habit.id}">${ICONS.edit}</button><button class="card-action-btn delete-btn" data-id="${habit.id}">${ICONS.delete}</button></div><div class="item-header"><label class="custom-checkbox-container"><input type="checkbox" class="habit-checkbox" ${isCompleted ? 'checked' : ''}><span class="checkmark"></span></label><h3 class="card-title">${habit.name}</h3></div><div class="item-footer"><div class="meta-item">🔥 <span>${streak} dia(s)</span></div><div class="mini-heatmap">${heatmapHTML}</div></div></div>`; }).join('')}</div>${state.habits.length === 0 ? '<div class="card"><p class="card-content">Nenhum hábito criado.</p></div>' : ''}${state.habits.length > 0 && habitsForToday.length === 0 ? '<div class="card"><p class="card-content">Nenhum hábito para hoje.</p></div>' : ''}`; createFab(() => openHabitModal()); attachHabitListeners(); }
-    function createFab(onClick) { const fab = document.createElement('button');fab.className = 'fab';fab.textContent = '+';fab.onclick = onClick;document.body.appendChild(fab); }
-    function closeModal() { modalContainer.innerHTML = ''; }
-    function showConfirmationModal(message) { return new Promise((resolve, reject) => { modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content confirm-modal-content"><h2 class="modal-title">Confirmação</h2><p class="card-content">${message}</p><div class="modal-footer"><button type="button" class="btn btn-secondary" id="cancel-btn">Cancelar</button><button type="button" class="btn btn-primary" id="confirm-btn">Confirmar</button></div></div></div>`; modalContainer.querySelector('#confirm-btn').onclick = () => { closeModal(); resolve(); }; modalContainer.querySelector('#cancel-btn').onclick = () => { closeModal(); reject(); }; }); }
-    async function attachTaskListeners() { const taskList = document.getElementById('task-list'); if (!taskList) return; taskList.addEventListener('click', async (e) => { const card = e.target.closest('.task-item'); if (!card) return; const id = card.dataset.id; if (e.target.closest('.delete-btn')) { e.stopPropagation(); try { await showConfirmationModal('Deseja realmente excluir esta tarefa?'); state.tasks = state.tasks.filter(t => t.id !== id); saveState(); render(); } catch {} return; } if (e.target.closest('.edit-btn')) { e.stopPropagation(); const task = state.tasks.find(t => t.id === id); if (task) openTaskModal(task); return; } if (e.target.closest('.custom-checkbox-container')) { e.stopPropagation(); const checkbox = e.target.closest('.custom-checkbox-container').querySelector('input'); const task = state.tasks.find(t => t.id === id); if (task) { task.completed = checkbox.checked; saveState(); render(); } return; } if (e.target.closest('.attached-note-link')) { e.stopPropagation(); state.pendingHighlightNoteId = e.target.closest('.attached-note-link').dataset.noteId; saveState(); window.location.hash = '#notes'; return; } const task = state.tasks.find(t => t.id === id); if (task) openTaskViewer(task); }); }
-    async function attachNoteListeners(){ const notesGrid = document.getElementById('notes-grid'); if (!notesGrid) return; notesGrid.addEventListener('click', async (e) => { const card = e.target.closest('.note-card'); if (!card) return; const id = card.dataset.id; if(e.target.closest('.delete-btn')){ e.stopPropagation(); try { await showConfirmationModal('Deseja realmente excluir esta nota?'); state.notes = state.notes.filter(n => n.id !== id); saveState(); render(); } catch {} return; } if(e.target.closest('.edit-btn')){ e.stopPropagation(); const note = state.notes.find(n => n.id === id); if(note) openNoteModal(note); return; } const note = state.notes.find(n => n.id === id); if(note) openNoteViewer(note); }); }
-    function attachHabitListeners() { const habitList = document.getElementById('habit-list'); if (!habitList) return; habitList.addEventListener('click', async (e) => { const card = e.target.closest('.habit-item'); if (!card) return; const id = card.dataset.id; if (e.target.closest('.delete-btn')) { e.stopPropagation(); try { await showConfirmationModal('Deseja realmente excluir este hábito?'); state.habits = state.habits.filter(h => h.id !== id); saveState(); render(); } catch {} return; } if (e.target.closest('.edit-btn')) { e.stopPropagation(); const habit = state.habits.find(h => h.id === id); if (habit) openHabitModal(habit); return; } if (e.target.closest('.custom-checkbox-container')) { handleHabitCompletion(id); } }); }
-    function handleTaskSave(e) { e.preventDefault(); const id = document.getElementById('taskId').value; const taskData = { title: document.getElementById('taskTitle').value.trim(), deadline: document.getElementById('taskDeadline').value || null, progress: parseInt(document.getElementById('taskProgress').value) || 0, priority: document.getElementById('taskPriority').value, attachedNoteId: document.getElementById('attachedNoteId').value || null }; if (!taskData.title) return; if (id) { const task = state.tasks.find(t => t.id === id); if(task) Object.assign(task, taskData); } else { const newTask = { id: `task-${Date.now()}`, completed: false, ...taskData }; state.tasks.push(newTask); } saveState(); render(); closeModal(); }
-    function openTaskModal(task = null) { const notesOptions = state.notes.map(note => `<option value="${note.id}" ${task && task.attachedNoteId === note.id ? 'selected' : ''}>${note.title}</option>`).join(''); modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content"><form id="task-form"><div class="modal-header"><h2 class="modal-title">${task ? 'Editar Tarefa' : 'Nova Tarefa'}</h2><button type="button" class="modal-close-btn">&times;</button></div><input type="hidden" id="taskId" value="${task ? task.id : ''}"><div class="form-group"><label for="taskTitle">Título</label><input type="text" id="taskTitle" class="form-control" value="${task ? task.title : ''}" required></div><div class="form-group"><label for="taskDeadline">Prazo</label><input type="date" id="taskDeadline" class="form-control" value="${task ? (task.deadline || '') : ''}"></div><div class="form-group"><label for="taskProgress">Progresso (%)</label><input type="number" id="taskProgress" class="form-control" value="${task ? (task.progress || 0) : 0}" min="0" max="100"></div><div class="form-group"><label for="taskPriority">Prioridade</label><select id="taskPriority" class="form-control"><option value="1" ${task && task.priority == 1 ? 'selected' : ''}>P1</option><option value="2" ${task && task.priority == 2 ? 'selected' : ''}>P2</option><option value="3" ${(task && task.priority == 3) || !task ? 'selected' : ''}>P3</option><option value="4" ${task && task.priority == 4 ? 'selected' : ''}>P4</option></select></div><div class="form-group"><label for="attachedNoteId">Anexar Nota</label><select id="attachedNoteId" class="form-control"><option value="">Nenhuma</option>${notesOptions}</select></div><div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div></form></div></div>`; const form = modalContainer.querySelector('form'); form.addEventListener('submit', handleTaskSave); form.querySelector('.modal-close-btn').addEventListener('click', closeModal); form.querySelector('.btn-secondary').addEventListener('click', closeModal); }
-    function handleNoteSave(e) { e.preventDefault(); const id = document.getElementById('noteId').value; const noteData = { title: document.getElementById('noteTitle').value.trim(), content: document.getElementById('noteContent').value.trim(), link: document.getElementById('noteLink').value.trim() || null }; if(!noteData.title) return; if (id) { const note = state.notes.find(n => n.id === id); if(note) Object.assign(note, noteData); } else { const newNote = { id: `note-${Date.now()}`, ...noteData }; state.notes.push(newNote); } saveState(); render(); closeModal(); }
-    function openNoteModal(note = null) { modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content"><form id="note-form"><div class="modal-header"><h2 class="modal-title">${note ? 'Editar Nota' : 'Nova Nota'}</h2><button type="button" class="modal-close-btn">&times;</button></div><input type="hidden" id="noteId" value="${note ? note.id : ''}"><div class="form-group"><label for="noteTitle">Título</label><input type="text" id="noteTitle" class="form-control" value="${note ? note.title : ''}" required></div><div class="form-group"><label for="noteContent">Conteúdo</label><textarea id="noteContent" class="form-control">${note ? note.content : ''}</textarea></div><div class="form-group"><label for="noteLink">Link/Anexo (URL)</label><input type="url" id="noteLink" class="form-control" value="${note && note.link ? note.link : ''}" placeholder="https://..."></div><div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div></form></div></div>`; const form = modalContainer.querySelector('form'); form.addEventListener('submit', handleNoteSave); form.querySelector('.modal-close-btn').addEventListener('click', closeModal); form.querySelector('.btn-secondary').addEventListener('click', closeModal); }
-    function openTaskViewer(task) { const noteLinkHTML = task.attachedNoteId ? `<button class="attached-note-link" data-note-id="${task.attachedNoteId}">📝 Ver Nota</button>` : ''; modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content viewer-modal-content"><div class="modal-header"><h2 class="modal-title">${task.title}</h2><button type="button" class="modal-close-btn">&times;</button></div><div class="viewer-content"><div class="progress-container" style="margin-top:0;"><div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${task.progress || 0}%;"></div></div><span class="progress-text">${task.progress || 0}%</span></div><div class="card-meta" style="margin-top: 1.5rem;">${task.deadline ? `<div class="meta-item">${ICONS.calendar}<span>${calculateDaysRemaining(task.deadline)}</span></div>` : ''}${noteLinkHTML}</div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" id="edit-from-viewer-btn">Editar</button></div></div></div>`; const viewerModal = modalContainer.querySelector('.viewer-modal-content'); if (!viewerModal) return; viewerModal.addEventListener('click', (e) => { if (e.target.closest('.modal-close-btn')) { closeModal(); } if (e.target.closest('#edit-from-viewer-btn')) { openTaskModal(task); } if (e.target.closest('.attached-note-link')) { e.stopPropagation(); closeModal(); state.pendingHighlightNoteId = e.target.closest('.attached-note-link').dataset.noteId; saveState(); window.location.hash = '#notes'; } }); }
-    function openNoteViewer(note) { const linkHTML = note.link ? `<a href="${note.link}" target="_blank" class="viewer-link">Acessar Link</a>` : ''; modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content viewer-modal-content"><div class="modal-header"><h2 class="modal-title">${note.title}</h2><button type="button" class="modal-close-btn">&times;</button></div><div class="viewer-content"><p class="viewer-text">${note.content}</p>${linkHTML}</div><div class="modal-footer"><button type="button" class="btn btn-secondary" id="edit-from-viewer-btn">Editar</button></div></div></div>`; const viewerModal = modalContainer.querySelector('.viewer-modal-content'); if (!viewerModal) return; viewerModal.addEventListener('click', (e) => { if (e.target.closest('.modal-close-btn')) { closeModal(); } if (e.target.closest('#edit-from-viewer-btn')) { openNoteModal(note); } }); }
-    function handleHabitCompletion(id) { const habit = state.habits.find(h => h.id === id); if (!habit) return; const today = new Date().toLocaleDateString('en-CA'); const completionIndex = habit.completions.findIndex(c => c.date === today); if (completionIndex > -1) { habit.completions.splice(completionIndex, 1); } else { habit.completions.push({ date: today, value: 1 }); } saveState(); render(); }
-    function calculateStreak(habit) { if (!habit.completions || habit.completions.length === 0) return 0; const completionDates = new Set(habit.completions.map(c => c.date)); let streak = 0; let currentDate = new Date(); if (!completionDates.has(currentDate.toLocaleDateString('en-CA'))) { currentDate.setDate(currentDate.getDate() - 1); } while (completionDates.has(currentDate.toLocaleDateString('en-CA'))) { streak++; currentDate.setDate(currentDate.getDate() - 1); } return streak; }
-    function openHabitModal(habit = null) { const days = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab']; const dayLabels = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']; const selectedDays = habit ? habit.frequency : []; modalContainer.innerHTML = `<div class="modal-overlay"><div class="modal-content"><form id="habit-form"><div class="modal-header"><h2 class="modal-title">${habit ? 'Editar Hábito' : 'Novo Hábito'}</h2><button type="button" class="modal-close-btn">&times;</button></div><input type="hidden" id="habitId" value="${habit ? habit.id : ''}"><div class="form-group"><label for="habitName">Nome</label><input type="text" id="habitName" class="form-control" value="${habit ? habit.name : ''}" required></div><div class="form-group"><label>Frequência</label><div class="day-selector">${days.map((day, index) => `<button type="button" class="day-toggle ${selectedDays.includes(day) ? 'selected' : ''}" data-day="${day}">${dayLabels[index]}</button>`).join('')}</div></div><div class="modal-footer"><button type="button" class="btn btn-secondary">Cancelar</button><button type="submit" class="btn btn-primary">Salvar</button></div></form></div></div>`; const form = modalContainer.querySelector('form'); form.querySelector('.day-selector').addEventListener('click', e => { if (e.target.matches('.day-toggle')) { e.target.classList.toggle('selected'); } }); form.addEventListener('submit', handleHabitSave); form.querySelector('.modal-close-btn').addEventListener('click', closeModal); form.querySelector('.btn-secondary').addEventListener('click', closeModal); }
-    function handleHabitSave(e) { e.preventDefault(); const id = document.getElementById('habitId').value; const name = document.getElementById('habitName').value.trim(); const frequency = [...document.querySelectorAll('.day-toggle.selected')].map(btn => btn.dataset.day); if (!name || frequency.length === 0) { alert('Preencha o nome e selecione pelo menos um dia.'); return; } const habitData = { name, frequency, type: 'binary', completions: [] }; if (id) { const existingHabit = state.habits.find(h => h.id === id); if (existingHabit) { Object.assign(existingHabit, habitData); habitData.completions = existingHabit.completions; } } else { state.habits.push({ id: `habit-${Date.now()}`, ...habitData }); } saveState(); render(); closeModal(); }
-    function openHabitLogModal(habit) { /* Simplificado e removido */ }
+    // Carrega o estado do localStorage
+    function loadState() {
+        const savedState = localStorage.getItem('segundoCerebroState');
+        if (savedState) {
+            state = JSON.parse(savedState);
+        } else {
+            // Estado inicial de exemplo se não houver nada salvo
+            state = {
+                tasks: [{ id: 1, title: 'Configurar o projeto', content: 'Criar arquivos HTML, CSS e JS.' }],
+                notes: [{ id: 1, title: 'Ideia para o App', content: 'Usar localStorage para persistência.' }],
+            };
+        }
+    }
+
+    // Salva o estado atual no localStorage
+    function saveState() {
+        localStorage.setItem('segundoCerebroState', JSON.stringify(state));
+    }
+
+    // =================================================================
+    // 2. SELETORES DE ELEMENTOS DO DOM
+    // =================================================================
+    const pages = document.querySelectorAll('.page');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const tasksList = document.getElementById('tasks-list');
+    const notesList = document.getElementById('notes-list');
+    const dashboardKpis = document.getElementById('dashboard-kpis');
+    const modalContainer = document.getElementById('modal-container');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const modalSaveBtn = document.getElementById('modal-save-btn');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
     
-    function init() { setupNavbar(); loadState(); render(); window.addEventListener('hashchange', render); }
+    // =================================================================
+    // 3. LÓGICA DE RENDERIZAÇÃO
+    // =================================================================
+
+    // Renderiza a lista de tarefas
+    function renderTasks() {
+        tasksList.innerHTML = '';
+        if (state.tasks.length === 0) {
+            tasksList.innerHTML = '<p>Você não tem tarefas. Crie uma!</p>';
+            return;
+        }
+        state.tasks.forEach(task => {
+            const taskCard = document.createElement('div');
+            taskCard.className = 'card';
+            taskCard.innerHTML = `
+                <h4 class="card-title">${task.title}</h4>
+                <p class="card-content">${task.content}</p>
+                <button class="delete-btn" data-id="${task.id}" data-type="task">&times;</button>
+            `;
+            tasksList.appendChild(taskCard);
+        });
+    }
+
+    // Renderiza a lista de notas
+    function renderNotes() {
+        notesList.innerHTML = '';
+        if (state.notes.length === 0) {
+            notesList.innerHTML = '<p>Você não tem notas. Crie uma!</p>';
+            return;
+        }
+        state.notes.forEach(note => {
+            const noteCard = document.createElement('div');
+            noteCard.className = 'card';
+            noteCard.innerHTML = `
+                <h4 class="card-title">${note.title}</h4>
+                <p class="card-content">${note.content}</p>
+                <button class="delete-btn" data-id="${note.id}" data-type="note">&times;</button>
+            `;
+            notesList.appendChild(noteCard);
+        });
+    }
+
+    // Renderiza os KPIs do Dashboard
+    function renderDashboard() {
+        dashboardKpis.innerHTML = `
+            <div class="card">
+                <h4 class="card-title">Tarefas Ativas</h4>
+                <p class="card-content" style="font-size: 2rem; font-weight: bold;">${state.tasks.length}</p>
+            </div>
+            <div class="card">
+                <h4 class="card-title">Notas Criadas</h4>
+                <p class="card-content" style="font-size: 2rem; font-weight: bold;">${state.notes.length}</p>
+            </div>
+        `;
+    }
+
+    // Função agregadora para renderizar tudo
+    function renderAll() {
+        renderDashboard();
+        renderTasks();
+        renderNotes();
+    }
+    
+    // =================================================================
+    // 4. LÓGICA DE NAVEGAÇÃO
+    // =================================================================
+    function showPage(pageId) {
+        pages.forEach(page => page.classList.remove('active'));
+        navLinks.forEach(link => link.classList.remove('active'));
+
+        document.getElementById(`${pageId}-page`).classList.add('active');
+        document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const pageId = e.target.dataset.page;
+            showPage(pageId);
+            window.location.hash = pageId;
+        });
+    });
+
+    // =================================================================
+    // 5. LÓGICA DO MODAL
+    // =================================================================
+    let currentModalAction = null;
+
+    function openModal(config) {
+        modalTitle.textContent = config.title;
+        modalBody.innerHTML = config.body;
+        currentModalAction = config.onSave;
+        modalContainer.classList.add('visible');
+    }
+
+    function closeModal() {
+        modalContainer.classList.remove('visible');
+        currentModalAction = null;
+    }
+
+    modalSaveBtn.addEventListener('click', () => {
+        if (currentModalAction) {
+            currentModalAction();
+        }
+    });
+    modalCancelBtn.addEventListener('click', closeModal);
+
+    // Adiciona evento para fechar modal com a tecla 'Escape'
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modalContainer.classList.contains('visible')) {
+            closeModal();
+        }
+    });
+
+    // =================================================================
+    // 6. EVENT LISTENERS E AÇÕES CRUD
+    // =================================================================
+
+    // Adicionar Tarefa
+    document.getElementById('add-task-btn').addEventListener('click', () => {
+        openModal({
+            title: 'Nova Tarefa',
+            body: `
+                <div class="form-group">
+                    <input type="text" id="task-title-input" class="soft-input" placeholder="Título da tarefa">
+                </div>
+                <div class="form-group">
+                    <textarea id="task-content-input" class="soft-textarea" placeholder="Descrição..."></textarea>
+                </div>
+            `,
+            onSave: () => {
+                const title = document.getElementById('task-title-input').value;
+                const content = document.getElementById('task-content-input').value;
+                if (!title) return alert('O título é obrigatório.');
+
+                state.tasks.push({ id: Date.now(), title, content });
+                saveState();
+                renderAll();
+                closeModal();
+            }
+        });
+    });
+
+    // Adicionar Nota
+    document.getElementById('add-note-btn').addEventListener('click', () => {
+         openModal({
+            title: 'Nova Nota',
+            body: `
+                <div class="form-group">
+                    <input type="text" id="note-title-input" class="soft-input" placeholder="Título da nota">
+                </div>
+                <div class="form-group">
+                    <textarea id="note-content-input" class="soft-textarea" rows="5" placeholder="Escreva sua ideia..."></textarea>
+                </div>
+            `,
+            onSave: () => {
+                const title = document.getElementById('note-title-input').value;
+                const content = document.getElementById('note-content-input').value;
+                if (!title) return alert('O título é obrigatório.');
+
+                state.notes.push({ id: Date.now(), title, content });
+                saveState();
+                renderAll();
+                closeModal();
+            }
+        });
+    });
+
+    // Deletar Itens (usando delegação de evento)
+    document.querySelector('.main-content').addEventListener('click', (e) => {
+        if (e.target.classList.contains('delete-btn')) {
+            const id = parseInt(e.target.dataset.id);
+            const type = e.target.dataset.type;
+            
+            if(confirm(`Tem certeza que deseja excluir est${type === 'task' ? 'a tarefa' : 'a nota'}?`)){
+                if (type === 'task') {
+                    state.tasks = state.tasks.filter(t => t.id !== id);
+                } else if (type === 'note') {
+                    state.notes = state.notes.filter(n => n.id !== id);
+                }
+                saveState();
+                renderAll();
+            }
+        }
+    });
+
+    // Ações de Configurações
+    document.getElementById('export-data-btn').addEventListener('click', () => {
+        const dataStr = JSON.stringify(state, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileDefaultName = 'segundo-cerebro-backup.json';
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+    });
+
+    document.getElementById('clear-data-btn').addEventListener('click', () => {
+        if(confirm('ATENÇÃO: Isso apagará TODOS os seus dados. Esta ação não pode ser desfeita. Deseja continuar?')){
+            localStorage.removeItem('segundoCerebroState');
+            state = { tasks: [], notes: [] };
+            renderAll();
+        }
+    });
+
+    // =================================================================
+    // 7. INICIALIZAÇÃO DA APLICAÇÃO
+    // =================================================================
+    function init() {
+        loadState();
+        renderAll();
+        const initialPage = window.location.hash.substring(1) || 'dashboard';
+        showPage(initialPage);
+    }
+
     init();
 });
