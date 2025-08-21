@@ -1,7 +1,7 @@
 /* --- Reset Básico e Configurações Globais --- */
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
-/* --- Variáveis de Tema --- */
+/* --- Variáveis de Tema com SOMBRAS NÍTIDAS --- */
 :root[data-theme="light"] {
     --bg-color: #E0E5EC; --text-color: #555; --primary-color: #007AFF;
     --component-bg: #E0E5EC; --shadow-light: #ffffff; --shadow-dark: #a3b1c6;
@@ -17,8 +17,8 @@
     --soft-shadow-inset-sharp: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
 }
 
-body { background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; height: 100vh; /* overflow: hidden; -> REMOVIDO PARA PERMITIR SCROLL */ }
-.content { flex-grow: 1; padding: 2rem; overflow-y: auto; padding-bottom: 100px; } /* SCROLL APLICADO AQUI */
+body { background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; height: 100vh; }
+.content { flex-grow: 1; padding: 2rem; overflow-y: auto; padding-bottom: 100px; }
 .page { display: none; }
 .page.active { display: block; }
 .page h1 { font-weight: 600; margin-bottom: 1.5rem; }
@@ -112,6 +112,12 @@ body { background-color: var(--bg-color); color: var(--text-color); display: fle
 .custom-checkbox::after { content: '\ea4c'; font-family: 'boxicons'; font-size: 20px; color: var(--text-color); opacity: 0; transform: scale(0.5); transition: all 0.2s ease; }
 .subtask-item input[type="checkbox"]:checked + .subtask-item-label .custom-checkbox { box-shadow: var(--soft-shadow-sharp); }
 .subtask-item input[type="checkbox"]:checked + .subtask-item-label .custom-checkbox::after { opacity: 1; transform: scale(1); }
+
+/* --- CORREÇÃO DE ÍCONES --- */
+.subtask-actions { display: flex; align-items: center; }
+.subtask-actions button { background: none; border: none; color: var(--icon-color); font-size: 20px; cursor: pointer; }
+.subtask-actions button i { font-size: inherit; /* Garante que o ícone tenha o tamanho do botão */ }
+
 
 /* Modal Styles */
 .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 1; transition: opacity 0.3s ease; }
