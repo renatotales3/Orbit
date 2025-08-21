@@ -13,7 +13,6 @@
 <body>
 
     <main class="content">
-        
         <section id="inicio" class="page active">
             <h1>Dashboard</h1>
             <p>Em breve, seus insights diários estarão aqui.</p>
@@ -34,13 +33,15 @@
 
             <div class="todo-app">
                 <header class="todo-header">
-                    <input type="text" id="task-input" class="soft-input" placeholder="Adicione uma tarefa rápida...">
-                    <select id="task-priority" class="soft-input">
-                        <option value="2">Importante, Não Urgente</option>
-                        <option value="1">Importante, Urgente</option>
-                        <option value="3">Não Importante, Urgente</option>
-                        <option value="4">Não Importante, Não Urgente</option>
-                    </select>
+                    <input type="text" id="task-input" class="soft-input" placeholder="O que precisa ser feito?">
+                    <div class="priority-selector-wrapper">
+                        <button id="task-priority-btn" class="soft-button priority-btn" aria-label="Selecionar Prioridade">
+                            <i class='bx bxs-circle priority-indicator-btn priority-3'></i>
+                        </button>
+                        <div id="priority-picker" class="priority-picker hidden">
+                            <!-- Opções de prioridade serão inseridas aqui pelo JS -->
+                        </div>
+                    </div>
                     <button id="add-task-btn" class="soft-button" aria-label="Adicionar Tarefa"><i class='bx bx-plus'></i></button>
                 </header>
                 <ul id="task-list"></ul>
@@ -49,9 +50,7 @@
             <div class="goals-app">
                 <header class="goals-header">
                     <h2>Minhas Metas</h2>
-                    <button id="add-goal-modal-btn" class="soft-button">
-                        <i class='bx bx-plus'></i> Nova Meta
-                    </button>
+                    <button id="add-goal-modal-btn" class="soft-button"><i class='bx bx-plus'></i> Nova Meta</button>
                 </header>
                 <ul id="goals-list"></ul>
             </div>
@@ -67,7 +66,7 @@
             <h3 id="modal-title">Criar Nova Meta</h3>
             <form id="goal-form">
                 <input type="text" id="goal-title-input" class="soft-input" placeholder="Título da Meta" required>
-                <textarea id="goal-motivation-input" class="soft-textarea" placeholder="Minha motivação (O porquê...)"></textarea>
+                <textarea id="goal-motivation-input" class="soft-textarea" placeholder="Minha motivação..."></textarea>
                 <label>Categorias:</label>
                 <div id="goal-category-container" class="category-container"></div>
                 <label for="goal-date-input">Data Alvo:</label>
