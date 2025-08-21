@@ -6,31 +6,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const htmlElement = document.documentElement;
 
     // --- FUNÇÕES DE PERSISTÊNCIA (localStorage) ---
-
-    // Salva o estado geral do app (tema e aba ativa)
     const saveAppState = (key, value) => {
         localStorage.setItem(key, value);
     };
 
-    // Carrega o estado geral do app
     const loadAppState = () => {
-        // Carrega o tema
         const savedTheme = localStorage.getItem('theme') || 'light';
         applyTheme(savedTheme);
-
-        // Carrega a última aba ativa
         const savedTab = localStorage.getItem('activeTab') || 'inicio';
         switchTab(savedTab);
     };
 
     // --- LÓGICA PARA TROCA DE ABAS ---
-
     const switchTab = (targetId) => {
         const targetPage = document.getElementById(targetId);
         if (targetPage) {
             pages.forEach(page => page.classList.remove('active'));
             navButtons.forEach(btn => btn.classList.remove('active'));
-
             targetPage.classList.add('active');
             const activeButton = document.querySelector(`.nav-button[data-target="${targetId}"]`);
             if (activeButton) {
@@ -43,12 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', () => {
             const targetId = button.dataset.target;
             switchTab(targetId);
-            saveAppState('activeTab', targetId); // Salva a aba ativa
+            saveAppState('activeTab', targetId);
         });
     });
 
     // --- LÓGICA PARA TROCA DE TEMA ---
-
     const themeToggle = document.getElementById('theme-toggle');
     const applyTheme = (theme) => {
         htmlElement.setAttribute('data-theme', theme);
@@ -58,24 +49,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentTheme = htmlElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'light' ? 'dark' : 'light';
         applyTheme(newTheme);
-        saveAppState('theme', newTheme); // Salva o tema
+        saveAppState('theme', newTheme);
     });
 
     // --- LÓGICA: GERENCIADOR DE TAREFAS (COM PERSISTÊNCIA) ---
-
     const taskInput = document.getElementById('task-input');
     const addTaskBtn = document.getElementById('add-task-btn');
     const taskList = document.getElementById('task-list');
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-    // Salva as tarefas no localStorage
     const saveTasks = () => {
         localStorage.setItem('tasks', JSON.stringify(tasks));
     };
 
-    // Renderiza as tarefas na tela
     const renderTasks = () => {
-        taskList.innerHTML = ""; // Limpa a lista antes de renderizar
+        taskList.innerHTML = "";
         tasks.forEach((task, index) => {
             const taskElement = createTaskElement(task.text, task.completed, index);
             taskList.appendChild(taskElement);
@@ -86,21 +74,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const li = document.createElement('li');
         li.className = `task-item ${isCompleted ? 'completed' : ''}`;
         li.dataset.index = index;
-
         const span = document.createElement('span');
         span.textContent = taskText;
-
         const divButtons = document.createElement('div');
         divButtons.className = 'task-item-buttons';
-        
         const completeBtn = document.createElement('button');
         completeBtn.className = 'complete-btn';
         completeBtn.innerHTML = `<i class='bx bx-check-circle'></i>`;
-
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
         deleteBtn.innerHTML = `<i class='bx bxs-trash'></i>`;
-        
         divButtons.appendChild(completeBtn);
         divButtons.appendChild(deleteBtn);
         li.appendChild(span);
@@ -123,23 +106,18 @@ document.addEventListener('DOMContentLoaded', () => {
     taskList.addEventListener('click', (event) => {
         const clickedElement = event.target.closest('.task-item');
         if (!clickedElement) return;
-
         const index = parseInt(clickedElement.dataset.index);
-
         if (event.target.closest('.complete-btn')) {
             tasks[index].completed = !tasks[index].completed;
         }
-
         if (event.target.closest('.delete-btn')) {
             tasks.splice(index, 1);
         }
-
         saveTasks();
         renderTasks();
     });
 
-    // --- LÓGICA: POMODORO TIMER (COM PERSISTÊNCIA) ---
-
+    // --- LÓGICA: POMODORO TIMER (PERSISTÊNCIA SIMPLIFICADA) ---
     const timerDisplay = document.getElementById('timer-display');
     const timerStatus = document.getElementById('timer-status');
     const startBtn = document.getElementById('start-btn');
@@ -152,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let timer;
     let totalSeconds;
+    let isPaused = true;
     let currentCycle = localStorage.getItem('pomodoro_currentCycle') || 'focus';
     let pomodoroCount = parseInt(localStorage.getItem('pomodoro_pomodoroCount')) || 0;
 
@@ -159,9 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const minutes = Math.floor(totalSeconds / 60);
         const seconds = totalSeconds % 60;
         timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        document.title = `${timerDisplay.textContent} - Life OS`; // Atualiza o título da página
+        document.title = `${timerDisplay.textContent} - Life OS`;
     };
-    
+
     const switchCycle = () => {
         if (currentCycle === 'focus') {
             pomodoroCount++;
@@ -171,85 +150,59 @@ document.addEventListener('DOMContentLoaded', () => {
             currentCycle = 'focus';
         }
         localStorage.setItem('pomodoro_currentCycle', currentCycle);
-        resetTimer(false); // Reinicia para o novo ciclo sem perguntar
+        setTimerForCurrentCycle();
+        updateDisplay();
     };
 
     const countdown = () => {
-        const endTime = parseInt(localStorage.getItem('pomodoro_endTime'));
-        if (!endTime) return;
-
-        totalSeconds = Math.round((endTime - Date.now()) / 1000);
-
-        if (totalSeconds <= 0) {
+        if (isPaused) return;
+        if (totalSeconds > 0) {
+            totalSeconds--;
+            updateDisplay();
+        } else {
             clearInterval(timer);
-            localStorage.removeItem('pomodoro_endTime');
+            isPaused = true;
             switchCycle();
-            return;
         }
-        updateDisplay();
     };
 
     const startTimer = () => {
-        const isPaused = localStorage.getItem('pomodoro_isPaused') === 'true';
-        let remainingSecondsOnPause = parseInt(localStorage.getItem('pomodoro_remainingSecondsOnPause'));
-
-        if (isPaused && remainingSecondsOnPause > 0) {
-            totalSeconds = remainingSecondsOnPause;
+        if (isPaused) {
+            isPaused = false;
+            timer = setInterval(countdown, 1000);
         }
-        
-        const endTime = Date.now() + totalSeconds * 1000;
-        localStorage.setItem('pomodoro_endTime', endTime);
-        localStorage.setItem('pomodoro_isPaused', 'false');
-        localStorage.removeItem('pomodoro_remainingSecondsOnPause');
-
-        countdown(); // Chamada imediata para evitar delay de 1s
-        timer = setInterval(countdown, 1000);
     };
 
     const pauseTimer = () => {
+        isPaused = true;
         clearInterval(timer);
-        localStorage.setItem('pomodoro_isPaused', 'true');
-        localStorage.setItem('pomodoro_remainingSecondsOnPause', totalSeconds);
-        localStorage.removeItem('pomodoro_endTime');
     };
 
-    const resetTimer = (isManualReset = true) => {
+    const setTimerForCurrentCycle = () => {
         pauseTimer();
         switch (currentCycle) {
-            case 'focus': totalSeconds = FOCUS_TIME; timerStatus.textContent = "Hora de Focar!"; break;
-            case 'shortBreak': totalSeconds = SHORT_BREAK_TIME; timerStatus.textContent = "Pausa Curta"; break;
-            case 'longBreak': totalSeconds = LONG_BREAK_TIME; timerStatus.textContent = "Pausa Longa"; break;
-        }
-        if(isManualReset) {
-            localStorage.setItem('pomodoro_remainingSecondsOnPause', totalSeconds);
-        }
-        updateDisplay();
-    };
-
-    const initPomodoro = () => {
-        const isPaused = localStorage.getItem('pomodoro_isPaused') !== 'false'; // Default to paused
-        const endTime = parseInt(localStorage.getItem('pomodoro_endTime'));
-
-        if (!isPaused && endTime) {
-            // Se não estava pausado e tem um tempo final, continue
-            startTimer();
-        } else {
-            // Se estava pausado ou é a primeira vez
-            totalSeconds = parseInt(localStorage.getItem('pomodoro_remainingSecondsOnPause'));
-            if (isNaN(totalSeconds) || totalSeconds <= 0) {
-                // Se não há tempo salvo, resete para o ciclo atual
-                resetTimer(false);
-            }
+            case 'focus':
+                totalSeconds = FOCUS_TIME;
+                timerStatus.textContent = "Hora de Focar!";
+                break;
+            case 'shortBreak':
+                totalSeconds = SHORT_BREAK_TIME;
+                timerStatus.textContent = "Pausa Curta";
+                break;
+            case 'longBreak':
+                totalSeconds = LONG_BREAK_TIME;
+                timerStatus.textContent = "Pausa Longa";
+                break;
         }
         updateDisplay();
     };
 
     startBtn.addEventListener('click', startTimer);
     pauseBtn.addEventListener('click', pauseTimer);
-    resetBtn.addEventListener('click', () => resetTimer(true));
+    resetBtn.addEventListener('click', setTimerForCurrentCycle);
 
     // --- INICIALIZAÇÃO DO APLICATIVO ---
     loadAppState();
     renderTasks();
-    initPomodoro();
+    setTimerForCurrentCycle(); // Função que inicializa o estado do Pomodoro
 });
