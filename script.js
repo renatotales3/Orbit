@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <input type="checkbox" id="st-${index}-${stIndex}" data-subtask-index="${stIndex}" ${st.completed ? 'checked' : ''}>
                                 <label for="st-${index}-${stIndex}" class="subtask-item-label ${st.completed ? 'completed' : ''}">
                                     <span class="custom-checkbox"></span>
-                                    ${st.text}
+                                    <span class="subtask-text">${st.text}</span>
                                 </label>
                                 <div class="subtask-actions">
                                     <button class="add-to-focus-btn" data-subtask-index="${stIndex}" title="Adicionar ao Foco do Dia"><i class='bx bx-list-plus'></i></button>
@@ -216,10 +216,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.closest('.delete-goal-btn')) { goals.splice(goalIndex, 1); shouldReRender = true; }
         
         if (e.target.closest('.subtask-item-label') || e.target.closest('.custom-checkbox')) {
-            const checkbox = goalItem.querySelector(`input[id^="st-${goalIndex}-"][data-subtask-index="${e.target.closest('.subtask-item').querySelector('input').dataset.subtaskIndex}"]`);
-            if (checkbox) {
-                checkbox.checked = !checkbox.checked;
-                goals[goalIndex].subtasks[checkbox.dataset.subtaskIndex].completed = checkbox.checked;
+            const subtaskItem = e.target.closest('.subtask-item');
+            if(subtaskItem){
+                const checkbox = subtaskItem.querySelector('input[type="checkbox"]');
+                const subtaskIndex = checkbox.dataset.subtaskIndex;
+                if (e.target.nodeName !== 'INPUT') checkbox.checked = !checkbox.checked;
+                goals[goalIndex].subtasks[subtaskIndex].completed = checkbox.checked;
                 shouldReRender = true;
             }
         }
