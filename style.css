@@ -17,15 +17,15 @@
     --icon-color: #888;
 }
 
-/* NOVA PALETA DE CORES PARA O TEMA ESCURO */
+/* NOVA PALETA DE CORES: TEMA ESCURO MONOCROMÁTICO */
 :root[data-theme="dark"] {
-    --bg-color: #343A40; /* Cinza-escuro/Carvão */
-    --text-color: #F8F9FA; /* Cinza quase branco, mais suave */
-    --primary-color: #007AFF; /* Mantido por enquanto, podemos ajustar se necessário */
-    --component-bg: #343A40; /* Mesmo que o fundo para o efeito Soft UI */
-    --shadow-light: #40464D; /* Um tom mais claro que o fundo */
-    --shadow-dark: #282D32; /* Um tom mais escuro que o fundo */
-    --icon-color: #adb5bd; /* Um cinza mais claro e amigável */
+    --bg-color: #212529; /* Cinza-chumbo profundo */
+    --text-color: #F8F9FA; /* Branco sutil */
+    --primary-color: #F8F9FA; /* Branco sutil (para ícones ativos) */
+    --component-bg: #212529; /* Mesmo que o fundo */
+    --shadow-light: #2c3136; /* Sombra clara sutil */
+    --shadow-dark: #161a1d; /* Sombra escura sutil */
+    --icon-color: #868e96; /* Cinza médio para ícones inativos */
 }
 
 body {
@@ -57,7 +57,7 @@ body {
     width: 100%;
     background-color: var(--component-bg);
     padding: 10px 0;
-    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2); /* Sombra um pouco mais forte para destacar no escuro */
 }
 .bottom-nav nav {
     display: flex;
@@ -120,7 +120,9 @@ body {
 #add-task-btn {
     width: 50px; height: 50px;
     border: none; border-radius: 12px;
-    background-color: var(--primary-color); color: white;
+    /* Botão de adicionar tarefa agora usa a cor do ícone, não a primária */
+    background-color: var(--component-bg); 
+    color: var(--primary-color);
     font-size: 24px; cursor: pointer; display: flex;
     align-items: center; justify-content: center;
     box-shadow: -4px -4px 8px var(--shadow-light), 4px 4px 8px var(--shadow-dark);
@@ -170,7 +172,8 @@ body {
 }
 #timer-status {
     font-weight: 500;
-    color: var(--primary-color);
+    color: var(--text-color); /* Status também em branco para consistência */
+    opacity: 0.8;
 }
 .pomodoro-controls {
     display: flex;
