@@ -1,7 +1,7 @@
 /* --- Reset Básico e Configurações Globais --- */
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
-/* --- Variáveis de Tema com SOMBRAS NÍTIDAS --- */
+/* --- Variáveis de Tema --- */
 :root[data-theme="light"] {
     --bg-color: #E0E5EC; --text-color: #555; --primary-color: #007AFF;
     --component-bg: #E0E5EC; --shadow-light: #ffffff; --shadow-dark: #a3b1c6;
@@ -33,6 +33,9 @@ body { background-color: var(--bg-color); color: var(--text-color); display: fle
 .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--component-bg); padding: 10px 0; box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.2); z-index: 10; }
 .bottom-nav nav { display: flex; justify-content: space-around; align-items: center; }
 .nav-button { background: none; border: none; color: var(--icon-color); display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s ease; }
+.nav-button i { font-size: 24px; margin-bottom: 4px; }
+.nav-button span { font-size: 12px; }
+.nav-button.active { color: var(--primary-color); transform: translateY(-5px); }
 
 /* --- Aba Foco: Pomodoro --- */
 .pomodoro-timer { margin-bottom: 2.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
@@ -60,8 +63,9 @@ body { background-color: var(--bg-color); color: var(--text-color); display: fle
 .priority-option:hover { background-color: var(--bg-color); }
 #task-list { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
 .task-item { display: flex; align-items: center; justify-content: space-between; padding: 1rem; background-color: var(--component-bg); border-radius: 12px; box-shadow: var(--soft-shadow-sharp); }
-.task-item-content { display: flex; align-items: center; gap: 12px; }
-.priority-tag { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 8px; color: white; }
+.task-item-content { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+.task-item-content span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.priority-tag { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 8px; color: white; flex-shrink: 0; }
 .task-item.completed span { text-decoration: line-through; opacity: 0.6; }
 
 /* Cores de Prioridade */
@@ -73,14 +77,12 @@ body { background-color: var(--bg-color); color: var(--text-color); display: fle
 
 /* --- Módulo de Metas --- */
 .goals-app { margin-top: 2.5rem; }
-/* (O resto do CSS de Metas e Modal permanece o mesmo, está correto) */
 .goals-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
 .goals-header h2 { font-weight: 600; }
 #goals-list { list-style: none; display: flex; flex-direction: column; gap: 1.5rem; }
 .goal-item { background-color: var(--component-bg); border-radius: 16px; box-shadow: var(--soft-shadow-sharp); padding: 1rem; transition: all 0.3s ease; }
 .goal-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
 .goal-title { font-weight: 600; }
-.goal-actions { display: flex; gap: 10px; align-items: center; }
 .goal-actions button { background: none; border: none; color: var(--icon-color); font-size: 20px; cursor: pointer; }
 .goal-progress { margin-top: 1rem; cursor: pointer; }
 .progress-bar-container { width: 100%; height: 8px; background-color: var(--bg-color); border-radius: 4px; box-shadow: var(--soft-shadow-inset-sharp); overflow: hidden; }
@@ -101,7 +103,8 @@ body { background-color: var(--bg-color); color: var(--text-color); display: fle
 .custom-checkbox { width: 20px; height: 20px; background-color: var(--bg-color); border-radius: 6px; box-shadow: var(--soft-shadow-inset-sharp); margin-right: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0; }
 .custom-checkbox::after { content: '\ea4c'; font-family: 'boxicons'; font-size: 20px; color: var(--text-color); opacity: 0; transform: scale(0.5); transition: all 0.2s ease; }
 .subtask-item input[type="checkbox"]:checked + .subtask-item-label .custom-checkbox { box-shadow: var(--soft-shadow-sharp); }
-.subtask-item input[type="checkbox"]:checked + .sub-item-label .custom-checkbox::after { opacity: 1; transform: scale(1); }
+.subtask-item input[type="checkbox"]:checked + .subtask-item-label .custom-checkbox::after { opacity: 1; transform: scale(1); }
+
 /* Modal Styles */
 .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 1; transition: opacity 0.3s ease; }
 .modal-backdrop.hidden { opacity: 0; pointer-events: none; }
