@@ -21,24 +21,25 @@
 
         <section id="foco" class="page">
             <h1>Foco</h1>
-            <!-- APP DE TAREFAS -->
-            <div class="todo-app">
-                <header class="todo-header">
-                    <input type="text" id="task-input" placeholder="Adicione uma tarefa rápida...">
-                    <button id="add-task-btn" aria-label="Adicionar Tarefa"><i class='bx bx-plus'></i></button>
-                </header>
-                <ul id="task-list"></ul>
-            </div>
             
-            <!-- TIMER POMODORO -->
+            <!-- NOVA ORDEM: TIMER POMODORO NO TOPO -->
             <div class="pomodoro-timer">
                 <div class="timer-display-container"><h2 id="timer-display">25:00</h2></div>
                 <p id="timer-status">Hora de Focar!</p>
                 <div class="pomodoro-controls">
-                    <button id="start-btn" class="pomodoro-btn" aria-label="Iniciar timer"><i class='bx bx-play'></i></button>
-                    <button id="pause-btn" class="pomodoro-btn" aria-label="Pausar timer"><i class='bx bx-pause'></i></button>
-                    <button id="reset-btn" class="pomodoro-btn" aria-label="Reiniciar timer"><i class='bx bx-reset'></i></button>
+                    <button id="start-btn" class="soft-button pomodoro-btn" aria-label="Iniciar timer"><i class='bx bx-play'></i></button>
+                    <button id="pause-btn" class="soft-button pomodoro-btn" aria-label="Pausar timer"><i class='bx bx-pause'></i></button>
+                    <button id="reset-btn" class="soft-button pomodoro-btn" aria-label="Reiniciar timer"><i class='bx bx-reset'></i></button>
                 </div>
+            </div>
+
+            <!-- APP DE TAREFAS -->
+            <div class="todo-app">
+                <header class="todo-header">
+                    <input type="text" id="task-input" class="soft-input" placeholder="Adicione uma tarefa rápida...">
+                    <button id="add-task-btn" class="soft-button" aria-label="Adicionar Tarefa"><i class='bx bx-plus'></i></button>
+                </header>
+                <ul id="task-list"></ul>
             </div>
 
             <!-- MÓDULO DE METAS -->
@@ -70,7 +71,6 @@
                 <button id="theme-toggle" class="toggle-button"><div class="toggle-circle"></div></button>
             </div>
         </section>
-
     </main>
 
     <!-- MODAL PARA ADICIONAR/EDITAR METAS -->
@@ -78,8 +78,8 @@
         <div class="modal-content">
             <h3 id="modal-title">Criar Nova Meta</h3>
             <form id="goal-form">
-                <input type="text" id="goal-title-input" placeholder="Título da Meta" required>
-                <textarea id="goal-motivation-input" placeholder="Minha motivação (O porquê...)"></textarea>
+                <input type="text" id="goal-title-input" class="soft-input" placeholder="Título da Meta" required>
+                <textarea id="goal-motivation-input" class="soft-textarea" placeholder="Minha motivação (O porquê...)"></textarea>
                 
                 <label>Categorias:</label>
                 <div id="goal-category-container" class="category-container">
@@ -87,7 +87,7 @@
                 </div>
 
                 <label for="goal-date-input">Data Alvo:</label>
-                <input type="date" id="goal-date-input">
+                <input type="date" id="goal-date-input" class="soft-input">
 
                 <div class="modal-actions">
                     <button type="button" id="cancel-goal-btn" class="soft-button gray">Cancelar</button>
