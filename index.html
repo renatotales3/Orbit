@@ -73,26 +73,25 @@
 
     </main>
 
-    <!-- MODAL PARA ADICIONAR METAS (FORA DO MAIN) -->
+    <!-- MODAL PARA ADICIONAR/EDITAR METAS -->
     <div id="goal-modal" class="modal-backdrop hidden">
         <div class="modal-content">
-            <h3>Criar Nova Meta</h3>
+            <h3 id="modal-title">Criar Nova Meta</h3>
             <form id="goal-form">
-                <input type="text" id="goal-title-input" placeholder="Título da Meta (ex: Aprender a Investir)" required>
+                <input type="text" id="goal-title-input" placeholder="Título da Meta" required>
                 <textarea id="goal-motivation-input" placeholder="Minha motivação (O porquê...)"></textarea>
-                <select id="goal-category-input" required>
-                    <option value="" disabled selected>Selecione a categoria</option>
-                    <option value="Pessoal">Pessoal</option>
-                    <option value="Profissional">Profissional</option>
-                    <option value="Acadêmica">Acadêmica</option>
-                    <option value="Saúde">Saúde</option>
-                    <option value="Finanças">Finanças</option>
-                </select>
+                
+                <label>Categorias:</label>
+                <div id="goal-category-container" class="category-container">
+                    <!-- Categorias serão inseridas aqui pelo JS -->
+                </div>
+
                 <label for="goal-date-input">Data Alvo:</label>
                 <input type="date" id="goal-date-input">
+
                 <div class="modal-actions">
                     <button type="button" id="cancel-goal-btn" class="soft-button gray">Cancelar</button>
-                    <button type="submit" class="soft-button">Salvar Meta</button>
+                    <button type="submit" class="soft-button">Salvar</button>
                 </div>
             </form>
         </div>
