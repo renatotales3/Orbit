@@ -1,89 +1,86 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Segundo Cérebro</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Life OS</title>
+    <!-- Google Fonts (Poppins) e Ícones (Boxicons) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <!-- Nosso CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="app-layout">
-        <!-- BARRA DE NAVEGAÇÃO LATERAL -->
-        <aside class="sidebar">
-            <h1 class="logo">Segundo Cérebro</h1>
-            <nav class="navigation">
-                <a href="#dashboard" class="nav-link active" data-page="dashboard">Dashboard</a>
-                <a href="#tasks" class="nav-link" data-page="tasks">Tarefas</a>
-                <a href="#notes" class="nav-link" data-page="notes">Notas</a>
-                <a href="#settings" class="nav-link" data-page="settings">Configurações</a>
-            </nav>
-        </aside>
+    <!-- Onde o conteúdo de cada aba será exibido -->
+    <main class="content">
+        
+        <!-- Seção do Dashboard (Início) -->
+        <section id="inicio" class="page active">
+            <h1>Dashboard</h1>
+            <p>Em breve, seus insights diários estarão aqui.</p>
+        </section>
 
-        <!-- CONTEÚDO PRINCIPAL -->
-        <main class="main-content">
-            <!-- PÁGINA DASHBOARD -->
-            <section id="dashboard-page" class="page active">
-                <h2 class="page-title">Dashboard</h2>
-                <div class="kpi-grid" id="dashboard-kpis">
-                    <!-- KPIs serão renderizados aqui pelo JS -->
-                </div>
-            </section>
+        <!-- Seção de Foco -->
+        <section id="foco" class="page">
+            <h1>Foco</h1>
+            <p>Gerencie suas tarefas e metas.</p>
+        </section>
 
-            <!-- PÁGINA TAREFAS -->
-            <section id="tasks-page" class="page">
-                <div class="page-header">
-                    <h2 class="page-title">Tarefas & Projetos</h2>
-                    <button class="soft-button" id="add-task-btn">Nova Tarefa</button>
-                </div>
-                <div id="tasks-list" class="content-grid">
-                    <!-- Cards de tarefas serão renderizados aqui pelo JS -->
-                </div>
-            </section>
+        <!-- Seção de Finanças -->
+        <section id="financas" class="page">
+            <h1>Finanças</h1>
+            <p>Seu controle financeiro completo.</p>
+        </section>
 
-            <!-- PÁGINA NOTAS -->
-            <section id="notes-page" class="page">
-                <div class="page-header">
-                    <h2 class="page-title">Notas & Ideias</h2>
-                    <button class="soft-button" id="add-note-btn">Nova Nota</button>
-                </div>
-                <div id="notes-list" class="content-grid">
-                    <!-- Cards de notas serão renderizados aqui pelo JS -->
-                </div>
-            </section>
+        <!-- Seção de Bem-estar -->
+        <section id="bem-estar" class="page">
+            <h1>Bem-estar</h1>
+            <p>Acompanhe seus hábitos e rotinas.</p>
+        </section>
 
-             <!-- PÁGINA CONFIGURAÇÕES -->
-            <section id="settings-page" class="page">
-                <h2 class="page-title">Configurações</h2>
-                <div class="settings-card">
-                    <h3>Backup de Dados</h3>
-                    <p>Exporte todos os seus dados para um arquivo JSON ou limpe tudo para começar de novo.</p>
-                    <div class="button-group">
-                         <button class="soft-button" id="export-data-btn">Exportar JSON</button>
-                         <button class="soft-button danger" id="clear-data-btn">Limpar Todos os Dados</button>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- MODAL (Inicialmente oculto) -->
-    <div id="modal-container" class="modal-overlay">
-        <div class="modal-content">
-            <h3 id="modal-title"></h3>
-            <div id="modal-body">
-                <!-- Formulário será inserido aqui pelo JS -->
+        <!-- Seção de Ajustes -->
+        <section id="ajustes" class="page">
+            <h1>Ajustes</h1>
+            <div class="setting-item">
+                <span>Tema Escuro</span>
+                <button id="theme-toggle" class="toggle-button">
+                    <div class="toggle-circle"></div>
+                </button>
             </div>
-            <div class="modal-actions">
-                <button class="soft-button secondary" id="modal-cancel-btn">Cancelar</button>
-                <button class="soft-button" id="modal-save-btn">Salvar</button>
-            </div>
-        </div>
-    </div>
+        </section>
 
+    </main>
+
+    <!-- Menu de Navegação Inferior -->
+    <footer class="bottom-nav">
+        <nav>
+            <button class="nav-button active" data-target="inicio">
+                <i class='bx bxs-dashboard'></i>
+                <span>Início</span>
+            </button>
+            <button class="nav-button" data-target="foco">
+                <i class='bx bx-target-lock'></i>
+                <span>Foco</span>
+            </button>
+            <button class="nav-button" data-target="financas">
+                <i class='bx bx-wallet'></i>
+                <span>Finanças</span>
+            </button>
+            <button class="nav-button" data-target="bem-estar">
+                <i class='bx bx-heart'></i>
+                <span>Bem-estar</span>
+            </button>
+            <button class="nav-button" data-target="ajustes">
+                <i class='bx bx-cog'></i>
+                <span>Ajustes</span>
+            </button>
+        </nav>
+    </footer>
+
+    <!-- Nosso JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
