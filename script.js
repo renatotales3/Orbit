@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const FOCUS_TIME = 25 * 60, SHORT_BREAK_TIME = 5 * 60, LONG_BREAK_TIME = 15 * 60;
     
     const updateDisplay = () => {
+        if (!timerDisplay) return;
         const minutes = Math.floor(totalSeconds / 60);
         const seconds = totalSeconds % 60;
         timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
@@ -113,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDisplay();
     };
     document.getElementById('start-btn').addEventListener('click', () => {
-        if (isPaused) { isPaused = false; timer = setInterval(() => { if (totalSeconds-- > 0) updateDisplay(); else switchCycle(); }, 1000); }
+        if (isPaused) { isPaused = false; timer = setInterval(() => { if (--totalSeconds >= 0) updateDisplay(); else switchCycle(); }, 1000); }
     });
     document.getElementById('pause-btn').addEventListener('click', () => { isPaused = true; clearInterval(timer); });
     document.getElementById('reset-btn').addEventListener('click', setTimerForCurrentCycle);
@@ -142,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="goal-category" style="background-color:${categoryColors[goal.category] || '#6c757d'}">${goal.category}</span>
                 </div>
                 <div class="goal-progress">
-                    <div class="progress-bar-container"><div class="progress-bar" style="width: ${progress}%"></div></div>
+                    <div class="progress-bar-container"><div class="progress-bar" style="width: ${progress.toFixed(0)}%"></div></div>
                 </div>
                 <div class="goal-details">
                     <div class="goal-details-content">
@@ -155,8 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <label for="st-${index}-${stIndex}" class="${st.completed ? 'completed' : ''}">${st.text}</label>
                                 </div>
                                 <div class="subtask-actions">
-                                    <button class="add-to-focus-btn" data-subtask-index="${stIndex}"><i class='bx bx-list-plus'></i></button>
-                                    <button class="delete-subtask-btn" data-subtask-index="${stIndex}"><i class='bx bxs-trash'></i></button>
+                                    <button class="add-to-focus-btn" data-subtask-index="${stIndex}" title="Adicionar ao Foco do Dia"><i class='bx bx-list-plus'></i></button>
+                                    <button class="delete-subtask-btn" data-subtask-index="${stIndex}" title="Excluir Subtarefa"><i class='bx bxs-trash'></i></button>
                                 </div>
                             </li>`).join('')}
                         </ul>
@@ -195,41 +196,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const goalItem = e.target.closest('.goal-item');
         if (!goalItem) return;
         const goalIndex = parseInt(goalItem.dataset.index);
+        let shouldReRender = false;
 
-        // Ação de expandir/recolher
-        if (!e.target.closest('.goal-details-content') && !e.target.closest('.goal-header')) {
-             goalItem.classList.toggle('expanded');
-        }
-        // Assegura que clicar no header também expande
+        // Lógica de Expansão (Mais confiável)
         if (e.target.closest('.goal-header') || e.target.closest('.goal-progress')) {
-             goalItem.classList.toggle('expanded');
+            goalItem.classList.toggle('expanded');
         }
 
-        const subtaskCheckbox = e.target.closest('input[type="checkbox"]');
-        if (subtaskCheckbox) {
-            const subtaskIndex = parseInt(subtaskCheckbox.dataset.subtaskIndex);
-            goals[goalIndex].subtasks[subtaskIndex].completed = subtaskCheckbox.checked;
+        // Lógica de ações dentro dos detalhes
+        if (e.target.closest('input[type="checkbox"]')) {
+            const checkbox = e.target.closest('input[type="checkbox"]');
+            const subtaskIndex = parseInt(checkbox.dataset.subtaskIndex);
+            goals[goalIndex].subtasks[subtaskIndex].completed = checkbox.checked;
+            shouldReRender = true;
         }
 
-        const deleteSubtaskBtn = e.target.closest('.delete-subtask-btn');
-        if (deleteSubtaskBtn) {
-            const subtaskIndex = parseInt(deleteSubtaskBtn.dataset.subtaskIndex);
+        if (e.target.closest('.delete-subtask-btn')) {
+            const subtaskIndex = parseInt(e.target.closest('.delete-subtask-btn').dataset.subtaskIndex);
             goals[goalIndex].subtasks.splice(subtaskIndex, 1);
+            shouldReRender = true;
         }
 
-        const addToFocusBtn = e.target.closest('.add-to-focus-btn');
-        if (addToFocusBtn) {
-            const subtaskIndex = parseInt(addToFocusBtn.dataset.subtaskIndex);
+        if (e.target.closest('.add-to-focus-btn')) {
+            const subtaskIndex = parseInt(e.target.closest('.add-to-focus-btn').dataset.subtaskIndex);
             const subtaskText = goals[goalIndex].subtasks[subtaskIndex].text;
             addTask(`[${goals[goalIndex].title}] ${subtaskText}`);
         }
         
-        saveGoals();
-        renderGoals();
-        // Mantém o estado expandido após a ação
-        if(goalItem.classList.contains('expanded')) {
-            const newGoalItem = document.querySelector(`.goal-item[data-index="${goalIndex}"]`);
-            if(newGoalItem) newGoalItem.classList.add('expanded');
+        if (shouldReRender) {
+            const wasExpanded = goalItem.classList.contains('expanded');
+            saveGoals();
+            renderGoals();
+            if (wasExpanded) {
+                const newGoalItem = document.querySelector(`.goal-item[data-index="${goalIndex}"]`);
+                if (newGoalItem) newGoalItem.classList.add('expanded');
+            }
         }
     });
 
@@ -245,8 +246,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 subtaskInput.value = "";
                 saveGoals();
                 renderGoals();
-                // Mantém o card expandido após adicionar sub-tarefa
-                document.querySelector(`.goal-item[data-index="${goalIndex}"]`).classList.add('expanded');
+                const newGoalItem = document.querySelector(`.goal-item[data-index="${goalIndex}"]`);
+                if (newGoalItem) newGoalItem.classList.add('expanded');
             }
         }
     });
