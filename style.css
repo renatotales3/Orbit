@@ -6,7 +6,7 @@
     font-family: 'Poppins', sans-serif;
 }
 
-/* --- Variáveis de Tema (Soft UI) --- */
+/* --- Variáveis de Tema --- */
 :root[data-theme="light"] {
     --bg-color: #E0E5EC;
     --text-color: #555;
@@ -15,17 +15,17 @@
     --shadow-light: #FFFFFF;
     --shadow-dark: #A3B1C6;
     --icon-color: #888;
+    --gray-color: #B0B0B0;
 }
-
-/* NOVA PALETA DE CORES: TEMA ESCURO MONOCROMÁTICO */
 :root[data-theme="dark"] {
-    --bg-color: #212529; /* Cinza-chumbo profundo */
-    --text-color: #F8F9FA; /* Branco sutil */
-    --primary-color: #F8F9FA; /* Branco sutil (para ícones ativos) */
-    --component-bg: #212529; /* Mesmo que o fundo */
-    --shadow-light: #2c3136; /* Sombra clara sutil */
-    --shadow-dark: #161a1d; /* Sombra escura sutil */
-    --icon-color: #868e96; /* Cinza médio para ícones inativos */
+    --bg-color: #212529;
+    --text-color: #F8F9FA;
+    --primary-color: #F8F9FA;
+    --component-bg: #212529;
+    --shadow-light: #2c3136;
+    --shadow-dark: #161a1d;
+    --icon-color: #868e96;
+    --gray-color: #6c757d;
 }
 
 body {
@@ -37,17 +37,19 @@ body {
     overflow: hidden;
 }
 
-/* --- Conteúdo Principal --- */
+/* --- Layout Principal --- */
 .content {
     flex-grow: 1;
     padding: 2rem;
     overflow-y: auto;
     padding-bottom: 100px;
 }
-
 .page { display: none; }
 .page.active { display: block; }
-.page h1 { font-weight: 600; }
+.page h1 {
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
 
 /* --- Menu de Navegação Inferior --- */
 .bottom-nav {
@@ -57,148 +59,80 @@ body {
     width: 100%;
     background-color: var(--component-bg);
     padding: 10px 0;
-    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2); /* Sombra um pouco mais forte para destacar no escuro */
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2);
 }
-.bottom-nav nav {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
+.bottom-nav nav { display: flex; justify-content: space-around; }
 .nav-button {
-    background: none; border: none;
-    color: var(--icon-color);
-    display: flex; flex-direction: column;
-    align-items: center; cursor: pointer;
-    transition: all 0.3s ease;
+    background: none; border: none; color: var(--icon-color);
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer; transition: all 0.3s ease;
 }
 .nav-button i { font-size: 24px; margin-bottom: 4px; }
 .nav-button span { font-size: 12px; }
-.nav-button.active {
-    color: var(--primary-color);
-    transform: translateY(-5px);
-}
+.nav-button.active { color: var(--primary-color); transform: translateY(-5px); }
 
-/* --- Estilos da página de Ajustes --- */
+/* --- Página de Ajustes --- */
 .setting-item {
-    display: flex; justify-content: space-between;
-    align-items: center; padding: 1rem;
-    background-color: var(--component-bg);
-    border-radius: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem; background-color: var(--component-bg); border-radius: 12px;
     box-shadow: -6px -6px 12px var(--shadow-light), 6px 6px 12px var(--shadow-dark);
-    margin-top: 1.5rem; 
 }
 .toggle-button {
-    width: 60px; height: 30px;
-    background-color: var(--bg-color); border: none;
-    border-radius: 15px; cursor: pointer;
-    position: relative;
+    width: 60px; height: 30px; background-color: var(--bg-color);
+    border: none; border-radius: 15px; cursor: pointer; position: relative;
     box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
 }
 .toggle-circle {
-    width: 24px; height: 24px;
-    background-color: var(--icon-color);
-    border-radius: 50%; position: absolute;
-    top: 3px; left: 4px;
+    width: 24px; height: 24px; background-color: var(--icon-color);
+    border-radius: 50%; position: absolute; top: 3px; left: 4px;
     transition: transform 0.3s ease;
 }
 :root[data-theme="dark"] .toggle-circle {
-    transform: translateX(29px);
-    background-color: var(--primary-color);
+    transform: translateX(29px); background-color: var(--primary-color);
 }
 
-/* --- ESTILOS: Aba Foco (To-Do List) --- */
-.todo-app { margin-top: 1.5rem; }
+/* --- Aba Foco: To-Do List --- */
 .todo-header { display: flex; gap: 10px; margin-bottom: 1.5rem; }
 #task-input {
-    flex-grow: 1; border: none;
-    padding: 1rem; border-radius: 12px;
-    background-color: var(--component-bg);
-    color: var(--text-color); font-size: 1rem;
+    flex-grow: 1; border: none; padding: 1rem; border-radius: 12px;
+    background-color: var(--component-bg); color: var(--text-color); font-size: 1rem;
     box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
 }
 #task-input:focus { outline: none; }
 #add-task-btn {
-    width: 50px; height: 50px;
-    border: none; border-radius: 12px;
-    /* Botão de adicionar tarefa agora usa a cor do ícone, não a primária */
-    background-color: var(--component-bg); 
-    color: var(--primary-color);
-    font-size: 24px; cursor: pointer; display: flex;
-    align-items: center; justify-content: center;
+    width: 50px; height: 50px; border: none; border-radius: 12px; font-size: 24px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
     box-shadow: -4px -4px 8px var(--shadow-light), 4px 4px 8px var(--shadow-dark);
     transition: transform 0.2s ease;
 }
+:root[data-theme="light"] #add-task-btn { background-color: #007AFF; color: white; }
+:root[data-theme="dark"] #add-task-btn { background-color: var(--component-bg); color: var(--primary-color); }
 #add-task-btn:active { transform: scale(0.95); }
 #task-list { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
 .task-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 1rem; background-color: var(--component-bg);
-    border-radius: 12px;
+    display: flex; align-items: center; justify-content: space-between; padding: 1rem;
+    background-color: var(--component-bg); border-radius: 12px;
     box-shadow: -6px -6px 12px var(--shadow-light), 6px 6px 12px var(--shadow-dark);
     transition: opacity 0.3s ease;
 }
 .task-item.completed span { text-decoration: line-through; opacity: 0.6; }
-.task-item-buttons button {
-    background: none; border: none;
-    font-size: 22px; cursor: pointer;
-    margin-left: 10px; color: var(--icon-color);
-    transition: color 0.3s ease;
-}
+.task-item-buttons button { background: none; border: none; font-size: 22px; cursor: pointer; margin-left: 10px; color: var(--icon-color); transition: color 0.3s ease; }
 .task-item-buttons .complete-btn:hover { color: #28a745; }
 .task-item-buttons .delete-btn:hover { color: #dc3545; }
 
-/* --- ESTILOS: Pomodoro Timer --- */
-.pomodoro-timer {
-    margin-top: 2.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-}
+/* --- Aba Foco: Pomodoro --- */
+.pomodoro-timer { margin-top: 2.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
 .timer-display-container {
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    background-color: var(--component-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 200px; height: 200px; border-radius: 50%; background-color: var(--component-bg);
+    display: flex; align-items: center; justify-content: center;
     box-shadow: -8px -8px 16px var(--shadow-light), 8px 8px 16px var(--shadow-dark);
 }
-#timer-display {
-    font-size: 2.8rem;
-    font-weight: 700;
-    color: var(--text-color);
-}
-#timer-status {
-    font-weight: 500;
-    color: var(--text-color); /* Status também em branco para consistência */
-    opacity: 0.8;
-}
-.pomodoro-controls {
-    display: flex;
-    gap: 1.5rem;
-    margin-top: 1rem;
-}
+#timer-display { font-size: 2.8rem; font-weight: 700; color: var(--text-color); }
+:root[data-theme="light"] #timer-status { color: #007AFF; }
+:root[data-theme="dark"] #timer-status { color: var(--text-color); opacity: 0.8; }
+#timer-status { font-weight: 500; }
+.pomodoro-controls { display: flex; gap: 1.5rem; margin-top: 1rem; }
 .pomodoro-btn {
-    width: 60px;
-    height: 60px;
-    border: none;
-    border-radius: 50%;
-    background-color: var(--component-bg);
-    color: var(--icon-color);
-    font-size: 28px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: -5px -5px 10px var(--shadow-light), 5px 5px 10px var(--shadow-dark);
-    transition: all 0.2s ease-in-out;
-}
-.pomodoro-btn:hover {
-    color: var(--primary-color);
-}
-.pomodoro-btn:active {
-    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
-    transform: scale(0.98);
-}
+    width: 60px; height: 60px; border: none; border-radius: 50%; background-color: var(--component-bg);
+    color: var(--icon-color); font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: -
