@@ -1,4 +1,3 @@
-```javascript
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- ELEMENTOS GERAIS ---
@@ -197,8 +196,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!goalItem) return;
         const goalIndex = parseInt(goalItem.dataset.index);
 
-        if (!e.target.closest('.goal-details')) goalItem.classList.toggle('expanded');
-        
+        // Ação de expandir/recolher
+        if (!e.target.closest('.goal-details-content') && !e.target.closest('.goal-header')) {
+             goalItem.classList.toggle('expanded');
+        }
+        // Assegura que clicar no header também expande
+        if (e.target.closest('.goal-header') || e.target.closest('.goal-progress')) {
+             goalItem.classList.toggle('expanded');
+        }
+
         const subtaskCheckbox = e.target.closest('input[type="checkbox"]');
         if (subtaskCheckbox) {
             const subtaskIndex = parseInt(subtaskCheckbox.dataset.subtaskIndex);
@@ -219,7 +225,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         saveGoals();
-        renderGoals(); // Re-render para atualizar progresso e estados
+        renderGoals();
+        // Mantém o estado expandido após a ação
+        if(goalItem.classList.contains('expanded')) {
+            const newGoalItem = document.querySelector(`.goal-item[data-index="${goalIndex}"]`);
+            if(newGoalItem) newGoalItem.classList.add('expanded');
+        }
     });
 
     goalsList.addEventListener('submit', (e) => {
