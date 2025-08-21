@@ -171,6 +171,10 @@ document.addEventListener('DOMContentLoaded', () => {
     goalForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const selectedCategories = [...categoryContainer.querySelectorAll('.category-btn.active')].map(btn => btn.textContent);
+        if (selectedCategories.length === 0) {
+            alert("Por favor, selecione ao menos uma categoria.");
+            return;
+        }
         const goalData = {
             title: document.getElementById('goal-title-input').value,
             motivation: document.getElementById('goal-motivation-input').value,
@@ -235,7 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- INICIALIZAÇÃO GERAL ---
     const initApp = () => {
-        loadFromLocalStorage('activeTab', 'inicio');
         applyTheme(loadFromLocalStorage('theme', 'light'));
         renderTasks();
         setTimerForCurrentCycle();
