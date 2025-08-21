@@ -14,16 +14,13 @@
 
     <main class="content">
         <section id="inicio" class="page active">
-            <h1>Dashboard</h1>
+            <h1>Início</h1>
             <p>Em breve, seus insights diários estarão aqui.</p>
         </section>
 
         <section id="foco" class="page">
-            <div class="page-title">
-                <img src="assets/foco-icon.png" alt="Ícone de Foco" class="title-icon">
-                <h1>Foco</h1>
-            </div>
-            
+            <h1>Foco</h1>
+
             <div class="pomodoro-timer">
                 <div class="timer-display-container"><h2 id="timer-display">25:00</h2></div>
                 <p id="timer-status">Hora de Focar!</p>
@@ -34,36 +31,56 @@
                 </div>
             </div>
 
-            <div class="todo-app">
-                <header class="todo-header">
-                    <input type="text" id="task-input" class="soft-input" placeholder="O que precisa ser feito?">
-                    <div class="priority-selector-wrapper">
-                        <button id="task-priority-btn" class="soft-button priority-btn" aria-label="Selecionar Prioridade">
-                            <i class='bx bxs-circle priority-indicator-btn priority-3'></i>
-                        </button>
-                        <div id="priority-picker" class="priority-picker hidden"></div>
-                    </div>
-                    <button id="add-task-btn" class="soft-button" aria-label="Adicionar Tarefa"><i class='bx bx-plus'></i></button>
-                </header>
-                <ul id="task-list"></ul>
-            </div>
+            <div class="foco-grid-container">
+                <div class="todo-app">
+                    <header class="todo-header">
+                        <input type="text" id="task-input" class="soft-input" placeholder="O que precisa ser feito?">
+                        <div class="priority-selector-wrapper">
+                            <button id="task-priority-btn" class="soft-button priority-btn" aria-label="Selecionar Prioridade">
+                                <i class='bx bxs-circle priority-indicator-btn priority-3'></i>
+                            </button>
+                            <div id="priority-picker" class="priority-picker hidden"></div>
+                        </div>
+                        <button id="add-task-btn" class="soft-button" aria-label="Adicionar Tarefa"><i class='bx bx-plus'></i></button>
+                    </header>
+                    <ul id="task-list"></ul>
+                </div>
 
-            <div class="goals-app">
-                <header class="goals-header">
-                    <h2>Minhas Metas</h2>
-                    <button id="add-goal-modal-btn" class="soft-button"><i class='bx bx-plus'></i> Nova Meta</button>
-                </header>
-                <ul id="goals-list"></ul>
+                <div class="goals-app">
+                    <header class="goals-header">
+                        <h2>Minhas Metas</h2>
+                        <button id="add-goal-modal-btn" class="soft-button"><i class='bx bx-plus'></i> Nova Meta</button>
+                    </header>
+                    <ul id="goals-list"></ul>
+                </div>
             </div>
         </section>
 
         <section id="financas" class="page"><h1>Finanças</h1><p>Seu controle financeiro completo.</p></section>
         <section id="bem-estar" class="page"><h1>Bem-estar</h1><p>Acompanhe seus hábitos e rotinas.</p></section>
+
         <section id="ajustes" class="page">
             <h1>Ajustes</h1>
-            <div class="setting-item">
+            <div class="setting-item setting-item-row">
                 <span>Tema Escuro</span>
                 <button id="theme-toggle" class="toggle-button"><div class="toggle-circle"></div></button>
+            </div>
+            <div class="setting-item">
+                <h3>Configurações do Pomodoro</h3>
+                <div class="pomodoro-settings">
+                    <div class="setting-field">
+                        <label for="focus-time">Foco (minutos)</label>
+                        <input type="number" id="focus-time" class="soft-input" min="1">
+                    </div>
+                    <div class="setting-field">
+                        <label for="short-break-time">Pausa Curta (minutos)</label>
+                        <input type="number" id="short-break-time" class="soft-input" min="1">
+                    </div>
+                    <div class="setting-field">
+                        <label for="long-break-time">Pausa Longa (minutos)</label>
+                        <input type="number" id="long-break-time" class="soft-input" min="1">
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -88,8 +105,8 @@
 
     <footer class="bottom-nav">
         <nav>
-            <button class="nav-button active" data-target="inicio"><i class='bx bxs-dashboard'></i><span>Início</span></button>
-            <button class="nav-button" data-target="foco"><i class='bx bx-target-lock'></i><span>Foco</span></button>
+            <button class="nav-button active" data-target="inicio"><i class='bx bx-home-alt'></i><span>Início</span></button>
+            <button class="nav-button" data-target="foco"><i class='bx bx-crosshair'></i><span>Foco</span></button>
             <button class="nav-button" data-target="financas"><i class='bx bx-wallet'></i><span>Finanças</span></button>
             <button class="nav-button" data-target="bem-estar"><i class='bx bx-heart'></i><span>Bem-estar</span></button>
             <button class="nav-button" data-target="ajustes"><i class='bx bx-cog'></i><span>Ajustes</span></button>
