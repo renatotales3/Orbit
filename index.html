@@ -22,7 +22,6 @@
         <section id="foco" class="page">
             <h1>Foco</h1>
             
-            <!-- NOVA ORDEM: TIMER POMODORO NO TOPO -->
             <div class="pomodoro-timer">
                 <div class="timer-display-container"><h2 id="timer-display">25:00</h2></div>
                 <p id="timer-status">Hora de Focar!</p>
@@ -33,16 +32,20 @@
                 </div>
             </div>
 
-            <!-- APP DE TAREFAS -->
             <div class="todo-app">
                 <header class="todo-header">
                     <input type="text" id="task-input" class="soft-input" placeholder="Adicione uma tarefa rápida...">
+                    <select id="task-priority" class="soft-input">
+                        <option value="2">Importante, Não Urgente</option>
+                        <option value="1">Importante, Urgente</option>
+                        <option value="3">Não Importante, Urgente</option>
+                        <option value="4">Não Importante, Não Urgente</option>
+                    </select>
                     <button id="add-task-btn" class="soft-button" aria-label="Adicionar Tarefa"><i class='bx bx-plus'></i></button>
                 </header>
                 <ul id="task-list"></ul>
             </div>
 
-            <!-- MÓDULO DE METAS -->
             <div class="goals-app">
                 <header class="goals-header">
                     <h2>Minhas Metas</h2>
@@ -54,41 +57,21 @@
             </div>
         </section>
 
-        <section id="financas" class="page">
-            <h1>Finanças</h1>
-            <p>Seu controle financeiro completo.</p>
-        </section>
-        
-        <section id="bem-estar" class="page">
-            <h1>Bem-estar</h1>
-            <p>Acompanhe seus hábitos e rotinas.</p>
-        </section>
-
-        <section id="ajustes" class="page">
-            <h1>Ajustes</h1>
-            <div class="setting-item">
-                <span>Tema Escuro</span>
-                <button id="theme-toggle" class="toggle-button"><div class="toggle-circle"></div></button>
-            </div>
-        </section>
+        <section id="financas" class="page"><h1>Finanças</h1><p>Seu controle financeiro completo.</p></section>
+        <section id="bem-estar" class="page"><h1>Bem-estar</h1><p>Acompanhe seus hábitos e rotinas.</p></section>
+        <section id="ajustes" class="page"><h1>Ajustes</h1><div class="setting-item"><span>Tema Escuro</span><button id="theme-toggle" class="toggle-button"><div class="toggle-circle"></div></button></div></section>
     </main>
 
-    <!-- MODAL PARA ADICIONAR/EDITAR METAS -->
     <div id="goal-modal" class="modal-backdrop hidden">
         <div class="modal-content">
             <h3 id="modal-title">Criar Nova Meta</h3>
             <form id="goal-form">
                 <input type="text" id="goal-title-input" class="soft-input" placeholder="Título da Meta" required>
                 <textarea id="goal-motivation-input" class="soft-textarea" placeholder="Minha motivação (O porquê...)"></textarea>
-                
                 <label>Categorias:</label>
-                <div id="goal-category-container" class="category-container">
-                    <!-- Categorias serão inseridas aqui pelo JS -->
-                </div>
-
+                <div id="goal-category-container" class="category-container"></div>
                 <label for="goal-date-input">Data Alvo:</label>
                 <input type="date" id="goal-date-input" class="soft-input">
-
                 <div class="modal-actions">
                     <button type="button" id="cancel-goal-btn" class="soft-button gray">Cancelar</button>
                     <button type="submit" class="soft-button">Salvar</button>
@@ -106,7 +89,6 @@
             <button class="nav-button" data-target="ajustes"><i class='bx bx-cog'></i><span>Ajustes</span></button>
         </nav>
     </footer>
-
     <script src="script.js"></script>
 </body>
 </html>
