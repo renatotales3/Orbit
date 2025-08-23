@@ -13,28 +13,37 @@
 <body>
 
     <main class="content">
-        <section id="inicio" class="page active">
+        <section id="inicio" class="page">
             <h1>Início</h1>
             <p>Em breve, seus insights diários estarão aqui.</p>
         </section>
 
         <section id="foco" class="page">
             <h1>Foco</h1>
-
-            <div class="pomodoro-timer">
-                <div class="timer-display-container"><h2 id="timer-display">25:00</h2></div>
-                <p id="timer-status">Hora de Focar!</p>
-                <div class="pomodoro-controls">
-                    <button id="start-btn" class="soft-button pomodoro-btn" aria-label="Iniciar timer"><i class='bx bx-play'></i></button>
-                    <button id="pause-btn" class="soft-button pomodoro-btn" aria-label="Pausar timer"><i class='bx bx-pause'></i></button>
-                    <button id="reset-btn" class="soft-button pomodoro-btn" aria-label="Reiniciar timer"><i class='bx bx-reset'></i></button>
+            <div class="pomodoro-app">
+                <header class="pomodoro-header">
+                    <h2>Pomodoro</h2>
+                </header>
+                <div class="pomodoro-timer">
+                    <div class="timer-display-container"><h2 id="timer-display">25:00</h2></div>
+                    <p id="timer-status">Hora de Focar!</p>
+                    <div class="pomodoro-controls">
+                        <button id="start-btn" class="soft-button pomodoro-btn" aria-label="Iniciar timer"><i class='bx bx-play'></i></button>
+                        <button id="pause-btn" class="soft-button pomodoro-btn" aria-label="Pausar timer"><i class='bx bx-pause'></i></button>
+                        <button id="reset-btn" class="soft-button pomodoro-btn" aria-label="Reiniciar timer"><i class='bx bx-reset'></i></button>
+                    </div>
                 </div>
             </div>
-
-            <div class="foco-grid-container">
-                <div class="todo-app">
-                    <header class="todo-header">
-                        <input type="text" id="task-input" class="soft-input" placeholder="O que precisa ser feito?">
+            <div class="todo-app">
+                <header class="todo-header">
+                    <h2>Tarefas do Dia</h2>
+                    <button id="clear-completed-tasks-btn" class="soft-button icon-btn hidden" title="Limpar Concluídas">
+                        <i class='bx bxs-eraser'></i>
+                    </button>
+                </header>
+                <div class="todo-body">
+                    <div class="add-task-container">
+                        <input type="text" id="task-input" class="soft-input" placeholder="Adicionar nova tarefa...">
                         <div class="priority-selector-wrapper">
                             <button id="task-priority-btn" class="soft-button priority-btn" aria-label="Selecionar Prioridade">
                                 <i class='bx bxs-circle priority-indicator-btn priority-3'></i>
@@ -42,49 +51,178 @@
                             <div id="priority-picker" class="priority-picker hidden"></div>
                         </div>
                         <button id="add-task-btn" class="soft-button" aria-label="Adicionar Tarefa"><i class='bx bx-plus'></i></button>
-                    </header>
+                    </div>
                     <ul id="task-list"></ul>
                 </div>
-
-                <div class="goals-app">
-                    <header class="goals-header">
-                        <h2>Minhas Metas</h2>
-                        <button id="add-goal-modal-btn" class="soft-button"><i class='bx bx-plus'></i> Nova Meta</button>
-                    </header>
-                    <ul id="goals-list"></ul>
-                </div>
+            </div>
+            <div class="goals-app">
+                <header class="goals-header">
+                    <h2>Minhas Metas</h2>
+                    <button id="add-goal-modal-btn" class="soft-button"><i class='bx bx-plus'></i> Nova Meta</button>
+                </header>
+                <ul id="goals-list"></ul>
             </div>
         </section>
 
         <section id="financas" class="page"><h1>Finanças</h1><p>Seu controle financeiro completo.</p></section>
-        <section id="bem-estar" class="page"><h1>Bem-estar</h1><p>Acompanhe seus hábitos e rotinas.</p></section>
+
+        <section id="bem-estar" class="page">
+            <h1>Bem-estar</h1>
+
+            <div class="water-tracker-card">
+                <header class="water-header">
+                    <div class="metric-header">
+                        <i class='bx bxs-droplet'></i>
+                        <h4>Hidratação</h4>
+                    </div>
+                    <button id="water-history-btn" class="soft-button icon-btn" aria-label="Ver Histórico de Hidratação">
+                        <i class='bx bx-history'></i>
+                    </button>
+                </header>
+                <div class="water-body">
+                    <button id="decrease-water-btn" class="soft-button icon-btn metric-control-btn"><i class='bx bx-minus'></i></button>
+                    <div class="water-display">
+                        <span id="water-count">0</span>
+                        <span id="water-goal-text">/ 8 copos</span>
+                    </div>
+                    <button id="increase-water-btn" class="soft-button icon-btn metric-control-btn"><i class='bx bx-plus'></i></button>
+                </div>
+                <div class="water-footer">
+                    <progress id="water-progress" value="0" max="100"></progress>
+                    <p id="water-feedback"></p>
+                </div>
+            </div>
+
+            <div class="sleep-tracker-card">
+                <header class="sleep-header">
+                    <div class="metric-header">
+                        <i class='bx bxs-moon'></i>
+                        <h4>Sono</h4>
+                    </div>
+                    <button id="sleep-history-btn" class="soft-button icon-btn" aria-label="Ver Histórico de Sono">
+                        <i class='bx bx-history'></i>
+                    </button>
+                </header>
+                <div class="sleep-body-container">
+                    <div id="sleep-form-view" class="metric-body sleep-body">
+                        <form id="sleep-form">
+                            <div class="sleep-inputs">
+                                <div>
+                                    <label for="bed-time">Dormi às</label>
+                                    <input type="time" id="bed-time" class="soft-input">
+                                </div>
+                                <div>
+                                    <label for="wake-time">Acordei às</label>
+                                    <input type="time" id="wake-time" class="soft-input">
+                                </div>
+                            </div>
+                            <button type="submit" id="save-sleep-btn" class="soft-button">Salvar Sono</button>
+                        </form>
+                    </div>
+                    <div id="sleep-completed-view" class="metric-body sleep-body completed">
+                        <div class="sleep-total-display">
+                            <p>Total de Sono</p>
+                            <p id="sleep-total"></p>
+                        </div>
+                        <p id="sleep-feedback"></p>
+                        <button id="edit-sleep-btn" class="soft-button gray"><i class='bx bxs-pencil'></i> Editar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mood-tracker">
+                <h3>Como você está se sentindo hoje?</h3>
+                <div id="mood-options" class="mood-options"></div>
+            </div>
+
+            <div id="daily-journal" class="daily-journal">
+                <header class="journal-header">
+                    <h4>Reflexão do Dia</h4>
+                    <button id="show-journal-history-btn" class="soft-button icon-btn" aria-label="Ver Histórico de Reflexões">
+                        <i class='bx bx-history'></i>
+                    </button>
+                </header>
+                <div class="journal-body">
+                    <div class="journal-form">
+                        <p id="journal-question" class="journal-question-text"></p>
+                        <form id="journal-form">
+                            <textarea id="journal-input" class="soft-textarea" placeholder="Sua reflexão aqui..."></textarea>
+                            <button type="submit" class="soft-button">Salvar Reflexão</button>
+                        </form>
+                    </div>
+                    <div class="journal-completed-view">
+                        <p id="journal-question-completed" class="journal-question-text"></p>
+                        <p id="journal-answer"></p>
+                        <span>Ótimo, te vejo amanhã!</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="habit-tracker">
+                <header class="habits-header">
+                    <h2>Meus Hábitos</h2>
+                    <button id="add-habit-modal-btn" class="soft-button"><i class='bx bx-plus'></i> Novo Hábito</button>
+                </header>
+                <ul id="habits-list"></ul>
+            </div>
+        </section>
 
         <section id="ajustes" class="page">
             <h1>Ajustes</h1>
-            <div class="setting-item setting-item-row">
-                <span>Tema Escuro</span>
-                <button id="theme-toggle" class="toggle-button"><div class="toggle-circle"></div></button>
+            <div class="settings-card">
+                <header class="settings-card-header">
+                    <i class='bx bx-palette'></i>
+                    <h2>Aparência</h2>
+                </header>
+                <div class="settings-card-body">
+                    <div class="setting-row">
+                        <label for="theme-toggle">Tema Escuro</label>
+                        <button id="theme-toggle" class="toggle-button"><div class="toggle-circle"></div></button>
+                    </div>
+                    <div class="setting-divider"></div>
+                    <div class="setting-row column">
+                        <label>Cor de Destaque</label>
+                        <div id="light-theme-palette" class="color-palette"></div>
+                        <div id="dark-theme-palette" class="color-palette"></div>
+                    </div>
+                </div>
             </div>
-            <div class="setting-item">
-                <h3>Configurações do Pomodoro</h3>
-                <div class="pomodoro-settings">
-                    <div class="setting-field">
+            <div class="settings-card">
+                 <header class="settings-card-header">
+                    <i class='bx bx-timer'></i>
+                    <h2>Pomodoro</h2>
+                </header>
+                <div class="settings-card-body">
+                    <div class="setting-row">
                         <label for="focus-time">Foco (minutos)</label>
                         <input type="number" id="focus-time" class="soft-input" min="1">
                     </div>
-                    <div class="setting-field">
+                    <div class="setting-row">
                         <label for="short-break-time">Pausa Curta (minutos)</label>
                         <input type="number" id="short-break-time" class="soft-input" min="1">
                     </div>
-                    <div class="setting-field">
+                    <div class="setting-row">
                         <label for="long-break-time">Pausa Longa (minutos)</label>
                         <input type="number" id="long-break-time" class="soft-input" min="1">
                     </div>
                 </div>
             </div>
+            <div class="settings-card">
+                <header class="settings-card-header">
+                   <i class='bx bx-slider-alt'></i>
+                   <h2>Geral</h2>
+               </header>
+               <div class="settings-card-body">
+                   <div class="setting-row">
+                       <label for="water-goal">Meta de Copos de Água</label>
+                       <input type="number" id="water-goal" class="soft-input" min="1">
+                   </div>
+               </div>
+           </div>
         </section>
     </main>
 
+    <!-- Modals -->
     <div id="goal-modal" class="modal-backdrop hidden">
         <div class="modal-content">
             <h3 id="modal-title">Criar Nova Meta</h3>
@@ -95,23 +233,82 @@
                 <div id="goal-category-container" class="category-container"></div>
                 <label for="goal-date-input">Data Alvo:</label>
                 <input type="date" id="goal-date-input" class="soft-input">
+                <div class="modal-actions"><button type="button" id="cancel-goal-btn" class="soft-button gray">Cancelar</button><button type="submit" class="soft-button">Salvar</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="habit-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h3 id="habit-modal-title">Novo Hábito</h3>
+            <form id="habit-form">
+                <input type="text" id="habit-name-input" class="soft-input" placeholder="Nome do Hábito" required>
+                <label>Ícone:</label>
+                <div id="habit-icon-picker" class="picker-container"></div>
+                <label>Cor:</label>
+                <div id="habit-color-picker" class="picker-container"></div>
                 <div class="modal-actions">
-                    <button type="button" id="cancel-goal-btn" class="soft-button gray">Cancelar</button>
-                    <button type="submit" class="soft-button">Salvar</button>
+                    <button type="button" id="delete-habit-btn" class="soft-button danger hidden">Excluir</button>
+                    <div><button type="button" id="cancel-habit-btn" class="soft-button gray">Cancelar</button><button type="submit" class="soft-button">Salvar</button></div>
                 </div>
             </form>
         </div>
     </div>
 
+    <div id="confirmation-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h3>Tem certeza?</h3>
+            <p>Esta ação não pode ser desfeita.</p>
+            <div class="modal-actions">
+                <button type="button" id="confirmation-cancel-btn" class="soft-button gray">Cancelar</button>
+                <button type="button" id="confirmation-confirm-btn" class="soft-button danger">Confirmar Exclusão</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="journal-history-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3>Histórico de Reflexões</h3>
+                <button id="close-journal-history-btn-x" class="soft-button close-btn"><i class='bx bx-x'></i></button>
+            </header>
+            <ul id="journal-history-list"></ul>
+            <div class="modal-actions">
+                <button type="button" id="close-journal-history-btn" class="soft-button gray">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="metrics-history-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3 id="metrics-history-title">Histórico</h3>
+                <button id="close-metrics-history-btn-x" class="soft-button close-btn"><i class='bx bx-x'></i></button>
+            </header>
+            <ul id="metrics-history-list"></ul>
+            <div class="modal-actions">
+                <button type="button" id="close-metrics-history-btn" class="soft-button gray">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="priority-modal-for-subtask" class="modal-backdrop hidden">
+        <div class="modal-content small">
+            <h3 class="modal-title-center">Definir Prioridade</h3>
+            <div id="subtask-priority-picker" class="priority-picker-modal"></div>
+        </div>
+    </div>
+
     <footer class="bottom-nav">
         <nav>
-            <button class="nav-button active" data-target="inicio"><i class='bx bx-home-alt'></i><span>Início</span></button>
+            <button class="nav-button" data-target="inicio"><i class='bx bx-home-alt'></i><span>Início</span></button>
             <button class="nav-button" data-target="foco"><i class='bx bx-crosshair'></i><span>Foco</span></button>
             <button class="nav-button" data-target="financas"><i class='bx bx-wallet'></i><span>Finanças</span></button>
             <button class="nav-button" data-target="bem-estar"><i class='bx bx-heart'></i><span>Bem-estar</span></button>
             <button class="nav-button" data-target="ajustes"><i class='bx bx-cog'></i><span>Ajustes</span></button>
         </nav>
     </footer>
+
     <script src="script.js"></script>
 </body>
 </html>
