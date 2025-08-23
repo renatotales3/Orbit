@@ -89,7 +89,7 @@
                 </div>
                 <div class="water-footer">
                     <progress id="water-progress" value="0" max="100"></progress>
-                    <p id="water-feedback"></p>
+                    <p id="water-feedback" aria-live="polite"></p>
                 </div>
             </div>
 
@@ -122,9 +122,9 @@
                     <div id="sleep-completed-view" class="metric-body sleep-body completed">
                         <div class="sleep-total-display">
                             <p>Total de Sono</p>
-                            <p id="sleep-total"></p>
+                            <p id="sleep-total" aria-live="polite"></p>
                         </div>
-                        <p id="sleep-feedback"></p>
+                        <p id="sleep-feedback" aria-live="polite"></p>
                         <button id="edit-sleep-btn" class="soft-button gray"><i class='bx bxs-pencil'></i> Editar</button>
                     </div>
                 </div>
@@ -223,7 +223,7 @@
     </main>
 
     <!-- Modals -->
-    <div id="goal-modal" class="modal-backdrop hidden">
+    <div id="goal-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-content">
             <h3 id="modal-title">Criar Nova Meta</h3>
             <form id="goal-form">
@@ -238,7 +238,7 @@
         </div>
     </div>
 
-    <div id="habit-modal" class="modal-backdrop hidden">
+    <div id="habit-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="habit-modal-title">
         <div class="modal-content">
             <h3 id="habit-modal-title">Novo Hábito</h3>
             <form id="habit-form">
@@ -255,9 +255,9 @@
         </div>
     </div>
 
-    <div id="confirmation-modal" class="modal-backdrop hidden">
+    <div id="confirmation-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirmation-title">
         <div class="modal-content">
-            <h3>Tem certeza?</h3>
+            <h3 id="confirmation-title">Tem certeza?</h3>
             <p>Esta ação não pode ser desfeita.</p>
             <div class="modal-actions">
                 <button type="button" id="confirmation-cancel-btn" class="soft-button gray">Cancelar</button>
@@ -266,10 +266,10 @@
         </div>
     </div>
 
-    <div id="journal-history-modal" class="modal-backdrop hidden">
+    <div id="journal-history-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="journal-history-title">
         <div class="modal-content">
             <header class="modal-header">
-                <h3>Histórico de Reflexões</h3>
+                <h3 id="journal-history-title">Histórico de Reflexões</h3>
                 <button id="close-journal-history-btn-x" class="soft-button close-btn"><i class='bx bx-x'></i></button>
             </header>
             <ul id="journal-history-list"></ul>
@@ -279,7 +279,7 @@
         </div>
     </div>
 
-    <div id="metrics-history-modal" class="modal-backdrop hidden">
+    <div id="metrics-history-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="metrics-history-title">
         <div class="modal-content">
             <header class="modal-header">
                 <h3 id="metrics-history-title">Histórico</h3>
@@ -292,9 +292,9 @@
         </div>
     </div>
 
-    <div id="priority-modal-for-subtask" class="modal-backdrop hidden">
+    <div id="priority-modal-for-subtask" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="priority-modal-title">
         <div class="modal-content small">
-            <h3 class="modal-title-center">Definir Prioridade</h3>
+            <h3 id="priority-modal-title" class="modal-title-center">Definir Prioridade</h3>
             <div id="subtask-priority-picker" class="priority-picker-modal"></div>
         </div>
     </div>

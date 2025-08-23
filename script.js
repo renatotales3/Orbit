@@ -25,7 +25,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- MÓDULO DE UTILITÁRIOS ---
     const Utils = (() => {
         const saveToLocalStorage = (key, value) => localStorage.setItem(key, JSON.stringify(value));
-        const loadFromLocalStorage = (key, defaultValue) => JSON.parse(localStorage.getItem(key)) || defaultValue;
+        const loadFromLocalStorage = (key, defaultValue) => {
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw === null) return defaultValue;
+                return JSON.parse(raw);
+            } catch (e) {
+                console.warn(`[Storage] Valor inválido para chave "${key}", aplicando fallback e limpando.`, e);
+                try { localStorage.removeItem(key); } catch (_) {}
+                return defaultValue;
+            }
+        };
         const getTodayString = () => new Date().toISOString().split('T')[0];
         const formatDateToBR = (dateString) => {
             const date = new Date(dateString);
@@ -42,7 +52,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
         };
-        return { saveToLocalStorage, loadFromLocalStorage, getTodayString, formatDateToBR, escapeHTML };
+        const openDialog = (modalEl, focusSelector, onEsc) => {
+            if (!modalEl) return;
+            modalEl._prevFocused = document.activeElement;
+            modalEl.classList.remove('hidden');
+            let focusTarget = focusSelector ? modalEl.querySelector(focusSelector) : null;
+            if (!focusTarget) {
+                focusTarget = modalEl.querySelector('[autofocus], button, [role="button"], input, textarea, select, [tabindex]:not([tabindex="-1"])');
+            }
+            focusTarget?.focus();
+            const escHandler = (e) => {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    if (typeof onEsc === 'function') onEsc();
+                }
+            };
+            modalEl._escHandler = escHandler;
+            document.addEventListener('keydown', escHandler);
+        };
+        const closeDialog = (modalEl) => {
+            if (!modalEl) return;
+            modalEl.classList.add('hidden');
+            if (modalEl._escHandler) {
+                document.removeEventListener('keydown', modalEl._escHandler);
+                modalEl._escHandler = null;
+            }
+            const prev = modalEl._prevFocused;
+            if (prev && typeof prev.focus === 'function') {
+                prev.focus();
+            }
+            modalEl._prevFocused = null;
+        };
+        return { saveToLocalStorage, loadFromLocalStorage, getTodayString, formatDateToBR, escapeHTML, openDialog, closeDialog };
     })();
 
     // --- MÓDULO DE NAVEGAÇÃO ---
@@ -61,9 +102,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             pages.forEach(p => p.classList.remove('active'));
             targetPage.classList.add('active');
-            allNavButtons.forEach(b => b.classList.toggle('active', b.dataset.target === targetId));
+            allNavButtons.forEach(b => {
+                const isActive = b.dataset.target === targetId;
+                b.classList.toggle('active', isActive);
+                b.setAttribute('aria-current', isActive ? 'page' : 'false');
+            });
             Utils.saveToLocalStorage('activeTab', targetId);
             content.scrollTop = 0;
+
+            // Mover foco para o título principal da página ativa
+            const pageHeading = targetPage.querySelector('h1');
+            if (pageHeading) {
+                pageHeading.setAttribute('tabindex', '-1');
+                pageHeading.focus({ preventScroll: true });
+            }
 
             // Renderiza módulos relevantes para a aba ativa para garantir que estejam atualizados
             if (targetId === 'bem-estar') {
@@ -79,6 +131,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const init = () => {
             allNavButtons.forEach(button => button.addEventListener('click', () => switchTab(button.dataset.target)));
+            // Acessibilidade: permitir ativar via teclado (Enter/Espaço)
+            allNavButtons.forEach(button => {
+                button.setAttribute('role', 'tab');
+                button.setAttribute('tabindex', '0');
+                button.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        switchTab(button.dataset.target);
+                    }
+                });
+            });
         };
         return { init, switchTab };
     })();
@@ -256,8 +319,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const createGoalHTML = goal => { const progress = goal.subtasks.length > 0 ? (goal.subtasks.filter(st => st.completed).length / goal.subtasks.length) * 100 : 0; return `<li class="goal-item" data-id="${goal.id}"><div class="goal-header"><span class="goal-title">${Utils.escapeHTML(goal.title)}</span><div class="goal-actions"><button class="soft-button icon-btn edit-goal-btn" title="Editar Meta"><i class='bx bxs-pencil'></i></button><button class="soft-button icon-btn delete-goal-btn" title="Excluir Meta"><i class='bx bxs-trash'></i></button></div></div><div class="goal-progress"><div class="progress-bar-container"><div class="progress-bar" style="width: ${progress.toFixed(0)}%"></div></div></div><div class="goal-details"><div class="goal-details-content"><div class="goal-categories">${goal.categories.map(cat => `<span class="goal-category" style="background-color:${ALL_CATEGORIES[cat] || '#6c757d'}">${cat}</span>`).join('')}</div><p><strong>Motivação:</strong> ${goal.motivation ? Utils.escapeHTML(goal.motivation) : 'N/A'}</p><p><strong>Data Alvo:</strong> ${goal.targetDate ? Utils.formatDateToBR(goal.targetDate) : 'N/A'}</p><ul class="subtask-list">${goal.subtasks.map(createSubtaskHTML).join('')}</ul><form class="add-subtask-form"><input type="text" class="soft-input subtask-input" placeholder="Novo passo..."><button type="submit" class="soft-button add-subtask-btn"><i class='bx bx-plus'></i></button></form></div></div></li>`; };
 
         const render = () => { goalsList.innerHTML = goals.map(createGoalHTML).join(''); };
-        const openGoalModal = (mode = 'add', goalId = null) => { goalForm.reset(); goalForm.dataset.mode = mode; goalForm.dataset.goalId = goalId; categoryContainer.innerHTML = Object.keys(ALL_CATEGORIES).map(cat => `<button type="button" class="category-btn">${cat}</button>`).join(''); if (mode === 'edit' && goalId !== null) { modalTitle.textContent = "Editar Meta"; const goal = goals.find(g => g.id === goalId); document.getElementById('goal-title-input').value = goal.title; document.getElementById('goal-motivation-input').value = goal.motivation; document.getElementById('goal-date-input').value = goal.targetDate; categoryContainer.querySelectorAll('.category-btn').forEach(btn => { if (goal.categories.includes(btn.textContent)) btn.classList.add('active'); }); } else { modalTitle.textContent = "Criar Nova Meta"; } goalModal.classList.remove('hidden'); };
-        const closeGoalModal = () => goalModal.classList.add('hidden');
+        const openGoalModal = (mode = 'add', goalId = null) => { goalForm.reset(); goalForm.dataset.mode = mode; goalForm.dataset.goalId = goalId; categoryContainer.innerHTML = Object.keys(ALL_CATEGORIES).map(cat => `<button type="button" class="category-btn">${cat}</button>`).join(''); if (mode === 'edit' && goalId !== null) { modalTitle.textContent = "Editar Meta"; const goal = goals.find(g => g.id === goalId); document.getElementById('goal-title-input').value = goal.title; document.getElementById('goal-motivation-input').value = goal.motivation; document.getElementById('goal-date-input').value = goal.targetDate; categoryContainer.querySelectorAll('.category-btn').forEach(btn => { if (goal.categories.includes(btn.textContent)) btn.classList.add('active'); }); } else { modalTitle.textContent = "Criar Nova Meta"; } Utils.openDialog(goalModal, '#goal-title-input', () => closeGoalModal()); };
+        const closeGoalModal = () => Utils.closeDialog(goalModal);
 
         const setSubtaskCompletedState = (goalId, subtaskId, isCompleted) => {
             const goal = goals.find(g => g.id === goalId);
@@ -356,10 +419,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let habits = Utils.loadFromLocalStorage('habits', []);
         let habitToDeleteId = null;
         const calculateStreak = dates => { if (dates.length === 0) return 0; let streak = 0; const today = new Date(); today.setHours(0, 0, 0, 0); const completedDates = new Set(dates); let currentDate = new Date(today); if (!completedDates.has(currentDate.toISOString().split('T')[0])) { currentDate.setDate(today.getDate() - 1); } while (completedDates.has(currentDate.toISOString().split('T')[0])) { streak++; currentDate.setDate(currentDate.getDate() - 1); } return streak; };
-        const render = () => { habitsList.innerHTML = ""; habits.forEach(habit => { const li = document.createElement('li'); li.className = 'habit-item'; li.dataset.id = habit.id; const today = new Date(); const startOfWeek = new Date(new Date().setDate(today.getDate() - today.getDay())); let weekTrackerHTML = ""; const weekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']; for (let i = 0; i < 7; i++) { const day = new Date(startOfWeek); day.setDate(startOfWeek.getDate() + i); const dateString = day.toISOString().split('T')[0]; const isCompleted = habit.completedDates.includes(dateString); const isCurrent = day.toDateString() === new Date().toDateString(); const isFuture = day > new Date(); weekTrackerHTML += `<div class="day-circle ${isCurrent ? 'current' : ''} ${isCompleted ? 'completed' : ''} ${isFuture ? 'disabled' : ''}" data-date="${dateString}" style="${isCompleted ? '--habit-color:' + habit.color : ''}">${weekDays[i]}</div>`; } li.innerHTML = `<div class="habit-info"><div class="habit-icon-name"><i class='bx ${habit.icon}' style="color: ${habit.color}"></i><span class="habit-name">${Utils.escapeHTML(habit.name)}</span></div><div class="habit-info-right"><div class="habit-streak"><span>🔥</span><span>${calculateStreak(habit.completedDates)}</span></div><div class="habit-actions"><button class="soft-button icon-btn edit-habit-btn" title="Editar Hábito"><i class="bx bxs-pencil"></i></button></div></div></div><div class="habit-week-tracker">${weekTrackerHTML}</div>`; habitsList.appendChild(li); }); };
-        const openHabitModal = (mode = 'add', habitId = null) => { habitForm.reset(); habitForm.dataset.mode = mode; habitForm.dataset.habitId = habitId; iconPicker.innerHTML = AVAILABLE_ICONS.map(i => `<div class="picker-option"><button type="button" class="picker-button" data-icon="${i.name}"><i class='bx ${i.name}'></i></button><span class="picker-label">${i.label}</span></div>`).join(''); colorPicker.innerHTML = AVAILABLE_COLORS.map(c => `<button type="button" class="picker-button" data-color="${c}"><div class="color-swatch" style="background-color:${c}"></div></button>`).join(''); const modalTitle = document.getElementById('habit-modal-title'); if (mode === 'edit' && habitId !== null) { modalTitle.textContent = "Editar Hábito"; deleteHabitBtn.classList.remove('hidden'); const habit = habits.find(h => h.id === habitId); document.getElementById('habit-name-input').value = habit.name; iconPicker.querySelector(`.picker-button[data-icon="${habit.icon}"]`)?.classList.add('active'); colorPicker.querySelector(`.picker-button[data-color="${habit.color}"]`)?.classList.add('active'); } else { modalTitle.textContent = "Novo Hábito"; deleteHabitBtn.classList.add('hidden'); } habitModal.classList.remove('hidden'); };
-        const closeHabitModal = () => { habitForm.reset(); habitModal.classList.add('hidden'); };
-        const init = () => { addHabitModalBtn.addEventListener('click', () => openHabitModal('add')); cancelHabitBtn.addEventListener('click', closeHabitModal); habitModal.addEventListener('click', e => { if (e.target === habitModal) closeHabitModal(); }); iconPicker.addEventListener('click', e => { const button = e.target.closest('.picker-button'); if (button) { iconPicker.querySelector('.active')?.classList.remove('active'); button.classList.add('active'); }}); colorPicker.addEventListener('click', e => { const button = e.target.closest('.picker-button'); if (button) { colorPicker.querySelector('.active')?.classList.remove('active'); button.classList.add('active'); }}); habitForm.addEventListener('submit', e => { e.preventDefault(); const name = document.getElementById('habit-name-input').value, icon = iconPicker.querySelector('.active')?.dataset.icon, color = colorPicker.querySelector('.active')?.dataset.color; if (!name || !icon || !color) return alert("Por favor, preencha todos os campos."); const mode = habitForm.dataset.mode, habitId = Number(habitForm.dataset.habitId); if (mode === 'add') { habits.push({ id: Date.now(), name, icon, color, completedDates: [] }); } else if (mode === 'edit') { const habitIndex = habits.findIndex(h => h.id === habitId); if(habitIndex > -1) habits[habitIndex] = { ...habits[habitIndex], name, icon, color }; } Utils.saveToLocalStorage('habits', habits); render(); closeHabitModal(); }); habitsList.addEventListener('click', e => { const habitItem = e.target.closest('.habit-item'); if (!habitItem) return; const habitId = Number(habitItem.dataset.id); const habit = habits.find(h => h.id === habitId); if (!habit) return; if (e.target.closest('.day-circle:not(.disabled)')) { const date = e.target.closest('.day-circle').dataset.date; const dateIndex = habit.completedDates.indexOf(date); if (dateIndex > -1) habit.completedDates.splice(dateIndex, 1); else habit.completedDates.push(date); Utils.saveToLocalStorage('habits', habits); render(); } if (e.target.closest('.edit-habit-btn')) openHabitModal('edit', habitId); }); deleteHabitBtn.addEventListener('click', () => { habitToDeleteId = Number(habitForm.dataset.habitId); confirmationModal.classList.remove('hidden'); }); cancelDeleteBtn.addEventListener('click', () => { confirmationModal.classList.add('hidden'); habitToDeleteId = null; }); confirmDeleteBtn.addEventListener('click', () => { if (habitToDeleteId !== null) { habits = habits.filter(h => h.id !== habitToDeleteId); Utils.saveToLocalStorage('habits', habits); render(); habitToDeleteId = null; } confirmationModal.classList.add('hidden'); closeHabitModal(); }); render(); };
+        const render = () => { habitsList.innerHTML = ""; habits.forEach(habit => { const li = document.createElement('li'); li.className = 'habit-item'; li.dataset.id = habit.id; const today = new Date(); const startOfWeek = new Date(new Date().setDate(today.getDate() - today.getDay())); let weekTrackerHTML = ""; const weekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']; for (let i = 0; i < 7; i++) { const day = new Date(startOfWeek); day.setDate(startOfWeek.getDate() + i); const dateString = day.toISOString().split('T')[0]; const isCompleted = habit.completedDates.includes(dateString); const isCurrent = day.toDateString() === new Date().toDateString(); const isFuture = day > new Date(); weekTrackerHTML += `<div class="day-circle ${isCurrent ? 'current' : ''} ${isCompleted ? 'completed' : ''} ${isFuture ? 'disabled' : ''}" data-date="${dateString}" style="${isCompleted ? '--habit-color:' + habit.color : ''}" role="button" tabindex="${isFuture ? '-1' : '0'}" aria-pressed="${isCompleted ? 'true' : 'false'}" aria-label="${weekDays[i]} ${isCompleted ? 'concluído' : 'não concluído'}">${weekDays[i]}</div>`; } li.innerHTML = `<div class="habit-info"><div class="habit-icon-name"><i class='bx ${habit.icon}' style="color: ${habit.color}"></i><span class="habit-name">${Utils.escapeHTML(habit.name)}</span></div><div class="habit-info-right"><div class="habit-streak"><span>🔥</span><span>${calculateStreak(habit.completedDates)}</span></div><div class="habit-actions"><button class="soft-button icon-btn edit-habit-btn" title="Editar Hábito"><i class="bx bxs-pencil"></i></button></div></div></div><div class="habit-week-tracker">${weekTrackerHTML}</div>`; habitsList.appendChild(li); const tracker = li.querySelector('.habit-week-tracker'); tracker.addEventListener('keydown', (e) => { const target = e.target.closest('.day-circle'); if (!target || target.classList.contains('disabled')) return; if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); target.click(); } }); }); };
+        const openHabitModal = (mode = 'add', habitId = null) => { habitForm.reset(); habitForm.dataset.mode = mode; habitForm.dataset.habitId = habitId; iconPicker.innerHTML = AVAILABLE_ICONS.map(i => `<div class="picker-option"><button type="button" class="picker-button" data-icon="${i.name}"><i class='bx ${i.name}'></i></button><span class="picker-label">${i.label}</span></div>`).join(''); colorPicker.innerHTML = AVAILABLE_COLORS.map(c => `<button type="button" class="picker-button" data-color="${c}"><div class="color-swatch" style="background-color:${c}"></div></button>`).join(''); const modalTitle = document.getElementById('habit-modal-title'); if (mode === 'edit' && habitId !== null) { modalTitle.textContent = "Editar Hábito"; deleteHabitBtn.classList.remove('hidden'); const habit = habits.find(h => h.id === habitId); document.getElementById('habit-name-input').value = habit.name; iconPicker.querySelector(`.picker-button[data-icon="${habit.icon}"]`)?.classList.add('active'); colorPicker.querySelector(`.picker-button[data-color="${habit.color}"]`)?.classList.add('active'); } else { modalTitle.textContent = "Novo Hábito"; deleteHabitBtn.classList.add('hidden'); } Utils.openDialog(habitModal, '#habit-name-input', () => { confirmationModal.classList.add('hidden'); closeHabitModal(); }); };
+        const closeHabitModal = () => { habitForm.reset(); Utils.closeDialog(habitModal); };
+        const init = () => { addHabitModalBtn.addEventListener('click', () => openHabitModal('add')); cancelHabitBtn.addEventListener('click', closeHabitModal); habitModal.addEventListener('click', e => { if (e.target === habitModal) closeHabitModal(); }); iconPicker.addEventListener('click', e => { const button = e.target.closest('.picker-button'); if (button) { iconPicker.querySelector('.active')?.classList.remove('active'); button.classList.add('active'); }}); colorPicker.addEventListener('click', e => { const button = e.target.closest('.picker-button'); if (button) { colorPicker.querySelector('.active')?.classList.remove('active'); button.classList.add('active'); }}); habitForm.addEventListener('submit', e => { e.preventDefault(); const name = document.getElementById('habit-name-input').value, icon = iconPicker.querySelector('.active')?.dataset.icon, color = colorPicker.querySelector('.active')?.dataset.color; if (!name || !icon || !color) return alert("Por favor, preencha todos os campos."); const mode = habitForm.dataset.mode, habitId = Number(habitForm.dataset.habitId); if (mode === 'add') { habits.push({ id: Date.now(), name, icon, color, completedDates: [] }); } else if (mode === 'edit') { const habitIndex = habits.findIndex(h => h.id === habitId); if(habitIndex > -1) habits[habitIndex] = { ...habits[habitIndex], name, icon, color }; } Utils.saveToLocalStorage('habits', habits); render(); closeHabitModal(); }); habitsList.addEventListener('click', e => { const habitItem = e.target.closest('.habit-item'); if (!habitItem) return; const habitId = Number(habitItem.dataset.id); const habit = habits.find(h => h.id === habitId); if (!habit) return; if (e.target.closest('.day-circle:not(.disabled)')) { const date = e.target.closest('.day-circle').dataset.date; const dateIndex = habit.completedDates.indexOf(date); if (dateIndex > -1) habit.completedDates.splice(dateIndex, 1); else habit.completedDates.push(date); Utils.saveToLocalStorage('habits', habits); render(); } if (e.target.closest('.edit-habit-btn')) openHabitModal('edit', habitId); }); deleteHabitBtn.addEventListener('click', () => { habitToDeleteId = Number(habitForm.dataset.habitId); Utils.openDialog(confirmationModal, '#confirmation-cancel-btn', () => { habitToDeleteId = null; Utils.closeDialog(confirmationModal); }); }); cancelDeleteBtn.addEventListener('click', () => { Utils.closeDialog(confirmationModal); habitToDeleteId = null; }); confirmDeleteBtn.addEventListener('click', () => { if (habitToDeleteId !== null) { habits = habits.filter(h => h.id !== habitToDeleteId); Utils.saveToLocalStorage('habits', habits); render(); habitToDeleteId = null; } confirmationModal.classList.add('hidden'); closeHabitModal(); }); render(); };
         return { init, render };
     })();
 
@@ -626,11 +689,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 sleepTrackerEl.classList.remove('answered');
             });
 
-            waterHistoryBtn.addEventListener('click', () => openHistoryModal('Hidratação'));
-            sleepHistoryBtn.addEventListener('click', () => openHistoryModal('Sono'));
-            closeHistoryBtn.addEventListener('click', closeHistoryModal);
-            closeHistoryBtnX.addEventListener('click', closeHistoryModal);
-            historyModal.addEventListener('click', e => { if(e.target === historyModal) closeHistoryModal(); });
+            waterHistoryBtn.addEventListener('click', () => { openHistoryModal('Hidratação'); Utils.openDialog(historyModal, '#close-metrics-history-btn', closeHistoryModal); });
+            sleepHistoryBtn.addEventListener('click', () => { openHistoryModal('Sono'); Utils.openDialog(historyModal, '#close-metrics-history-btn', closeHistoryModal); });
+            closeHistoryBtn.addEventListener('click', () => Utils.closeDialog(historyModal));
+            closeHistoryBtnX.addEventListener('click', () => Utils.closeDialog(historyModal));
+            historyModal.addEventListener('click', e => { if(e.target === historyModal) Utils.closeDialog(historyModal); });
 
             render();
         };
