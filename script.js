@@ -968,4 +968,223 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INICIALIZAÇÃO GERAL ---
     App.init();
+
+    // --- MÓDULO FINANÇAS ---
+    const Finance = (() => {
+        const periodChips = document.getElementById('fin-period-chips');
+        const categoryFilter = document.getElementById('fin-category-filter');
+        const sumInEl = document.getElementById('fin-sum-in');
+        const sumOutEl = document.getElementById('fin-sum-out');
+        const balanceEl = document.getElementById('fin-balance');
+        const varianceEl = document.getElementById('fin-variance');
+        const txList = document.getElementById('fin-transactions-list');
+        const budgetsList = document.getElementById('fin-budgets-list');
+        const savingsList = document.getElementById('fin-savings-list');
+        const recurringList = document.getElementById('fin-recurring-list');
+        const billsList = document.getElementById('fin-bills-list');
+        const txModal = document.getElementById('transaction-modal');
+        const txForm = document.getElementById('transaction-form');
+        const txOpenBtn = document.getElementById('open-transaction-modal-btn');
+        const txCancelBtn = document.getElementById('tr-cancel');
+        const bdgModal = document.getElementById('budget-modal');
+        const bdgForm = document.getElementById('budget-form');
+        const bdgOpenBtn = document.getElementById('open-budget-modal-btn');
+        const bdgCancelBtn = document.getElementById('bdg-cancel');
+        const svModal = document.getElementById('savings-modal');
+        const svForm = document.getElementById('savings-form');
+        const svOpenBtn = document.getElementById('open-savings-modal-btn');
+        const svCancelBtn = document.getElementById('sv-cancel');
+        const rcModal = document.getElementById('recurring-modal');
+        const rcForm = document.getElementById('recurring-form');
+        const rcOpenBtn = document.getElementById('open-recurring-modal-btn');
+        const rcCancelBtn = document.getElementById('rc-cancel');
+        const blModal = document.getElementById('bill-modal');
+        const blForm = document.getElementById('bill-form');
+        const blOpenBtn = document.getElementById('open-bill-modal-btn');
+        const blCancelBtn = document.getElementById('bl-cancel');
+
+        const CATS = ['Alimentação','Transporte','Moradia','Lazer','Saúde','Educação','Outros'];
+        const CURRENCY = 'R$';
+
+        let transactions = Utils.loadFromLocalStorage('fin_transactions', []);
+        let budgets = Utils.loadFromLocalStorage('fin_budgets', {});
+        let savings = Utils.loadFromLocalStorage('fin_savings', []);
+        let recurring = Utils.loadFromLocalStorage('fin_recurring', []);
+        let bills = Utils.loadFromLocalStorage('fin_bills', []);
+        let currentPeriod = Utils.loadFromLocalStorage('fin_period', 'month');
+        let currentCategory = Utils.loadFromLocalStorage('fin_category', 'Todas');
+
+        const fmt = v => `${CURRENCY} ${(Number(v)||0).toFixed(2).replace('.', ',')}`;
+        const getPeriodRange = () => {
+            const d = new Date();
+            if (currentPeriod === 'today') {
+                const s = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+                const e = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1);
+                return { start: s, end: e };
+            } else if (currentPeriod === 'week') {
+                const day = d.getDay();
+                const s = new Date(d.getFullYear(), d.getMonth(), d.getDate() - day);
+                const e = new Date(d.getFullYear(), d.getMonth(), d.getDate() + (7-day));
+                return { start: s, end: e };
+            }
+            // month default
+            const s = new Date(d.getFullYear(), d.getMonth(), 1);
+            const e = new Date(d.getFullYear(), d.getMonth()+1, 1);
+            return { start: s, end: e };
+        };
+        const inRange = (dateStr) => {
+            const { start, end } = getPeriodRange();
+            const dd = new Date(dateStr);
+            return dd >= start && dd < end;
+        };
+
+        const renderFilters = () => {
+            if (!periodChips || !categoryFilter) return;
+            periodChips.innerHTML = ['today','week','month'].map(p=>`<button type="button" class="category-btn ${currentPeriod===p?'active':''}" data-period="${p}">${p==='today'?'Hoje':p==='week'?'Semana':'Mês'}</button>`).join('');
+            categoryFilter.innerHTML = ['Todas',...CATS].map(c=>`<option ${currentCategory===c?'selected':''}>${c}</option>`).join('');
+        };
+
+        const renderSummary = () => {
+            const inTx = transactions.filter(t => inRange(t.date) && (currentCategory==='Todas' || t.category===currentCategory) && t.type==='in');
+            const outTx = transactions.filter(t => inRange(t.date) && (currentCategory==='Todas' || t.category===currentCategory) && t.type==='out');
+            const sumIn = inTx.reduce((a,t)=>a+Number(t.value||0),0);
+            const sumOut = outTx.reduce((a,t)=>a+Number(t.value||0),0);
+            const balance = sumIn - sumOut;
+            sumInEl && (sumInEl.textContent = fmt(sumIn));
+            sumOutEl && (sumOutEl.textContent = fmt(sumOut));
+            balanceEl && (balanceEl.textContent = fmt(balance));
+            // variance vs previous month
+            const now = new Date();
+            const prevStart = new Date(now.getFullYear(), now.getMonth()-1, 1);
+            const prevEnd = new Date(now.getFullYear(), now.getMonth(), 1);
+            const prev = transactions.filter(t=> { const d = new Date(t.date); return d>=prevStart && d<prevEnd; });
+            const prevIn = prev.filter(t=>t.type==='in').reduce((a,t)=>a+Number(t.value||0),0);
+            const prevOut = prev.filter(t=>t.type==='out').reduce((a,t)=>a+Number(t.value||0),0);
+            const prevBal = prevIn - prevOut;
+            const diff = balance - prevBal;
+            varianceEl && (varianceEl.textContent = `Variação vs mês anterior: ${diff>=0?'+':''}${fmt(diff)}`);
+        };
+
+        const renderTransactions = () => {
+            if (!txList) return;
+            const filtered = transactions.filter(t => inRange(t.date) && (currentCategory==='Todas' || t.category===currentCategory));
+            const items = filtered.sort((a,b)=> new Date(b.date) - new Date(a.date)).map(t=>
+                `<li class="finance-item" data-id="${t.id}">`+
+                `<div class="left"><span class="title">${Utils.escapeHTML(t.category||'Sem categoria')}</span><span class="meta">${new Date(t.date).toLocaleDateString('pt-BR')}${t.note?(' • '+Utils.escapeHTML(t.note)) : ''}</span></div>`+
+                `<div class="actions"><button class="soft-button icon-btn edit-tx"><i class='bx bxs-pencil'></i></button><button class="soft-button icon-btn del-tx"><i class='bx bxs-trash'></i></button></div>`+
+                `<div class="finance-amount ${t.type}">${fmt(t.value)}</div>`+
+                `</li>`).join('');
+            txList.innerHTML = items || '<p style="opacity:.7; text-align:center;">Sem lançamentos no período.</p>';
+        };
+
+        const renderBudgets = () => {
+            if (!budgetsList) return;
+            const cats = Object.keys(budgets);
+            budgetsList.innerHTML = cats.length? cats.map(cat=>{
+                const limit = Number(budgets[cat]||0);
+                const spent = transactions.filter(t=> t.type==='out' && t.category===cat && inRange(t.date)).reduce((a,t)=>a+Number(t.value||0),0);
+                const pct = limit>0? Math.min(100, Math.round((spent/limit)*100)) : 0;
+                return `<li class="finance-item"><div class="left"><span class="title">${Utils.escapeHTML(cat)}</span><span class="meta">${fmt(spent)} / ${fmt(limit)}</span><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${pct}%"></div></div></div><div class="actions"><button class="soft-button icon-btn del-bdg"><i class='bx bxs-trash'></i></button></div></li>`;
+            }).join('') : '<p style="opacity:.7; text-align:center;">Nenhum orçamento definido.</p>';
+        };
+
+        const renderSavings = () => {
+            if (!savingsList) return;
+            savingsList.innerHTML = savings.length? savings.map(s=>{
+                const pct = s.current && s.target? Math.min(100, Math.round((Number(s.current)/Number(s.target))*100)) : 0;
+                return `<li class="finance-item" data-id="${s.id}"><div class="left"><span class="title">${Utils.escapeHTML(s.title)}</span><span class="meta">Meta ${fmt(s.target)} • Até ${s.due || '-'}</span><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${pct}%"></div></div></div><div class="actions"><button class="soft-button icon-btn add-sv"><i class='bx bx-plus'></i></button><button class="soft-button icon-btn del-sv"><i class='bx bxs-trash'></i></button></div></li>`;
+            }).join('') : '<p style="opacity:.7; text-align:center;">Nenhuma meta de poupança.</p>';
+        };
+
+        const renderRecurring = () => {
+            if (!recurringList) return;
+            recurringList.innerHTML = recurring.length? recurring.map(r=> `<li class="finance-item" data-id="${r.id}"><div class="left"><span class="title">${Utils.escapeHTML(r.category||'-')}</span><span class="meta">${r.type==='in'?'Entrada':'Saída'} • Dia ${r.day} • ${fmt(r.value)}</span></div><div class="actions"><button class="soft-button icon-btn del-rc"><i class='bx bxs-trash'></i></button></div></li>`).join('') : '<p style="opacity:.7; text-align:center;">Nenhuma recorrência.</p>';
+        };
+
+        const renderBills = () => {
+            if (!billsList) return;
+            billsList.innerHTML = bills.length? bills.sort((a,b)=> new Date(a.due) - new Date(b.due)).map(b=> `<li class="finance-item" data-id="${b.id}"><div class="left"><span class="title">${Utils.escapeHTML(b.title)}</span><span class="meta">Vence em ${new Date(b.due).toLocaleDateString('pt-BR')} • ${Utils.escapeHTML(b.category||'-')}</span></div><div class="actions"><button class="soft-button icon-btn del-bl"><i class='bx bxs-trash'></i></button></div><div class="finance-amount out">${fmt(b.value)}</div></li>`).join('') : '<p style="opacity:.7; text-align:center;">Nenhuma conta a pagar.</p>';
+        };
+
+        const openModal = (m) => m && m.classList.remove('hidden');
+        const closeModal = (m) => m && m.classList.add('hidden');
+
+        const addTransaction = (tx) => { transactions.push({ id: Date.now(), ...tx }); Utils.saveToLocalStorage('fin_transactions', transactions); renderAll(); };
+        const deleteTransaction = (id) => { transactions = transactions.filter(t=> t.id!==id); Utils.saveToLocalStorage('fin_transactions', transactions); renderAll(); };
+
+        const saveBudget = (cat, amount) => { budgets[cat] = Number(amount)||0; Utils.saveToLocalStorage('fin_budgets', budgets); renderBudgets(); };
+        const deleteBudget = (cat) => { delete budgets[cat]; Utils.saveToLocalStorage('fin_budgets', budgets); renderBudgets(); };
+
+        const addSavings = (data) => { savings.push({ id: Date.now(), current: 0, ...data }); Utils.saveToLocalStorage('fin_savings', savings); renderSavings(); };
+        const incSavings = (id, amount) => { const i = savings.findIndex(s=>s.id===id); if (i>-1) { savings[i].current = Number(savings[i].current||0) + Number(amount||0); Utils.saveToLocalStorage('fin_savings', savings); renderSavings(); } };
+        const deleteSavings = (id) => { savings = savings.filter(s=> s.id!==id); Utils.saveToLocalStorage('fin_savings', savings); renderSavings(); };
+
+        const addRecurring = (r) => { recurring.push({ id: Date.now(), ...r }); Utils.saveToLocalStorage('fin_recurring', recurring); renderRecurring(); };
+        const deleteRecurring = (id) => { recurring = recurring.filter(x=> x.id!==id); Utils.saveToLocalStorage('fin_recurring', recurring); renderRecurring(); };
+
+        const addBill = (b) => { bills.push({ id: Date.now(), ...b }); Utils.saveToLocalStorage('fin_bills', bills); renderBills(); };
+        const deleteBill = (id) => { bills = bills.filter(x=> x.id!==id); Utils.saveToLocalStorage('fin_bills', bills); renderBills(); };
+
+        const renderAll = () => { renderFilters(); renderSummary(); renderTransactions(); renderBudgets(); renderSavings(); renderRecurring(); renderBills(); };
+
+        const applyRecurringForToday = () => {
+            const today = new Date(); const day = today.getDate(); const todayKey = Utils.getTodayString();
+            const appliedKey = 'fin_recurring_applied_'+todayKey;
+            if (Utils.loadFromLocalStorage(appliedKey, false)) return; // evitar duplicar no mesmo dia
+            recurring.forEach(r=> { if (Number(r.day)===day) { addTransaction({ type:r.type, value:r.value, category:r.category, date: todayKey, note: r.note||'recorrente' }); }});
+            Utils.saveToLocalStorage(appliedKey, true);
+        };
+
+        const init = () => {
+            if (!periodChips) return; // aba pode não estar montada
+            // filtros
+            periodChips.addEventListener('click', (e)=>{ const btn=e.target.closest('.category-btn'); if(!btn) return; currentPeriod = btn.dataset.period; Utils.saveToLocalStorage('fin_period', currentPeriod); renderAll(); });
+            categoryFilter.addEventListener('change', ()=>{ currentCategory = categoryFilter.value; Utils.saveToLocalStorage('fin_category', currentCategory); renderAll(); });
+
+            // transações
+            txOpenBtn && txOpenBtn.addEventListener('click', ()=> openModal(txModal));
+            txCancelBtn && txCancelBtn.addEventListener('click', ()=> closeModal(txModal));
+            txModal && txModal.addEventListener('click', (e)=>{ if (e.target===txModal) closeModal(txModal); });
+            txForm && txForm.addEventListener('submit', (e)=>{ e.preventDefault(); const tx = { type: document.getElementById('tr-type').value, value: Number(document.getElementById('tr-value').value||0), category: document.getElementById('tr-category').value.trim()||'Outros', date: document.getElementById('tr-date').value || Utils.getTodayString(), note: document.getElementById('tr-note').value.trim()||null }; addTransaction(tx); closeModal(txModal); txForm.reset(); });
+            txList && txList.addEventListener('click', (e)=>{ const li=e.target.closest('.finance-item'); if (!li) return; const id = Number(li.dataset.id); if (e.target.closest('.del-tx')) deleteTransaction(id); if (e.target.closest('.edit-tx')) { // simples: abre modal com valores
+                const t = transactions.find(x=>x.id===id); if (!t) return; openModal(txModal); document.getElementById('tr-type').value=t.type; document.getElementById('tr-value').value=t.value; document.getElementById('tr-category').value=t.category; document.getElementById('tr-date').value=t.date; document.getElementById('tr-note').value=t.note||''; txForm.onsubmit = (ev)=>{ ev.preventDefault(); t.type=document.getElementById('tr-type').value; t.value=Number(document.getElementById('tr-value').value||0); t.category=document.getElementById('tr-category').value.trim()||'Outros'; t.date=document.getElementById('tr-date').value || Utils.getTodayString(); t.note=document.getElementById('tr-note').value.trim()||null; Utils.saveToLocalStorage('fin_transactions', transactions); closeModal(txModal); renderAll(); txForm.onsubmit=null; }; }});
+
+            // budgets
+            bdgOpenBtn && bdgOpenBtn.addEventListener('click', ()=> openModal(bdgModal));
+            bdgCancelBtn && bdgCancelBtn.addEventListener('click', ()=> closeModal(bdgModal));
+            bdgModal && bdgModal.addEventListener('click', (e)=>{ if (e.target===bdgModal) closeModal(bdgModal); });
+            bdgForm && bdgForm.addEventListener('submit', (e)=>{ e.preventDefault(); const cat = document.getElementById('bdg-category').value.trim()||'Outros'; const amount = Number(document.getElementById('bdg-amount').value||0); saveBudget(cat, amount); closeModal(bdgModal); bdgForm.reset(); });
+            budgetsList && budgetsList.addEventListener('click', (e)=>{ const li=e.target.closest('.finance-item'); if(!li) return; const title = li.querySelector('.title')?.textContent?.trim(); if (e.target.closest('.del-bdg') && title) deleteBudget(title); });
+
+            // savings
+            svOpenBtn && svOpenBtn.addEventListener('click', ()=> openModal(svModal));
+            svCancelBtn && svCancelBtn.addEventListener('click', ()=> closeModal(svModal));
+            svModal && svModal.addEventListener('click', (e)=>{ if (e.target===svModal) closeModal(svModal); });
+            svForm && svForm.addEventListener('submit', (e)=>{ e.preventDefault(); const data = { title: document.getElementById('sv-title').value.trim()||'Meta', target: Number(document.getElementById('sv-target').value||0), due: document.getElementById('sv-due').value||null, note: document.getElementById('sv-note').value.trim()||null }; addSavings(data); closeModal(svModal); svForm.reset(); });
+            savingsList && savingsList.addEventListener('click', (e)=>{ const li=e.target.closest('.finance-item'); if(!li) return; const id = Number(li.dataset.id); if (e.target.closest('.del-sv')) deleteSavings(id); if (e.target.closest('.add-sv')) { const val = prompt('Quanto adicionar?'); const n = Number(val||0); if (n>0) incSavings(id, n); }});
+
+            // recurring
+            rcOpenBtn && rcOpenBtn.addEventListener('click', ()=> openModal(rcModal));
+            rcCancelBtn && rcCancelBtn.addEventListener('click', ()=> closeModal(rcModal));
+            rcModal && rcModal.addEventListener('click', (e)=>{ if (e.target===rcModal) closeModal(rcModal); });
+            rcForm && rcForm.addEventListener('submit', (e)=>{ e.preventDefault(); const r = { type: document.getElementById('rc-type').value, value: Number(document.getElementById('rc-value').value||0), category: document.getElementById('rc-category').value.trim()||'Outros', day: Number(document.getElementById('rc-day').value||1), note: document.getElementById('rc-note').value.trim()||null }; addRecurring(r); closeModal(rcModal); rcForm.reset(); });
+            recurringList && recurringList.addEventListener('click', (e)=>{ const li=e.target.closest('.finance-item'); if(!li) return; const id = Number(li.dataset.id); if (e.target.closest('.del-rc')) deleteRecurring(id); });
+
+            // bills
+            blOpenBtn && blOpenBtn.addEventListener('click', ()=> openModal(blModal));
+            blCancelBtn && blCancelBtn.addEventListener('click', ()=> closeModal(blModal));
+            blModal && blModal.addEventListener('click', (e)=>{ if (e.target===blModal) closeModal(blModal); });
+            blForm && blForm.addEventListener('submit', (e)=>{ e.preventDefault(); const b = { title: document.getElementById('bl-title').value.trim()||'Conta', value: Number(document.getElementById('bl-value').value||0), due: document.getElementById('bl-due').value||Utils.getTodayString(), category: document.getElementById('bl-category').value.trim()||null }; addBill(b); closeModal(blModal); blForm.reset(); });
+            billsList && billsList.addEventListener('click', (e)=>{ const li=e.target.closest('.finance-item'); if(!li) return; const id = Number(li.dataset.id); if (e.target.closest('.del-bl')) deleteBill(id); });
+
+            // bootstrap
+            applyRecurringForToday();
+            renderAll();
+        };
+
+        return { init, renderAll };
+    })();
+
+    // Init Finance on load so filters are ready when switching tabs
+    Finance.init && Finance.init();
 });
