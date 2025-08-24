@@ -814,12 +814,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const soundVolume = document.getElementById('sound-volume');
             const soundPlay = document.getElementById('sound-play');
             const soundStop = document.getElementById('sound-stop');
-            const SOUND_SOURCES = { rain: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_1b1dce7f54.mp3?filename=rain-ambient-110874.mp3', cafe: 'https://cdn.pixabay.com/download/audio/2022/03/22/audio_2db279b109.mp3?filename=coffee-shop-ambient-112191.mp3', wind: 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_3c4f225bc1.mp3?filename=wind-ambient-5883.mp3', waves: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_1a7b3b42a4.mp3?filename=sea-waves-110744.mp3' };
-            let audioEl = null;
-            const stopSound = () => { if (audioEl) { audioEl.pause(); audioEl.src = ''; audioEl = null; } };
-            soundPlay && soundPlay.addEventListener('click', () => { stopSound(); const src = SOUND_SOURCES[soundPreset.value] || SOUND_SOURCES.rain; audioEl = new Audio(src); audioEl.loop = true; audioEl.volume = parseFloat(soundVolume.value || '0.5'); audioEl.play().catch(()=>{}); });
+            const SOUND_SOURCES = { rain: 'assets/sounds/rain.mp3', cafe: 'assets/sounds/cafe.mp3', wind: 'assets/sounds/wind.mp3', waves: 'assets/sounds/waves.mp3' };
+            let audioEl = null; let audioCtx = null; let noiseNode = null;
+            const stopSound = () => { if (audioEl) { audioEl.pause(); audioEl.src = ''; audioEl = null; } if (noiseNode) { noiseNode.stop(); noiseNode.disconnect(); noiseNode = null; } if (audioCtx) { try { audioCtx.close(); } catch(_){} audioCtx = null; } };
+            const playNoiseFallback = () => { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); const bufferSize = 2 * audioCtx.sampleRate; const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const output = noiseBuffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) { output[i] = Math.random() * 2 - 1; } noiseNode = audioCtx.createBufferSource(); noiseNode.buffer = noiseBuffer; noiseNode.loop = true; const gain = audioCtx.createGain(); gain.gain.value = parseFloat(soundVolume.value || '0.5'); noiseNode.connect(gain).connect(audioCtx.destination); noiseNode.start(0); } catch(_){} };
+            soundPlay && soundPlay.addEventListener('click', async () => { stopSound(); const src = SOUND_SOURCES[soundPreset.value] || SOUND_SOURCES.rain; audioEl = new Audio(src); audioEl.loop = true; audioEl.volume = parseFloat(soundVolume.value || '0.5'); try { await audioEl.play(); } catch(e) { playNoiseFallback(); } });
             soundStop && soundStop.addEventListener('click', stopSound);
-            soundVolume && soundVolume.addEventListener('input', () => { if (audioEl) audioEl.volume = parseFloat(soundVolume.value || '0.5'); });
+            soundVolume && soundVolume.addEventListener('input', () => { const vol = parseFloat(soundVolume.value || '0.5'); if (audioEl) audioEl.volume = vol; if (audioCtx && !audioEl) { const gainNodes = []; // simplistic: recreate context
+                stopSound(); playNoiseFallback(); } });
 
             // Nutrição leve
             const nutritionForm = document.getElementById('nutrition-form');
