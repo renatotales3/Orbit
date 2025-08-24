@@ -160,6 +160,21 @@
                 </div>
             </div>
 
+            <div class="water-tracker-card">
+                <header class="water-header">
+                    <div class="metric-header">
+                        <i class='bx bx-calendar-week'></i>
+                        <h4>Resumo da Semana</h4>
+                    </div>
+                    <button id="share-weekly-summary-btn" class="soft-button icon-btn" aria-label="Compartilhar Resumo">
+                        <i class='bx bx-share-alt'></i>
+                    </button>
+                </header>
+                <div class="water-footer" style="padding:1.5rem;">
+                    <ul id="weekly-summary-list" style="list-style:none; display:flex; flex-direction:column; gap:0.8rem;"></ul>
+                </div>
+            </div>
+
             <div class="sleep-tracker-card">
                 <header class="sleep-header">
                     <div class="metric-header">
@@ -285,8 +300,39 @@
                        <label for="water-goal">Meta de Copos de Água</label>
                        <input type="number" id="water-goal" class="soft-input" min="1">
                    </div>
-               </div>
-           </div>
+                   <div class="setting-row">
+                       <label for="water-cup-ml">Tamanho do copo (ml)</label>
+                       <input type="number" id="water-cup-ml" class="soft-input" min="50" step="10">
+                   </div>
+                </div>
+            </div>
+            <div class="settings-card">
+                <header class="settings-card-header">
+                    <i class='bx bx-data'></i>
+                    <h2>Dados</h2>
+                </header>
+                <div class="settings-card-body">
+                    <div class="setting-row">
+                        <label>Gerenciar dados locais</label>
+                        <div style="display:flex; gap:1rem;">
+                            <button id="purge-old-data-btn" class="soft-button gray">Limpar > 180 dias</button>
+                            <button id="reset-all-data-btn" class="soft-button danger">Resetar Tudo</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-card">
+                <header class="settings-card-header">
+                    <i class='bx bx-help-circle'></i>
+                    <h2>Tutorial</h2>
+                </header>
+                <div class="settings-card-body">
+                    <div class="setting-row">
+                        <label>Como usar o Life OS</label>
+                        <button id="open-tutorial-btn" class="soft-button">Abrir Tutorial</button>
+                    </div>
+                </div>
+            </div>
         </section>
 
     </main>
@@ -378,6 +424,19 @@
                     <button type="button" id="sleep-quality-cancel" class="soft-button gray">Cancelar</button>
                     <button type="button" id="sleep-quality-confirm" class="soft-button">Confirmar</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tutorial-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3>Como usar o Life OS</h3>
+                <button id="close-tutorial-btn-x" class="soft-button close-btn"><i class='bx bx-x'></i></button>
+            </header>
+            <div id="tutorial-content" style="max-height:60vh; overflow:auto; display:flex; flex-direction:column; gap:1rem;"></div>
+            <div class="modal-actions">
+                <button type="button" id="close-tutorial-btn" class="soft-button gray">Fechar</button>
             </div>
         </div>
     </div>

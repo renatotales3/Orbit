@@ -488,12 +488,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- MÓDULO DE MÉTRICAS (Hidratação e Sono) ---
     const Metrics = (() => {
         const waterGoalInput = document.getElementById('water-goal');
+        const waterCupMlInput = document.getElementById('water-cup-ml');
         const decreaseWaterBtn = document.getElementById('decrease-water-btn');
         const increaseWaterBtn = document.getElementById('increase-water-btn');
         const waterCountEl = document.getElementById('water-count');
         const waterGoalTextEl = document.getElementById('water-goal-text');
         const waterProgressEl = document.getElementById('water-progress');
         const waterFeedbackEl = document.getElementById('water-feedback');
+        const weeklySummaryList = document.getElementById('weekly-summary-list');
+        const weeklyShareBtn = document.getElementById('share-weekly-summary-btn');
 
         const sleepTrackerEl = document.querySelector('.sleep-tracker-card');
         const sleepForm = document.getElementById('sleep-form');
@@ -518,6 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let pendingSleepData = null;
 
         let waterGoal = Utils.loadFromLocalStorage('waterGoal', 8);
+        let waterCupMl = Utils.loadFromLocalStorage('waterCupMl', 250);
 
         const WATER_FEEDBACK = { 0: "Vamos começar o dia bem hidratado!", 25: "Bom começo! Continue assim.", 50: "Você está na metade do caminho!", 75: "Quase lá, falta pouco!", 100: "Meta atingida! Você mandou bem!" };
         const SLEEP_FEEDBACK = { 4: "Um sono muito curto. Tente descansar mais hoje.", 6: "Um pouco abaixo do ideal. Que tal ir para a cama mais cedo?", 9: "Ótima noite de sono! Isso vai te dar energia para o dia.", 12: "Um sono longo e restaurador! Seu corpo agradece." };
@@ -537,7 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const todayData = DailyData.getTodayData();
 
             waterCountEl.textContent = todayData.water || 0;
-            waterGoalTextEl.textContent = `/ ${waterGoal} copos`;
+            waterGoalTextEl.textContent = `/ ${waterGoal} copos (${waterCupMl} ml)`;
             const waterPercentage = Math.min(100, ((todayData.water || 0) / waterGoal) * 100);
             waterProgressEl.value = waterPercentage;
             waterFeedbackEl.textContent = getFeedback(waterPercentage, WATER_FEEDBACK);
@@ -553,6 +557,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 sleepTrackerEl.classList.remove('answered');
                 sleepForm.reset();
             }
+        };
+        const renderWeeklySummary = () => {
+            if (!weeklySummaryList) return;
+            const allData = DailyData.getAllData();
+            const now = new Date();
+            const start = new Date(now); start.setDate(now.getDate() - 6);
+            const span = allData.filter(d => new Date(d.date) >= new Date(start.toISOString().split('T')[0]));
+            const totalWater = span.reduce((a,d)=> a + (d.water||0), 0);
+            const totalWaterMl = totalWater * waterCupMl;
+            const sleepAvg = (()=>{ const minutes = span.filter(d=>d.sleep).map(d=>d.sleep.totalMinutes); if(!minutes.length) return '-'; const avg = Math.round(minutes.reduce((a,b)=>a+b,0)/minutes.length); const h = Math.floor(avg/60), m = avg%60; return `${h}h ${m}m`; })();
+            const focusStats = Utils.loadFromLocalStorage('focusStats', { sessions: [] });
+            const focusSpan = focusStats.sessions.filter(s=> new Date(s.date) >= new Date(start.toISOString().split('T')[0]));
+            const focusMin = focusSpan.reduce((a,s)=> a + (s.minutes||0), 0);
+            const focusSes = focusSpan.length;
+            weeklySummaryList.innerHTML = [
+                `<li>Água: ${totalWater} copos (${totalWaterMl} ml)</li>`,
+                `<li>Sono médio: ${sleepAvg}</li>`,
+                `<li>Foco: ${focusMin} min • ${focusSes} sessões</li>`
+            ].join('');
+        };
+        const shareWeeklySummary = () => {
+            const text = weeklySummaryList?.innerText || 'Resumo da semana - Life OS';
+            if (navigator.share) { navigator.share({ text }).catch(()=>{}); }
         };
 
         const calculateSleep = (bedTime, wakeTime) => {
@@ -605,14 +632,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const todayData = DailyData.getTodayData();
                 todayData.waterGoal = waterGoal;
                 DailyData.saveData();
-                render();
+                render(); renderWeeklySummary();
             });
+            if (waterCupMlInput) {
+                waterCupMlInput.value = waterCupMl;
+                waterCupMlInput.addEventListener('change', ()=>{ waterCupMl = Math.max(50, parseInt(waterCupMlInput.value)||250); Utils.saveToLocalStorage('waterCupMl', waterCupMl); render(); renderWeeklySummary(); });
+            }
 
             increaseWaterBtn.addEventListener('click', () => {
                 const todayData = DailyData.getTodayData();
                 todayData.water = (todayData.water || 0) + 1;
                 DailyData.saveData();
-                render();
+                render(); renderWeeklySummary();
             });
 
             decreaseWaterBtn.addEventListener('click', () => {
@@ -620,7 +651,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (todayData.water && todayData.water > 0) {
                     todayData.water -= 1;
                     DailyData.saveData();
-                    render();
+                    render(); renderWeeklySummary();
                 }
             });
 
@@ -654,7 +685,8 @@ document.addEventListener('DOMContentLoaded', () => {
             closeHistoryBtnX.addEventListener('click', closeHistoryModal);
             historyModal.addEventListener('click', e => { if(e.target === historyModal) closeHistoryModal(); });
 
-            render();
+            weeklyShareBtn && weeklyShareBtn.addEventListener('click', shareWeeklySummary);
+            render(); renderWeeklySummary();
         };
 
         return { init, render };
@@ -670,7 +702,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const carryoverMitsBtn = document.getElementById('carryover-mits-btn');
         let mits = Utils.loadFromLocalStorage('mits', []);
 
-        const renderMits = () => { mitsList.innerHTML = mits.map((m, i) => `<li class="mit-item" data-index="${i}"><span>${Utils.escapeHTML(m.text)}</span><div class="task-item-buttons"><button class="soft-button icon-btn delete-mit-btn"><i class='bx bxs-trash'></i></button></div></li>`).join(''); };
+        const renderMits = () => { mitsList.innerHTML = mits.map((m, i) => `<li class="mit-item" data-index="${i}"><span class="mit-text">${Utils.escapeHTML(m.text)}</span><div class="task-item-buttons"><button class="soft-button icon-btn delete-mit-btn"><i class='bx bxs-trash'></i></button></div></li>`).join(''); };
         const addMit = (text) => { const t = text?.trim(); if(!t) return; if (mits.length >= 3) return alert('Limite de 3 MITs.'); mits.push({ text: t }); Utils.saveToLocalStorage('mits', mits); renderMits(); };
         const carryoverMits = () => { const today = Utils.getTodayString(); const key = `mits_${today}`; Utils.saveToLocalStorage(key, mits); // simples: só persistir snapshot do dia
             // levar para amanhã
@@ -702,7 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const tbDuration = document.getElementById('tb-duration');
         const tbList = document.getElementById('timeboxing-list');
         let timeboxes = Utils.loadFromLocalStorage('timeboxes', []);
-        const renderTimeboxes = () => { tbList.innerHTML = timeboxes.map((tb, i) => `<li class="timeboxing-item" data-index="${i}"><span>${Utils.escapeHTML(tb.label)} — ${tb.start} • ${tb.duration}m</span><div class="task-item-buttons"><button class="soft-button icon-btn delete-tb-btn"><i class='bx bxs-trash'></i></button></div></li>`).join(''); };
+        const renderTimeboxes = () => { tbList.innerHTML = timeboxes.map((tb, i) => `<li class="timeboxing-item" data-index="${i}"><span class="tb-label">${Utils.escapeHTML(tb.label)}</span><span> — ${tb.start} • ${tb.duration}m</span><div class="task-item-buttons"><button class="soft-button icon-btn delete-tb-btn"><i class='bx bxs-trash'></i></button></div></li>`).join(''); };
 
         // Review do Dia
         const reviewForm = document.getElementById('review-form');
@@ -720,14 +752,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const init = () => {
             // MITs
             addMitBtn && addMitBtn.addEventListener('click', () => { addMit(mitInput.value); mitInput.value = ''; });
-            mitsList && mitsList.addEventListener('click', (e) => { const deleteBtn = e.target.closest('.delete-mit-btn'); if (!deleteBtn) return; const i = Number(e.target.closest('.mit-item')?.dataset.index); if(Number.isInteger(i)) { mits.splice(i,1); Utils.saveToLocalStorage('mits', mits); renderMits(); }});
+            mitsList && mitsList.addEventListener('click', (e) => {
+                const item = e.target.closest('.mit-item'); if (!item) return;
+                if (e.target.closest('.delete-mit-btn')) { const i = Number(item.dataset.index); if(Number.isInteger(i)) { mits.splice(i,1); Utils.saveToLocalStorage('mits', mits); renderMits(); } return; }
+                const textEl = item.querySelector('.mit-text'); if (!textEl) return;
+                const i = Number(item.dataset.index); if(!Number.isInteger(i)) return;
+                const current = mits[i].text;
+                const input = document.createElement('input'); input.type='text'; input.className='soft-input'; input.value=current;
+                textEl.replaceWith(input); input.focus();
+                const commit = () => { mits[i].text = input.value.trim() || current; Utils.saveToLocalStorage('mits', mits); renderMits(); };
+                input.addEventListener('blur', commit); input.addEventListener('keypress', ev => { if (ev.key==='Enter') { commit(); }});
+            });
             clearMitsBtn && clearMitsBtn.addEventListener('click', () => { mits = []; Utils.saveToLocalStorage('mits', mits); renderMits(); });
             carryoverMitsBtn && carryoverMitsBtn.addEventListener('click', carryoverMits);
             renderMits();
 
             // Timeboxing
             tbForm && tbForm.addEventListener('submit', (e) => { e.preventDefault(); const label = tbLabel.value.trim(); if (!label) return; const start = tbStart.value || '--:--'; const duration = parseInt(tbDuration.value) || 30; timeboxes.push({ label, start, duration }); Utils.saveToLocalStorage('timeboxes', timeboxes); tbLabel.value=''; tbStart.value=''; tbDuration.value=''; renderTimeboxes(); });
-            tbList && tbList.addEventListener('click', (e) => { const deleteBtn = e.target.closest('.delete-tb-btn'); if (!deleteBtn) return; const i = Number(e.target.closest('.timeboxing-item')?.dataset.index); if(Number.isInteger(i)) { timeboxes.splice(i,1); Utils.saveToLocalStorage('timeboxes', timeboxes); renderTimeboxes(); }});
+            tbList && tbList.addEventListener('click', (e) => {
+                const item = e.target.closest('.timeboxing-item'); if(!item) return;
+                if (e.target.closest('.delete-tb-btn')) { const i = Number(item.dataset.index); if(Number.isInteger(i)) { timeboxes.splice(i,1); Utils.saveToLocalStorage('timeboxes', timeboxes); renderTimeboxes(); } return; }
+                const labelEl = item.querySelector('.tb-label'); if(!labelEl) return;
+                const i = Number(item.dataset.index); if(!Number.isInteger(i)) return;
+                const current = timeboxes[i].label;
+                const input = document.createElement('input'); input.type='text'; input.className='soft-input'; input.value=current;
+                labelEl.replaceWith(input); input.focus();
+                const commit = () => { timeboxes[i].label = input.value.trim() || current; Utils.saveToLocalStorage('timeboxes', timeboxes); renderTimeboxes(); };
+                input.addEventListener('blur', commit); input.addEventListener('keypress', ev => { if (ev.key==='Enter') { commit(); }});
+            });
             renderTimeboxes();
 
             // Review
