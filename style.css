@@ -298,3 +298,9 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 .focus-mits-card .add-task-container { flex-wrap: nowrap; }
 #mit-input { flex: 1 1 auto; min-width: 0; }
 .toggle-button.active .toggle-circle { transform: translateX(2.9rem); background-color: var(--primary-color); }
+
+/******** Toque/Focus visual cleanup (mobile) ********/
+* { -webkit-tap-highlight-color: transparent; }
+button, a, input, textarea, select { outline: none; }
+button:focus, a:focus, input:focus, textarea:focus, select:focus { outline: none; box-shadow: none; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid transparent; box-shadow: none; }
