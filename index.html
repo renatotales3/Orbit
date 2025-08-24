@@ -38,7 +38,7 @@
                 <div class="todo-app">
                     <header class="todo-header">
                         <h2>Tarefas do Dia</h2>
-                        <button id="clear-completed-tasks-btn" class="soft-button icon-btn hidden" title="Limpar Concluídas">
+                        <button id="clear-completed-tasks-btn" class="soft-button icon-btn md hidden" title="Limpar Concluídas">
                             <i class='bx bxs-eraser'></i>
                         </button>
                     </header>
@@ -51,7 +51,7 @@
                                 </button>
                                 <div id="priority-picker" class="priority-picker hidden"></div>
                             </div>
-                            <button id="add-task-btn" class="soft-button" aria-label="Adicionar Tarefa"><i class='bx bx-plus'></i></button>
+                            <button id="add-task-btn" class="soft-button icon-btn lg" aria-label="Adicionar Tarefa"><i class='bx bx-plus'></i></button>
                         </div>
                         <ul id="task-list"></ul>
                     </div>
@@ -70,7 +70,7 @@
                     <div class="todo-body">
                         <div class="add-task-container">
                             <input type="text" id="mit-input" class="soft-input" placeholder="Adicionar MIT...">
-                            <button id="add-mit-btn" class="soft-button" aria-label="Adicionar MIT"><i class='bx bx-plus'></i></button>
+                            <button id="add-mit-btn" class="soft-button icon-btn lg" aria-label="Adicionar MIT"><i class='bx bx-plus'></i></button>
                         </div>
                         <ul id="mits-list"></ul>
                         <p style="font-size:1.2rem; opacity:0.7; margin-top:0.5rem;">Máx. 3 itens</p>
@@ -101,7 +101,7 @@
                             <input type="text" id="tb-label" class="soft-input" placeholder="Bloco (ex.: Inglês)">
                             <input type="time" id="tb-start" class="soft-input" style="max-width: 12rem;">
                             <input type="number" id="tb-duration" class="soft-input" placeholder="min" style="max-width: 9rem;">
-                            <button type="submit" class="soft-button"><i class='bx bx-plus'></i></button>
+                            <button type="submit" class="soft-button icon-btn lg"><i class='bx bx-plus'></i></button>
                         </form>
                         <ul id="timeboxing-list"></ul>
                     </div>
@@ -144,17 +144,17 @@
                         <i class='bx bxs-droplet'></i>
                         <h4>Hidratação</h4>
                     </div>
-                    <button id="water-history-btn" class="soft-button icon-btn" aria-label="Ver Histórico de Hidratação">
+                    <button id="water-history-btn" class="soft-button icon-btn md" aria-label="Ver Histórico de Hidratação">
                         <i class='bx bx-history'></i>
                     </button>
                 </header>
                 <div class="water-body">
-                    <button id="decrease-water-btn" class="soft-button icon-btn metric-control-btn"><i class='bx bx-minus'></i></button>
+                    <button id="decrease-water-btn" class="soft-button icon-btn md metric-control-btn"><i class='bx bx-minus'></i></button>
                     <div class="water-display">
                         <span id="water-count">0</span>
                         <span id="water-goal-text">/ 8 copos</span>
                     </div>
-                    <button id="increase-water-btn" class="soft-button icon-btn metric-control-btn"><i class='bx bx-plus'></i></button>
+                    <button id="increase-water-btn" class="soft-button icon-btn md metric-control-btn"><i class='bx bx-plus'></i></button>
                 </div>
                 <div class="water-footer">
                     <progress id="water-progress" value="0" max="100"></progress>
@@ -168,7 +168,7 @@
                         <i class='bx bx-calendar-week'></i>
                         <h4>Resumo da Semana</h4>
                     </div>
-                    <button id="share-weekly-summary-btn" class="soft-button icon-btn" aria-label="Compartilhar Resumo">
+                    <button id="share-weekly-summary-btn" class="soft-button icon-btn md" aria-label="Compartilhar Resumo">
                         <i class='bx bx-share-alt'></i>
                     </button>
                 </header>
@@ -182,7 +182,7 @@
                     <div class="metric-header">
                         <h4>Sono</h4>
                     </div>
-                    <button id="sleep-history-btn" class="soft-button icon-btn" aria-label="Ver Histórico de Sono">
+                    <button id="sleep-history-btn" class="soft-button icon-btn md" aria-label="Ver Histórico de Sono">
                         <i class='bx bx-history'></i>
                     </button>
                 </header>
@@ -222,7 +222,7 @@
             <div id="daily-journal" class="daily-journal">
                 <header class="journal-header">
                     <h4>Reflexão do Dia</h4>
-                    <button id="show-journal-history-btn" class="soft-button icon-btn" aria-label="Ver Histórico de Reflexões">
+                    <button id="show-journal-history-btn" class="soft-button icon-btn md" aria-label="Ver Histórico de Reflexões">
                         <i class='bx bx-history'></i>
                     </button>
                 </header>
@@ -388,7 +388,7 @@
         <div class="modal-content">
             <header class="modal-header">
                 <h3>Histórico de Reflexões</h3>
-                <button id="close-journal-history-btn-x" class="soft-button close-btn"><i class='bx bx-x'></i></button>
+                <button id="close-journal-history-btn-x" class="soft-button icon-btn md close-btn"><i class='bx bx-x'></i></button>
             </header>
             <ul id="journal-history-list"></ul>
             <div class="modal-actions">
@@ -401,7 +401,7 @@
         <div class="modal-content">
             <header class="modal-header">
                 <h3 id="metrics-history-title">Histórico</h3>
-                <button id="close-metrics-history-btn-x" class="soft-button close-btn"><i class='bx bx-x'></i></button>
+                <button id="close-metrics-history-btn-x" class="soft-button icon-btn md close-btn"><i class='bx bx-x'></i></button>
             </header>
             <ul id="metrics-history-list"></ul>
             <div class="modal-actions">
@@ -445,7 +445,7 @@
         <div class="modal-content">
             <header class="modal-header">
                 <h3>Como usar o Life OS</h3>
-                <button id="close-tutorial-btn-x" class="soft-button close-btn"><i class='bx bx-x'></i></button>
+                <button id="close-tutorial-btn-x" class="soft-button icon-btn md close-btn"><i class='bx bx-x'></i></button>
             </header>
             <div id="tutorial-content" style="max-height:60vh; overflow:auto; display:flex; flex-direction:column; gap:1rem;"></div>
             <div class="modal-actions">

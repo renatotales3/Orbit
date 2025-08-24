@@ -85,11 +85,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Salvar posição do scroll da aba atual
+            const currentActive = document.querySelector('.page.active');
+            if (currentActive) {
+                currentActive.dataset.scrollPosition = content.scrollTop;
+            }
+
             pages.forEach(p => p.classList.remove('active'));
             targetPage.classList.add('active');
             allNavButtons.forEach(b => b.classList.toggle('active', b.dataset.target === targetId));
             Utils.saveToLocalStorage('activeTab', targetId);
-            content.scrollTop = 0;
+            
+            // Restaurar posição do scroll se existir
+            const savedScrollPosition = targetPage.dataset.scrollPosition;
+            if (savedScrollPosition) {
+                content.scrollTop = parseInt(savedScrollPosition);
+            } else {
+                content.scrollTop = 0;
+            }
 
             // Renderiza módulos relevantes para a aba ativa para garantir que estejam atualizados
             if (targetId === 'bem-estar') {
@@ -175,7 +188,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const render = () => {
             const sortedTasks = [...tasks].sort((a, b) => a.priority - b.priority);
-            taskList.innerHTML = sortedTasks.map(createTaskHTML).join('');
+            
+            if (sortedTasks.length === 0) {
+                taskList.innerHTML = `
+                    <div class="empty-state">
+                        <i class='bx bx-list-ul'></i>
+                        <h4>Nenhuma tarefa ainda</h4>
+                        <p>Adicione sua primeira tarefa do dia para começar a organizar seu foco.</p>
+                    </div>
+                `;
+            } else {
+                taskList.innerHTML = sortedTasks.map(createTaskHTML).join('');
+            }
 
             const hasCompleted = tasks.some(task => task.completed);
             clearCompletedBtn.classList.toggle('hidden', !hasCompleted);
@@ -184,6 +208,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const add = (taskData) => { 
             const text = taskData.text?.trim();
             if (text) { 
+                // Loading state feedback
+                const addBtn = document.getElementById('add-task-btn');
+                if (addBtn) {
+                    addBtn.classList.add('loading');
+                    setTimeout(() => addBtn.classList.remove('loading'), 200);
+                }
+                
                 const newTask = { 
                     id: Date.now(),
                     text: text, 
@@ -211,8 +242,17 @@ document.addEventListener('DOMContentLoaded', () => {
             taskPriorityBtn.addEventListener('click', e => { e.stopPropagation(); priorityPicker.classList.toggle('hidden'); });
             priorityPicker.addEventListener('click', e => { const option = e.target.closest('.priority-option'); if (option) { currentTaskPriority = parseInt(option.dataset.priority); updatePriorityBtn(); priorityPicker.classList.add('hidden'); }});
             document.addEventListener('click', () => priorityPicker.classList.add('hidden'));
-            addTaskBtn.addEventListener('click', () => { add({ text: taskInput.value, priority: currentTaskPriority }); taskInput.value = ""; });
-            taskInput.addEventListener('keypress', e => { if (e.key === 'Enter') { add({ text: taskInput.value, priority: currentTaskPriority }); taskInput.value = ""; }});
+            addTaskBtn.addEventListener('click', () => { 
+                add({ text: taskInput.value, priority: currentTaskPriority }); 
+                taskInput.value = ""; 
+                taskInput.focus(); // Manter foco para adicionar próxima tarefa
+            });
+            taskInput.addEventListener('keypress', e => { 
+                if (e.key === 'Enter') { 
+                    add({ text: taskInput.value, priority: currentTaskPriority }); 
+                    taskInput.value = ""; 
+                }
+            });
 
             clearCompletedBtn.addEventListener('click', () => {
                 tasks = tasks.filter(task => !task.completed);
@@ -282,7 +322,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const createSubtaskHTML = st => `<li class="subtask-item" data-id="${st.id}"><div class="subtask-item-content"><button class="complete-subtask-btn ${st.completed ? 'completed' : ''}"><i class='bx bx-check-circle'></i></button><span class="subtask-text ${st.completed ? 'completed' : ''}">${st.text}</span></div><div class="subtask-actions"><button class="soft-button icon-btn add-to-focus-btn" title="Adicionar ao Foco do Dia"><i class='bx bx-list-plus'></i></button><button class="soft-button icon-btn delete-subtask-btn" title="Excluir Subtarefa"><i class='bx bxs-trash'></i></button></div></li>`;
         const createGoalHTML = goal => { const progress = goal.subtasks.length > 0 ? (goal.subtasks.filter(st => st.completed).length / goal.subtasks.length) * 100 : 0; return `<li class="goal-item" data-id="${goal.id}"><div class="goal-header"><span class="goal-title">${goal.title}</span><div class="goal-actions"><button class="soft-button icon-btn edit-goal-btn" title="Editar Meta"><i class='bx bxs-pencil'></i></button><button class="soft-button icon-btn delete-goal-btn" title="Excluir Meta"><i class='bx bxs-trash'></i></button></div></div><div class="goal-progress"><div class="progress-bar-container"><div class="progress-bar" style="width: ${progress.toFixed(0)}%"></div></div></div><div class="goal-details"><div class="goal-details-content"><div class="goal-categories">${goal.categories.map(cat => `<span class="goal-category" style="background-color:${ALL_CATEGORIES[cat] || '#6c757d'}">${cat}</span>`).join('')}</div><p><strong>Motivação:</strong> ${goal.motivation || 'N/A'}</p><p><strong>Data Alvo:</strong> ${goal.targetDate ? Utils.formatDateToBR(goal.targetDate) : 'N/A'}</p><ul class="subtask-list">${goal.subtasks.map(createSubtaskHTML).join('')}</ul><form class="add-subtask-form"><input type="text" class="soft-input subtask-input" placeholder="Novo passo..."><button type="submit" class="soft-button add-subtask-btn"><i class='bx bx-plus'></i></button></form></div></div></li>`; };
 
-        const render = () => { goalsList.innerHTML = goals.map(createGoalHTML).join(''); };
+        const render = () => { 
+            if (goals.length === 0) {
+                goalsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class='bx bx-target-lock'></i>
+                        <h4>Nenhuma meta definida</h4>
+                        <p>Crie sua primeira meta para começar a acompanhar seus objetivos.</p>
+                    </div>
+                `;
+            } else {
+                goalsList.innerHTML = goals.map(createGoalHTML).join('');
+            }
+        };
         const openGoalModal = (mode = 'add', goalId = null) => { goalForm.reset(); goalForm.dataset.mode = mode; goalForm.dataset.goalId = goalId; categoryContainer.innerHTML = Object.keys(ALL_CATEGORIES).map(cat => `<button type="button" class="category-btn">${cat}</button>`).join(''); if (mode === 'edit' && goalId !== null) { modalTitle.textContent = "Editar Meta"; const goal = goals.find(g => g.id === goalId); document.getElementById('goal-title-input').value = goal.title; document.getElementById('goal-motivation-input').value = goal.motivation; document.getElementById('goal-date-input').value = goal.targetDate; categoryContainer.querySelectorAll('.category-btn').forEach(btn => { if (goal.categories.includes(btn.textContent)) btn.classList.add('active'); }); } else { modalTitle.textContent = "Criar Nova Meta"; } goalModal.classList.remove('hidden'); };
         const closeGoalModal = () => goalModal.classList.add('hidden');
 
