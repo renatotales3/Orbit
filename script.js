@@ -938,7 +938,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <h4>Bem‑estar</h4>
 <h5>Hidratação</h5>
 <ul>
-  <li>Ajuste a meta em unidades e a unidade em ml por passo.</li>
+  <li>Ajuste a meta em unidades e a unidade em ml por copo.</li>
   <li>Exemplo: meta 8 copos de 250 ml (2 L/dia).</li>
   <li>Use +/– para registrar.</li>
   </ul>
@@ -978,7 +978,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <ul>
   <li>Aparência: tema e cor de destaque.</li>
   <li>Pomodoro: tempos de foco e pausas.</li>
-  <li>Hidratação: meta (unidades) e unidade (ml por passo).</li>
+  <li>Hidratação: meta (unidades) e unidade (ml por copo).</li>
   <li>Dados: limpar históricos antigos e resetar tudo (cuidado).</li>
   </ul>
 
