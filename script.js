@@ -390,10 +390,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const Mood = (() => {
         const moodOptionsContainer = document.getElementById('mood-options');
         const MOODS = { 5: { icon: 'bxs-happy-heart-eyes', label: 'Ótimo', class: 'mood-5' }, 4: { icon: 'bxs-smile', label: 'Bom', class: 'mood-4' }, 3: { icon: 'bxs-meh', label: 'Normal', class: 'mood-3' }, 2: { icon: 'bxs-meh-alt', label: 'Ruim', class: 'mood-2' }, 1: { icon: 'bxs-sad', label: 'Terrível', class: 'mood-1' } };
+        const MOOD_JOKES = { 5: 'Astronauta do bom humor 🚀', 4: 'Café passado na hora ☕', 3: 'Modo avião (mas com Wi‑Fi) ✈️', 2: 'Precisa de um meme urgente 📉', 1: 'Chamando reforços: cochilo e água 🆘' };
+        const moodNoteEl = document.createElement('p'); moodNoteEl.style.textAlign='center'; moodNoteEl.style.fontSize='1.2rem'; moodNoteEl.style.opacity='0.8';
 
         const render = () => {
              moodOptionsContainer.innerHTML = Object.keys(MOODS).sort((a, b) => b - a).map(key => `<div class="mood-option"><button class="mood-btn ${MOODS[key].class}" data-mood="${key}"><i class='bx ${MOODS[key].icon}'></i></button><span class="mood-label">${MOODS[key].label}</span></div>`).join('');
              loadMoodState();
+             // anexar nota engraçada abaixo do picker
+             moodOptionsContainer.parentElement?.appendChild(moodNoteEl);
         }
 
         const loadMoodState = () => {
@@ -402,6 +406,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (todayData.mood) {
                 const btnToActivate = moodOptionsContainer.querySelector(`.mood-btn[data-mood="${todayData.mood}"]`);
                 if (btnToActivate) btnToActivate.classList.add('active');
+                moodNoteEl.textContent = MOOD_JOKES[todayData.mood] || '';
+            } else {
+                moodNoteEl.textContent = '';
             }
         };
 
@@ -595,12 +602,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const focusSpan = focusStats.sessions.filter(s=> new Date(s.date) >= new Date(start.toISOString().split('T')[0]));
             const focusMin = focusSpan.reduce((a,s)=> a + (s.minutes||0), 0);
             const focusSes = focusSpan.length;
-            const moodAvg = (()=>{ const vals = span.map(d=> Number(d.mood||0)).filter(v=> v>0); if(!vals.length) return '-'; const avg = (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1); return `${avg}/5`; })();
+            const moodAvgVal = (()=>{ const vals = span.map(d=> Number(d.mood||0)).filter(v=> v>0); if(!vals.length) return null; return Number((vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)); })();
+            const moodAvg = moodAvgVal ? `${moodAvgVal}/5` : '-';
+            const MOOD_WEEK_JOKES = [ {max:1.9, text:'Semana pedindo feriado 😴'}, {max:2.9, text:'Precisamos de memes e sol ☀️'}, {max:3.9, text:'Ok, mas pode melhorar 👍'}, {max:4.5, text:'Clima excelente! 🚀'}, {max:5.1, text:'MVP do bom humor! 🏆'} ];
+            const moodNote = moodAvgVal ? (MOOD_WEEK_JOKES.find(j=> moodAvgVal <= j.max)?.text || '') : '';
             weeklySummaryList.innerHTML = [
                 `<li>Água: ${totalWater} copos (${totalWaterMl} ml)</li>`,
                 `<li>Sono médio: ${sleepAvg}</li>`,
                 `<li>Foco: ${focusMin} min • ${focusSes} sessões</li>`,
-                `<li>Humor médio: ${moodAvg}</li>`
+                `<li>Humor médio: ${moodAvg} ${moodNote?('— '+moodNote):''}</li>`
             ].join('');
         };
         const shareWeeklySummary = () => {
