@@ -604,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const focusSes = focusSpan.length;
             const moodAvgVal = (()=>{ const vals = span.map(d=> Number(d.mood||0)).filter(v=> v>0); if(!vals.length) return null; return Number((vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)); })();
             const moodAvg = moodAvgVal ? `${moodAvgVal}/5` : '-';
-            const MOOD_WEEK_JOKES = [ {max:1.9, text:'Semana pedindo feriado 😴'}, {max:2.9, text:'Precisamos de memes e sol ☀️'}, {max:3.9, text:'Ok, mas pode melhorar 👍'}, {max:4.5, text:'Clima excelente! 🚀'}, {max:5.1, text:'MVP do bom humor! 🏆'} ];
+            const MOOD_WEEK_JOKES = [ {max:1.9, text:'Semana pedindo feriado'}, {max:2.9, text:'Precisamos de memes e sol'}, {max:3.9, text:'Ok, mas pode melhorar'}, {max:4.5, text:'Clima excelente'}, {max:5.1, text:'MVP do bom humor'} ];
             const moodNote = moodAvgVal ? (MOOD_WEEK_JOKES.find(j=> moodAvgVal <= j.max)?.text || '') : '';
             weeklySummaryList.innerHTML = [
                 `<li>Água: ${totalWater} passos (${totalWaterMl} ml)</li>`,

@@ -325,19 +325,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 * { scrollbar-width: none; -ms-overflow-style: none; }
 *::-webkit-scrollbar { width: 0; height: 0; }
 
-/* Headers: layout robusto e espaçamento padrão */
-.todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header, .water-header, .sleep-header { flex-wrap: nowrap; }
-/* Apenas o ícone à esquerda herda a cor primária */
-.todo-header > i, .pomodoro-header > i, .goals-header > i, .habits-header > i, .journal-header > i { color: var(--primary-color); font-size: 2.4rem; }
-/* Espaço entre ícone e título como Ajustes */
+/* Headers unificados: sem gap global, spacing via margin-left e grupo metric-header */
+.todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header, .water-header, .sleep-header { display: flex; align-items: center; gap: 0; }
 .todo-header > i + h2, .pomodoro-header > i + h2, .goals-header > i + h2, .habits-header > i + h2, .journal-header > i + h4 { margin-left: 1.2rem; }
-/* Título ocupa restante, sem quebrar layout */
-.todo-header h2, .pomodoro-header h2, .goals-header h2, .habits-header h2, .journal-header h4 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-/* Ações travadas à direita */
-.todo-header .soft-button.icon-btn, .goals-header .soft-button, .habits-header .soft-button, .journal-header .soft-button, .water-header .soft-button.icon-btn, .sleep-header .soft-button.icon-btn { margin-left: auto; flex-shrink: 0; }
+.water-header .metric-header, .sleep-header .metric-header { display: flex; align-items: center; gap: 1.2rem; }
+/* Ações no extremo direito */
+.todo-header .soft-button.icon-btn, .goals-header .soft-button, .habits-header .soft-button, .journal-header .soft-button, .water-header .soft-button.icon-btn, .sleep-header .soft-button.icon-btn { margin-left: auto; }
 
-/* MIT: alinhar botões extremos e deixar meio vago */
-.focus-mits-card .todo-body > div:last-child { justify-content: space-between; }
+/* MIT ações: extremos e largura total */
+.focus-mits-card .todo-body > div:last-child { display: flex; justify-content: space-between; width: 100%; }
 
 /* Padronização de cor dos ícones de ação */
 .soft-button.icon-btn, .soft-button.icon-btn i { color: var(--icon-color) !important; }
