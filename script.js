@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
             Journal.init();
             Metrics.init();
             FocusExtras.init();
-            Fitness.init();
+            // Fitness removido
+            // Fitness.init && Fitness.init();
 
             // Lógica de inicialização corrigida
             const content = document.querySelector('.content');
@@ -83,8 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 Goals.render();
                 Tasks.render();
                 FocusExtras.renderStats();
-            } else if (targetId === 'fitness') {
-                // Fitness não requer re-render explícito além do próprio estado inicial
             }
         };
 
@@ -754,151 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return { init, renderStats, onFocusSessionComplete };
     })();
 
-    // --- MÓDULO FITNESS ---
-    const Fitness = (() => {
-        // Workouts simples
-        const workoutForm = document.getElementById('workout-form');
-        const workoutType = document.getElementById('workout-type');
-        const workoutMinutes = document.getElementById('workout-minutes');
-        const workoutRpe = document.getElementById('workout-rpe');
-        const workoutNotes = document.getElementById('workout-notes');
-        const workoutPreset = document.getElementById('workout-preset');
-        const workoutList = document.getElementById('workout-list');
-        const workoutWeekMinEl = document.getElementById('workout-week-min');
-        const workoutWeekSessionsEl = document.getElementById('workout-week-sessions');
-        const workoutTopTypeEl = document.getElementById('workout-top-type');
-        let workouts = Utils.loadFromLocalStorage('workouts', []);
-        const renderWorkoutStats = () => { const now = new Date(); const start = new Date(now); start.setDate(now.getDate() - 6); const recent = workouts.filter(w => new Date(w.date) >= new Date(start.toISOString().split('T')[0])); const minutes = recent.reduce((a, w) => a + (w.minutes || 0), 0); const sessions = recent.length; const typeCount = {}; recent.forEach(w => { const t = w.type || 'Treino'; typeCount[t] = (typeCount[t]||0)+1; }); const topType = Object.entries(typeCount).sort((a,b)=>b[1]-a[1])[0]?.[0] || '-'; workoutWeekMinEl && (workoutWeekMinEl.textContent = String(minutes)); workoutWeekSessionsEl && (workoutWeekSessionsEl.textContent = String(sessions)); workoutTopTypeEl && (workoutTopTypeEl.textContent = topType); };
-        const renderWorkouts = () => { workoutList.innerHTML = workouts.map((w, i) => `<li class="workout-item" data-index="${i}"><span>${Utils.escapeHTML(w.type)} — ${w.minutes}m ${w.rpe?('• RPE '+w.rpe):''}${w.notes?(' • '+Utils.escapeHTML(w.notes)) : ''}</span><div class="task-item-buttons"><button class="soft-button icon-btn delete-workout-btn"><i class='bx bxs-trash'></i></button></div></li>`).join(''); renderWorkoutStats(); };
 
-        // Respiração guiada (display)
-        const protocolSelect = document.getElementById('breath-protocol');
-        const breathRounds = document.getElementById('breath-rounds');
-        const startBreathBtn = document.getElementById('start-breath-btn');
-        const breathDisplay = document.getElementById('breath-display');
-        let breathTimer = null, currentStep = 0, remainingRounds = 0;
-        const PROTOCOLS = { box: [4,4,4,4], '478': [4,7,8], coerente: [5,5] };
-        const STEP_LABELS = { 3: ['Inspire','Segure','Expire','Segure'], 4: ['Inspire','Segure','Expire','Segure'] };
-        const stopBreath = () => { if (breathTimer) { clearTimeout(breathTimer); breathTimer = null; } if (breathDisplay) { breathDisplay.textContent = ''; breathDisplay.classList.remove('active'); const bar = breathDisplay.querySelector('.breath-progress-bar'); if (bar) bar.remove(); } };
-        const runBreath = (pattern) => {
-            if (remainingRounds <= 0) { stopBreath(); return; }
-            const stepSeconds = pattern[currentStep];
-            const label = (pattern.length === 4 ? STEP_LABELS[4][currentStep] : (pattern.length===3 ? ['Inspire','Segure','Expire'][currentStep] : ['Inspire','Expire'][currentStep]));
-            breathDisplay.textContent = `${label} • ${stepSeconds}s`;
-            let bar = breathDisplay.querySelector('.breath-progress-bar');
-            if (!bar) { bar = document.createElement('div'); bar.className = 'breath-progress-bar'; breathDisplay.appendChild(bar); }
-            bar.style.transition = 'none'; bar.style.width = '100%';
-            requestAnimationFrame(() => { requestAnimationFrame(() => { bar.style.transition = `width ${stepSeconds}s linear`; bar.style.width = '0%'; }); });
-            currentStep = (currentStep + 1) % pattern.length;
-            if (currentStep === 0) remainingRounds -= 1;
-            breathTimer = setTimeout(() => runBreath(pattern), stepSeconds * 1000);
-        };
-
-        // Alongamento
-        const stretchPreset = document.getElementById('stretch-preset');
-        const startStretchBtn = document.getElementById('start-stretch-btn');
-        const stretchStepsList = document.getElementById('stretch-steps');
-        const STRETCH_PRESETS = {
-            'pescoço': ['Inclinação lateral 30s', 'Rotação lenta 30s', 'Flexão 30s'],
-            'ombros': ['Alcance cruzado 30s', 'Roda de ombro 30s', 'Alongar peitoral 30s'],
-            'lombar': ['Criança 30s', 'Gato-vaca 30s', 'Torção suave 30s']
-        };
-
-        // Alongamento com barra regressiva
-        const stretchDisplay = document.getElementById('stretch-display');
-        const stopStretchBtn = document.getElementById('stop-stretch-btn');
-        let stretchTimer = null; let stretchIndex = 0; let stretchSteps = [];
-        const runStretch = () => { if (stretchIndex >= stretchSteps.length) { stretchDisplay.classList.remove('active'); return; } const stepText = stretchSteps[stretchIndex]; const seconds = 30; stretchDisplay.classList.add('active'); stretchDisplay.firstChild && (stretchDisplay.firstChild.style.width = '100%'); stretchDisplay.textContent = `${stepText} • ${seconds}s`; const bar = document.createElement('div'); bar.className = 'breath-progress-bar'; stretchDisplay.innerHTML = ''; stretchDisplay.appendChild(bar); requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ bar.style.transition = `width ${seconds}s linear`; bar.style.width = '0%'; }); }); let remaining = seconds; stretchTimer = setInterval(()=>{ remaining--; stretchDisplay.lastChild && (stretchDisplay.lastChild.previousSibling); stretchDisplay.childNodes.length && (stretchDisplay.firstChild.style.width); if (remaining <= 0) { clearInterval(stretchTimer); stretchTimer = null; stretchIndex++; runStretch(); } }, 1000); };
-        stopStretchBtn && stopStretchBtn.addEventListener('click', () => { if (stretchTimer) { clearInterval(stretchTimer); stretchTimer = null; } stretchDisplay.classList.remove('active'); });
-        startStretchBtn && startStretchBtn.addEventListener('click', () => { const preset = stretchPreset.value; stretchSteps = STRETCH_PRESETS[preset] || []; stretchStepsList.innerHTML = stretchSteps.map(s => `<li class=\"stretch-step\"><span>${s}</span></li>`).join(''); stretchIndex = 0; runStretch(); });
-
-        // Sol/Ar Livre
-        // (removido)
-
-        const init = () => {
-            // Workouts
-            workoutForm && workoutForm.addEventListener('submit', (e) => { e.preventDefault(); const type = (workoutType.value.trim() || workoutPreset.value || 'Treino'); const minutes = parseInt(workoutMinutes.value) || 20; const rpe = parseInt(workoutRpe.value) || null; const notes = workoutNotes.value.trim() || null; workouts.push({ date: Utils.getTodayString(), type, minutes, rpe, notes }); Utils.saveToLocalStorage('workouts', workouts); workoutType.value=''; workoutMinutes.value=''; workoutRpe.value=''; workoutNotes.value=''; renderWorkouts(); });
-            workoutList && workoutList.addEventListener('click', (e) => { const deleteBtn = e.target.closest('.delete-workout-btn'); if (!deleteBtn) return; const i = Number(e.target.closest('.workout-item')?.dataset.index); if(Number.isInteger(i)) { workouts.splice(i,1); Utils.saveToLocalStorage('workouts', workouts); renderWorkouts(); }});
-            renderWorkouts();
-
-            // Respiração
-            startBreathBtn && startBreathBtn.addEventListener('click', () => { stopBreath(); const proto = protocolSelect.value; const rounds = parseInt(breathRounds.value) || 4; currentStep = 0; remainingRounds = rounds; if (breathDisplay) breathDisplay.classList.add('active'); runBreath(PROTOCOLS[proto] || PROTOCOLS.box); });
-
-            // Alongamento
-            // startStretchBtn && startStretchBtn.addEventListener('click', () => { const preset = stretchPreset.value; const steps = STRETCH_PRESETS[preset] || []; stretchStepsList.innerHTML = steps.map(s => `<li class="stretch-step"><span>${s}</span></li>`).join(''); });
-
-            // Sons de foco removido
-            // (mantido espaço para futura reintrodução)
-
-            // Nutrição leve
-            const nutritionForm = document.getElementById('nutrition-form');
-            const mealType = document.getElementById('meal-type');
-            const mealQuality = document.getElementById('meal-quality');
-            const mealSatiety = document.getElementById('meal-satiety');
-            const mealNotes = document.getElementById('meal-notes');
-            const mealList = document.getElementById('meal-list');
-            let meals = Utils.loadFromLocalStorage('meals', []);
-            const renderMeals = () => { mealList.innerHTML = meals.slice().reverse().map((m,i)=>`<li class="workout-item"><span>${m.date} • ${Utils.escapeHTML(m.type)} — Q${m.quality}/5 • S${m.satiety}/5${m.notes?(' • '+Utils.escapeHTML(m.notes)) : ''}</span></li>`).join(''); };
-            nutritionForm && nutritionForm.addEventListener('submit', (e) => { e.preventDefault(); const type = mealType.value; const notes = mealNotes.value.trim() || null; meals.push({ date: Utils.getTodayString(), type, quality: mealQuality.value, satiety: mealSatiety.value, notes }); Utils.saveToLocalStorage('meals', meals); mealNotes.value=''; renderMeals(); });
-            renderMeals();
-
-            // Nutrição com chips
-            const qualityChips = document.getElementById('meal-quality-chips');
-            const satietyChips = document.getElementById('meal-satiety-chips');
-            let selectedQuality = 3; let selectedSatiety = 3;
-            const selectChip = (container, value) => { container.querySelectorAll('.category-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.value === String(value))); };
-            qualityChips && qualityChips.addEventListener('click', (e)=>{ const btn = e.target.closest('.category-btn'); if(!btn) return; selectedQuality = parseInt(btn.dataset.value); selectChip(qualityChips, selectedQuality); });
-            satietyChips && satietyChips.addEventListener('click', (e)=>{ const btn = e.target.closest('.category-btn'); if(!btn) return; selectedSatiety = parseInt(btn.dataset.value); selectChip(satietyChips, selectedSatiety); });
-            nutritionForm && nutritionForm.addEventListener('submit', (e) => { e.preventDefault(); const type = mealType.value; const notes = mealNotes.value.trim() || null; meals.push({ date: Utils.getTodayString(), type, quality: selectedQuality, satiety: selectedSatiety, notes }); Utils.saveToLocalStorage('meals', meals); mealNotes.value=''; renderMeals(); });
-
-            // Toggle Saúde Feminina e cálculo
-            const femaleCard = document.getElementById('female-health-card');
-            const toggleFemaleBtn = document.getElementById('toggle-female-health');
-            const fhForm = document.getElementById('female-health-form');
-            const fhLastPeriod = document.getElementById('fh-last-period');
-            const fhCycleLength = document.getElementById('fh-cycle-length');
-            const fhPhase = document.getElementById('fh-phase');
-            const fhDay = document.getElementById('fh-day');
-            const fhTip = document.getElementById('fh-tip');
-            const femaleSettings = Utils.loadFromLocalStorage('femaleSettings', { enabled: false, lastPeriod: null, cycle: 28 });
-            const updateFemaleUI = () => { toggleFemaleBtn && toggleFemaleBtn.classList.toggle('active', !!femaleSettings.enabled); femaleCard.classList.toggle('hidden', !femaleSettings.enabled); if (!femaleSettings.enabled) return; if (femaleSettings.lastPeriod) fhLastPeriod.value = femaleSettings.lastPeriod; if (femaleSettings.cycle) fhCycleLength.value = femaleSettings.cycle; const start = new Date(femaleSettings.lastPeriod || Utils.getTodayString()); const today = new Date(Utils.getTodayString()); const diff = Math.floor((today - start) / (1000*60*60*24)); const cycle = Math.max(21, Math.min(35, parseInt(femaleSettings.cycle)||28)); const day = (diff % cycle) + 1; fhDay.textContent = String(day); let phase = 'Folicular'; let tip = 'Treinos moderados e foco em progressão.'; if (day <= 5) { phase = 'Menstrual'; tip = 'Intensidade baixa e autocuidado.'; } else if (day >= 12 && day <= 16) { phase = 'Ovulatória'; tip = 'Energia alta, bom para intensidades maiores.'; } else if (day > 16) { phase = 'Lútea'; tip = 'Manter consistência e recuperar bem.'; } fhPhase.textContent = phase; fhTip.textContent = tip; };
-            toggleFemaleBtn && toggleFemaleBtn.addEventListener('click', () => { femaleSettings.enabled = !femaleSettings.enabled; toggleFemaleBtn.classList.toggle('active', femaleSettings.enabled); Utils.saveToLocalStorage('femaleSettings', femaleSettings); updateFemaleUI(); });
-            fhForm && fhForm.addEventListener('submit', (e) => { e.preventDefault(); femaleSettings.lastPeriod = fhLastPeriod.value || Utils.getTodayString(); femaleSettings.cycle = parseInt(fhCycleLength.value) || 28; Utils.saveToLocalStorage('femaleSettings', femaleSettings); updateFemaleUI(); });
-            updateFemaleUI();
-
-            // Pickers custom de hora/data (ativados apenas se os modais existirem)
-            const timePickerModal = document.getElementById('time-picker-modal');
-            const datePickerModal = document.getElementById('date-picker-modal');
-            if (timePickerModal && datePickerModal) {
-                const tpHour = document.getElementById('tp-hour');
-                const tpMinute = document.getElementById('tp-minute');
-                const tpCancel = document.getElementById('tp-cancel');
-                const tpConfirm = document.getElementById('tp-confirm');
-                const dpYear = document.getElementById('dp-year');
-                const dpMonth = document.getElementById('dp-month');
-                const dpDay = document.getElementById('dp-day');
-                const dpCancel = document.getElementById('dp-cancel');
-                const dpConfirm = document.getElementById('dp-confirm');
-                let timeTargetInput = null; let dateTargetInput = null;
-                const fillTimeOptions = () => { tpHour.innerHTML = Array.from({length:24},(_,i)=>`<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`).join(''); tpMinute.innerHTML = Array.from({length:12},(_,i)=>{ const m=i*5; return `<option value="${String(m).padStart(2,'0')}">${String(m).padStart(2,'0')}</option>`; }).join(''); };
-                const fillDateOptions = () => { const now = new Date(); const years = [now.getFullYear()-1, now.getFullYear(), now.getFullYear()+1]; dpYear.innerHTML = years.map(y=>`<option value="${y}">${y}</option>`).join(''); dpMonth.innerHTML = Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join(''); const daysIn = (y,m)=> new Date(y,m,0).getDate(); const updateDays=()=>{ const y=parseInt(dpYear.value), m=parseInt(dpMonth.value); dpDay.innerHTML = Array.from({length: daysIn(y,m)},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join(''); }; dpYear.addEventListener('change', updateDays); dpMonth.addEventListener('change', updateDays); updateDays(); };
-                const openTimePicker = (inputEl) => { timeTargetInput = inputEl; fillTimeOptions(); timePickerModal.classList.remove('hidden'); };
-                const openDatePicker = (inputEl) => { dateTargetInput = inputEl; fillDateOptions(); datePickerModal.classList.remove('hidden'); };
-                tpCancel && tpCancel.addEventListener('click', ()=>{ timePickerModal.classList.add('hidden'); timeTargetInput=null; });
-                tpConfirm && tpConfirm.addEventListener('click', ()=>{ if (!timeTargetInput) return; const val = `${tpHour.value}:${tpMinute.value}`; timeTargetInput.value = val; timePickerModal.classList.add('hidden'); timeTargetInput=null; });
-                dpCancel && dpCancel.addEventListener('click', ()=>{ datePickerModal.classList.add('hidden'); dateTargetInput=null; });
-                dpConfirm && dpConfirm.addEventListener('click', ()=>{ if (!dateTargetInput) return; const y=dpYear.value, m=String(dpMonth.value).padStart(2,'0'), d=String(dpDay.value).padStart(2,'0'); dateTargetInput.value = `${y}-${m}-${d}`; datePickerModal.classList.add('hidden'); dateTargetInput=null; });
-                // bind inputs locais
-                const bedTimeInputEl = document.getElementById('bed-time'); bedTimeInputEl && bedTimeInputEl.addEventListener('click', ()=> openTimePicker(bedTimeInputEl));
-                const wakeTimeInputEl = document.getElementById('wake-time'); wakeTimeInputEl && wakeTimeInputEl.addEventListener('click', ()=> openTimePicker(wakeTimeInputEl));
-                const tbStartInput = document.getElementById('tb-start'); tbStartInput && tbStartInput.addEventListener('click', ()=> openTimePicker(tbStartInput));
-                const goalDateInput = document.getElementById('goal-date-input'); goalDateInput && goalDateInput.addEventListener('click', ()=> openDatePicker(goalDateInput));
-            }
-
-        };
-
-        return { init };
-    })();
 
     // --- INICIALIZAÇÃO GERAL ---
     App.init();

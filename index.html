@@ -43,7 +43,7 @@
                 </header>
                 <div class="todo-body">
                     <div class="add-task-container">
-                        <input type="text" id="task-input" class="soft-input" placeholder="Adicionar nova tarefa...">
+                        <input type="text" id="task-input" class="soft-input" placeholder="Adicionar tarefa...">
                         <div class="priority-selector-wrapper">
                             <button id="task-priority-btn" class="soft-button priority-btn" aria-label="Selecionar Prioridade">
                                 <i class='bx bxs-circle priority-indicator-btn priority-3'></i>
@@ -68,10 +68,11 @@
                 </header>
                 <div class="todo-body">
                     <div class="add-task-container">
-                        <input type="text" id="mit-input" class="soft-input" placeholder="Adicionar MIT (máx. 3)...">
+                        <input type="text" id="mit-input" class="soft-input" placeholder="Adicionar MIT...">
                         <button id="add-mit-btn" class="soft-button" aria-label="Adicionar MIT"><i class='bx bx-plus'></i></button>
                     </div>
                     <ul id="mits-list"></ul>
+                    <p style="font-size:1.2rem; opacity:0.7; margin-top:0.5rem;">Máx. 3 itens</p>
                     <div style="margin-top:1rem; display:flex; gap:1rem;">
                         <button id="carryover-mits-btn" class="soft-button gray">Levar para amanhã</button>
                         <button id="clear-mits-btn" class="soft-button danger">Limpar MITs</button>
@@ -96,7 +97,7 @@
                 </header>
                 <div class="todo-body">
                     <form id="timeboxing-form" class="add-task-container">
-                        <input type="text" id="tb-label" class="soft-input" placeholder="Bloco (ex.: Estudar Inglês)">
+                        <input type="text" id="tb-label" class="soft-input" placeholder="Bloco (ex.: Inglês)">
                         <input type="time" id="tb-start" class="soft-input" style="max-width: 12rem;">
                         <input type="number" id="tb-duration" class="soft-input" placeholder="min" style="max-width: 9rem;">
                         <button type="submit" class="soft-button"><i class='bx bx-plus'></i></button>
@@ -111,9 +112,9 @@
                 <div class="todo-body">
                     <div id="review-form-view">
                         <form id="review-form" style="display:flex; flex-direction:column; gap:1rem;">
-                            <textarea id="review-good" class="soft-textarea" placeholder="O que foi bem?"></textarea>
-                            <textarea id="review-delay" class="soft-textarea" placeholder="O que adiar?"></textarea>
-                            <textarea id="review-learn" class="soft-textarea" placeholder="Aprendizado do dia"></textarea>
+                            <textarea id="review-good" class="soft-textarea" placeholder="Foi bem?"></textarea>
+                            <textarea id="review-delay" class="soft-textarea" placeholder="Adiar?"></textarea>
+                            <textarea id="review-learn" class="soft-textarea" placeholder="Aprendizado?"></textarea>
                             <button type="submit" class="soft-button">Salvar Review</button>
                         </form>
                     </div>
@@ -231,23 +232,7 @@
                 </header>
                 <ul id="habits-list"></ul>
             </div>
-            <div id="female-health-card" class="fitness-card hidden">
-                <header class="todo-header">
-                    <h2>Saúde Feminina</h2>
-                </header>
-                <div class="todo-body">
-                    <form id="female-health-form" class="add-task-container" style="flex-wrap:wrap;">
-                        <input type="text" id="fh-last-period" class="soft-input" placeholder="Último início (YYYY-MM-DD)" readonly>
-                        <input type="number" id="fh-cycle-length" class="soft-input" placeholder="Ciclo (dias)" style="max-width: 12rem;">
-                        <button type="submit" class="soft-button">Salvar</button>
-                    </form>
-                    <div class="stats-grid" style="margin-top:1rem;">
-                        <div class="stat-item"><span>Fase</span><strong id="fh-phase">-</strong></div>
-                        <div class="stat-item"><span>Dia do ciclo</span><strong id="fh-day">-</strong></div>
-                        <div class="stat-item"><span>Sugestão</span><strong id="fh-tip">-</strong></div>
-                    </div>
-                </div>
-            </div>
+
         </section>
 
         <section id="ajustes" class="page">
@@ -302,118 +287,8 @@
                    </div>
                </div>
            </div>
-            <div class="settings-card">
-                <header class="settings-card-header">
-                    <i class='bx bx-toggle-left'></i>
-                    <h2>Módulos</h2>
-                </header>
-                <div class="settings-card-body">
-                    <div class="setting-row">
-                        <label for="toggle-female-health">Saúde Feminina</label>
-                        <button id="toggle-female-health" class="toggle-button"><div class="toggle-circle"></div></button>
-                    </div>
-                </div>
-            </div>
         </section>
 
-        <section id="fitness" class="page">
-            <h1>Fitness</h1>
-            <div class="fitness-card">
-                <header class="todo-header">
-                    <h2>Treinos</h2>
-                </header>
-                <div class="todo-body">
-                    <form id="workout-form" class="add-task-container" style="flex-wrap:wrap;">
-                        <select id="workout-preset" class="soft-input" style="max-width: 18rem;">
-                            <option value="Corrida">Corrida</option>
-                            <option value="Força">Força</option>
-                            <option value="Bike">Bike</option>
-                            <option value="HIIT">HIIT</option>
-                        </select>
-                        <input type="text" id="workout-type" class="soft-input" placeholder="Tipo (opcional)">
-                        <input type="number" id="workout-minutes" class="soft-input" placeholder="Min" style="max-width: 9rem;">
-                        <input type="number" id="workout-rpe" class="soft-input" placeholder="RPE" style="max-width: 9rem;">
-                        <input type="text" id="workout-notes" class="soft-input" placeholder="Notas (opcional)">
-                        <button type="submit" class="soft-button"><i class='bx bx-plus'></i></button>
-                    </form>
-                    <ul id="workout-list"></ul>
-                    <div class="stats-grid" style="margin-top:1rem;">
-                        <div class="stat-item"><span>Semana (min)</span><strong id="workout-week-min">0</strong></div>
-                        <div class="stat-item"><span>Sessões</span><strong id="workout-week-sessions">0</strong></div>
-                        <div class="stat-item"><span>Favorito</span><strong id="workout-top-type">-</strong></div>
-                    </div>
-                </div>
-            </div>
-            <div class="fitness-card">
-                <header class="todo-header">
-                    <h2>Alongamento</h2>
-                </header>
-                <div class="todo-body">
-                    <div class="add-task-container" style="flex-wrap:wrap;">
-                        <select id="stretch-preset" class="soft-input" style="max-width: 18rem;">
-                            <option value="pescoço">Pescoço</option>
-                            <option value="ombros">Ombros</option>
-                            <option value="lombar">Lombar</option>
-                        </select>
-                        <button id="start-stretch-btn" class="soft-button">Iniciar</button>
-                        <button id="stop-stretch-btn" class="soft-button gray">Parar</button>
-                    </div>
-                    <div id="stretch-display" class="breath-display"><div class="breath-progress-bar"></div></div>
-                    <ul id="stretch-steps"></ul>
-                </div>
-            </div>
-            <div class="fitness-card">
-                <header class="todo-header">
-                    <h2>Respiração</h2>
-                </header>
-                <div class="todo-body">
-                    <div class="add-task-container" style="flex-wrap:wrap;">
-                        <select id="breath-protocol" class="soft-input" style="max-width: 18rem;">
-                            <option value="box">Box 4-4-4-4</option>
-                            <option value="478">4-7-8</option>
-                            <option value="coerente">Coerente 6 bpm</option>
-                        </select>
-                        <input type="number" id="breath-rounds" class="soft-input" placeholder="Séries" style="max-width: 9rem;">
-                        <button id="start-breath-btn" class="soft-button">Começar</button>
-                    </div>
-                    <div id="breath-display" class="breath-display"></div>
-                </div>
-            </div>
-            <div class="fitness-card">
-                <header class="todo-header">
-                    <h2>Nutrição (Leve)</h2>
-                </header>
-                <div class="todo-body">
-                    <form id="nutrition-form" class="add-task-container" style="flex-wrap:wrap;">
-                        <select id="meal-type" class="soft-input" style="max-width: 14rem;">
-                            <option value="Café">Café</option>
-                            <option value="Almoço">Almoço</option>
-                            <option value="Jantar">Jantar</option>
-                            <option value="Lanche">Lanche</option>
-                        </select>
-                        <div id="meal-quality-chips" class="category-container" style="flex:0 0 100%;">
-                            <span style="font-weight:500;">Qualidade</span>
-                            <button type="button" class="category-btn" data-value="1">1</button>
-                            <button type="button" class="category-btn" data-value="2">2</button>
-                            <button type="button" class="category-btn" data-value="3">3</button>
-                            <button type="button" class="category-btn" data-value="4">4</button>
-                            <button type="button" class="category-btn" data-value="5">5</button>
-                        </div>
-                        <div id="meal-satiety-chips" class="category-container" style="flex:0 0 100%;">
-                            <span style="font-weight:500;">Saciedade</span>
-                            <button type="button" class="category-btn" data-value="1">1</button>
-                            <button type="button" class="category-btn" data-value="2">2</button>
-                            <button type="button" class="category-btn" data-value="3">3</button>
-                            <button type="button" class="category-btn" data-value="4">4</button>
-                            <button type="button" class="category-btn" data-value="5">5</button>
-                        </div>
-                        <input type="text" id="meal-notes" class="soft-input" placeholder="Notas (opcional)" style="flex:1 1 100%;">
-                        <button type="submit" class="soft-button"><i class='bx bx-plus'></i></button>
-                    </form>
-                    <ul id="meal-list"></ul>
-                </div>
-            </div>
-        </section>
     </main>
 
     <!-- Modals -->
@@ -513,7 +388,6 @@
             <button class="nav-button" data-target="foco"><i class='bx bx-crosshair'></i><span>Foco</span></button>
             <button class="nav-button" data-target="financas"><i class='bx bx-wallet'></i><span>Finanças</span></button>
             <button class="nav-button" data-target="bem-estar"><i class='bx bx-heart'></i><span>Bem-estar</span></button>
-            <button class="nav-button" data-target="fitness"><i class='bx bx-dumbbell'></i><span>Fitness</span></button>
             <button class="nav-button" data-target="ajustes"><i class='bx bx-cog'></i><span>Ajustes</span></button>
         </nav>
     </footer>
