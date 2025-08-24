@@ -27,7 +27,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- MÓDULO DE UTILITÁRIOS ---
     const Utils = (() => {
         const saveToLocalStorage = (key, value) => localStorage.setItem(key, JSON.stringify(value));
-        const loadFromLocalStorage = (key, defaultValue) => JSON.parse(localStorage.getItem(key)) || defaultValue;
+        const loadFromLocalStorage = (key, defaultValue) => {
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw === null || raw === undefined) return defaultValue;
+                return JSON.parse(raw);
+            } catch (e) {
+                console.warn('Invalid localStorage for', key, e);
+                try { localStorage.removeItem(key); } catch (_) {}
+                return defaultValue;
+            }
+        };
         const getTodayString = () => new Date().toISOString().split('T')[0];
         const formatDateToBR = (dateString) => {
             const date = new Date(dateString);
@@ -851,37 +861,39 @@ document.addEventListener('DOMContentLoaded', () => {
             const fhDay = document.getElementById('fh-day');
             const fhTip = document.getElementById('fh-tip');
             const femaleSettings = Utils.loadFromLocalStorage('femaleSettings', { enabled: false, lastPeriod: null, cycle: 28 });
-            const updateFemaleUI = () => { femaleCard.classList.toggle('hidden', !femaleSettings.enabled); if (!femaleSettings.enabled) return; if (femaleSettings.lastPeriod) fhLastPeriod.value = femaleSettings.lastPeriod; if (femaleSettings.cycle) fhCycleLength.value = femaleSettings.cycle; const start = new Date(femaleSettings.lastPeriod || Utils.getTodayString()); const today = new Date(Utils.getTodayString()); const diff = Math.floor((today - start) / (1000*60*60*24)); const cycle = Math.max(21, Math.min(35, parseInt(femaleSettings.cycle)||28)); const day = (diff % cycle) + 1; fhDay.textContent = String(day); let phase = 'Folicular'; let tip = 'Treinos moderados e foco em progressão.'; if (day <= 5) { phase = 'Menstrual'; tip = 'Intensidade baixa e autocuidado.'; } else if (day >= 12 && day <= 16) { phase = 'Ovulatória'; tip = 'Energia alta, bom para intensidades maiores.'; } else if (day > 16) { phase = 'Lútea'; tip = 'Manter consistência e recuperar bem.'; } fhPhase.textContent = phase; fhTip.textContent = tip; };
+            const updateFemaleUI = () => { toggleFemaleBtn && toggleFemaleBtn.classList.toggle('active', !!femaleSettings.enabled); femaleCard.classList.toggle('hidden', !femaleSettings.enabled); if (!femaleSettings.enabled) return; if (femaleSettings.lastPeriod) fhLastPeriod.value = femaleSettings.lastPeriod; if (femaleSettings.cycle) fhCycleLength.value = femaleSettings.cycle; const start = new Date(femaleSettings.lastPeriod || Utils.getTodayString()); const today = new Date(Utils.getTodayString()); const diff = Math.floor((today - start) / (1000*60*60*24)); const cycle = Math.max(21, Math.min(35, parseInt(femaleSettings.cycle)||28)); const day = (diff % cycle) + 1; fhDay.textContent = String(day); let phase = 'Folicular'; let tip = 'Treinos moderados e foco em progressão.'; if (day <= 5) { phase = 'Menstrual'; tip = 'Intensidade baixa e autocuidado.'; } else if (day >= 12 && day <= 16) { phase = 'Ovulatória'; tip = 'Energia alta, bom para intensidades maiores.'; } else if (day > 16) { phase = 'Lútea'; tip = 'Manter consistência e recuperar bem.'; } fhPhase.textContent = phase; fhTip.textContent = tip; };
             toggleFemaleBtn && toggleFemaleBtn.addEventListener('click', () => { femaleSettings.enabled = !femaleSettings.enabled; toggleFemaleBtn.classList.toggle('active', femaleSettings.enabled); Utils.saveToLocalStorage('femaleSettings', femaleSettings); updateFemaleUI(); });
             fhForm && fhForm.addEventListener('submit', (e) => { e.preventDefault(); femaleSettings.lastPeriod = fhLastPeriod.value || Utils.getTodayString(); femaleSettings.cycle = parseInt(fhCycleLength.value) || 28; Utils.saveToLocalStorage('femaleSettings', femaleSettings); updateFemaleUI(); });
             updateFemaleUI();
 
-            // Pickers custom de hora/data
+            // Pickers custom de hora/data (ativados apenas se os modais existirem)
             const timePickerModal = document.getElementById('time-picker-modal');
-            const tpHour = document.getElementById('tp-hour');
-            const tpMinute = document.getElementById('tp-minute');
-            const tpCancel = document.getElementById('tp-cancel');
-            const tpConfirm = document.getElementById('tp-confirm');
             const datePickerModal = document.getElementById('date-picker-modal');
-            const dpYear = document.getElementById('dp-year');
-            const dpMonth = document.getElementById('dp-month');
-            const dpDay = document.getElementById('dp-day');
-            const dpCancel = document.getElementById('dp-cancel');
-            const dpConfirm = document.getElementById('dp-confirm');
-            let timeTargetInput = null; let dateTargetInput = null;
-            const fillTimeOptions = () => { tpHour.innerHTML = Array.from({length:24},(_,i)=>`<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`).join(''); tpMinute.innerHTML = Array.from({length:12},(_,i)=>{ const m=i*5; return `<option value="${String(m).padStart(2,'0')}">${String(m).padStart(2,'0')}</option>`; }).join(''); };
-            const fillDateOptions = () => { const now = new Date(); const years = [now.getFullYear()-1, now.getFullYear(), now.getFullYear()+1]; dpYear.innerHTML = years.map(y=>`<option value="${y}">${y}</option>`).join(''); dpMonth.innerHTML = Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join(''); const daysIn = (y,m)=> new Date(y,m,0).getDate(); const updateDays=()=>{ const y=parseInt(dpYear.value), m=parseInt(dpMonth.value); dpDay.innerHTML = Array.from({length: daysIn(y,m)},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join(''); }; dpYear.addEventListener('change', updateDays); dpMonth.addEventListener('change', updateDays); updateDays(); };
-            const openTimePicker = (inputEl) => { timeTargetInput = inputEl; fillTimeOptions(); timePickerModal.classList.remove('hidden'); };
-            const openDatePicker = (inputEl) => { dateTargetInput = inputEl; fillDateOptions(); datePickerModal.classList.remove('hidden'); };
-            tpCancel && tpCancel.addEventListener('click', ()=>{ timePickerModal.classList.add('hidden'); timeTargetInput=null; });
-            tpConfirm && tpConfirm.addEventListener('click', ()=>{ if (!timeTargetInput) return; const val = `${tpHour.value}:${tpMinute.value}`; timeTargetInput.value = val; timePickerModal.classList.add('hidden'); timeTargetInput=null; });
-            dpCancel && dpCancel.addEventListener('click', ()=>{ datePickerModal.classList.add('hidden'); dateTargetInput=null; });
-            dpConfirm && dpConfirm.addEventListener('click', ()=>{ if (!dateTargetInput) return; const y=dpYear.value, m=String(dpMonth.value).padStart(2,'0'), d=String(dpDay.value).padStart(2,'0'); dateTargetInput.value = `${y}-${m}-${d}`; datePickerModal.classList.add('hidden'); dateTargetInput=null; });
-            // bind inputs
-            bedTimeInput && bedTimeInput.addEventListener('click', ()=> openTimePicker(bedTimeInput));
-            wakeTimeInput && wakeTimeInput.addEventListener('click', ()=> openTimePicker(wakeTimeInput));
-            const tbStartInput = document.getElementById('tb-start'); tbStartInput && tbStartInput.addEventListener('click', ()=> openTimePicker(tbStartInput));
-            const goalDateInput = document.getElementById('goal-date-input'); goalDateInput && goalDateInput.addEventListener('click', ()=> openDatePicker(goalDateInput));
+            if (timePickerModal && datePickerModal) {
+                const tpHour = document.getElementById('tp-hour');
+                const tpMinute = document.getElementById('tp-minute');
+                const tpCancel = document.getElementById('tp-cancel');
+                const tpConfirm = document.getElementById('tp-confirm');
+                const dpYear = document.getElementById('dp-year');
+                const dpMonth = document.getElementById('dp-month');
+                const dpDay = document.getElementById('dp-day');
+                const dpCancel = document.getElementById('dp-cancel');
+                const dpConfirm = document.getElementById('dp-confirm');
+                let timeTargetInput = null; let dateTargetInput = null;
+                const fillTimeOptions = () => { tpHour.innerHTML = Array.from({length:24},(_,i)=>`<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`).join(''); tpMinute.innerHTML = Array.from({length:12},(_,i)=>{ const m=i*5; return `<option value="${String(m).padStart(2,'0')}">${String(m).padStart(2,'0')}</option>`; }).join(''); };
+                const fillDateOptions = () => { const now = new Date(); const years = [now.getFullYear()-1, now.getFullYear(), now.getFullYear()+1]; dpYear.innerHTML = years.map(y=>`<option value="${y}">${y}</option>`).join(''); dpMonth.innerHTML = Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join(''); const daysIn = (y,m)=> new Date(y,m,0).getDate(); const updateDays=()=>{ const y=parseInt(dpYear.value), m=parseInt(dpMonth.value); dpDay.innerHTML = Array.from({length: daysIn(y,m)},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join(''); }; dpYear.addEventListener('change', updateDays); dpMonth.addEventListener('change', updateDays); updateDays(); };
+                const openTimePicker = (inputEl) => { timeTargetInput = inputEl; fillTimeOptions(); timePickerModal.classList.remove('hidden'); };
+                const openDatePicker = (inputEl) => { dateTargetInput = inputEl; fillDateOptions(); datePickerModal.classList.remove('hidden'); };
+                tpCancel && tpCancel.addEventListener('click', ()=>{ timePickerModal.classList.add('hidden'); timeTargetInput=null; });
+                tpConfirm && tpConfirm.addEventListener('click', ()=>{ if (!timeTargetInput) return; const val = `${tpHour.value}:${tpMinute.value}`; timeTargetInput.value = val; timePickerModal.classList.add('hidden'); timeTargetInput=null; });
+                dpCancel && dpCancel.addEventListener('click', ()=>{ datePickerModal.classList.add('hidden'); dateTargetInput=null; });
+                dpConfirm && dpConfirm.addEventListener('click', ()=>{ if (!dateTargetInput) return; const y=dpYear.value, m=String(dpMonth.value).padStart(2,'0'), d=String(dpDay.value).padStart(2,'0'); dateTargetInput.value = `${y}-${m}-${d}`; datePickerModal.classList.add('hidden'); dateTargetInput=null; });
+                // bind inputs locais
+                const bedTimeInputEl = document.getElementById('bed-time'); bedTimeInputEl && bedTimeInputEl.addEventListener('click', ()=> openTimePicker(bedTimeInputEl));
+                const wakeTimeInputEl = document.getElementById('wake-time'); wakeTimeInputEl && wakeTimeInputEl.addEventListener('click', ()=> openTimePicker(wakeTimeInputEl));
+                const tbStartInput = document.getElementById('tb-start'); tbStartInput && tbStartInput.addEventListener('click', ()=> openTimePicker(tbStartInput));
+                const goalDateInput = document.getElementById('goal-date-input'); goalDateInput && goalDateInput.addEventListener('click', ()=> openDatePicker(goalDateInput));
+            }
 
         };
 
