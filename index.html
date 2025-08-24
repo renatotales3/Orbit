@@ -62,6 +62,72 @@
                 </header>
                 <ul id="goals-list"></ul>
             </div>
+            <div class="focus-mits-card">
+                <header class="todo-header">
+                    <h2>MITs do Dia</h2>
+                </header>
+                <div class="todo-body">
+                    <div class="add-task-container">
+                        <input type="text" id="mit-input" class="soft-input" placeholder="Adicionar MIT (máx. 3)...">
+                        <button id="add-mit-btn" class="soft-button" aria-label="Adicionar MIT"><i class='bx bx-plus'></i></button>
+                    </div>
+                    <ul id="mits-list"></ul>
+                    <div style="margin-top:1rem; display:flex; gap:1rem;">
+                        <button id="carryover-mits-btn" class="soft-button gray">Levar para amanhã</button>
+                        <button id="clear-mits-btn" class="soft-button danger">Limpar MITs</button>
+                    </div>
+                </div>
+            </div>
+            <div class="focus-stats-card">
+                <header class="todo-header">
+                    <h2>Estatísticas de Foco</h2>
+                </header>
+                <div class="todo-body">
+                    <div class="stats-grid">
+                        <div class="stat-item"><span>Hoje (min)</span><strong id="focus-stats-today-minutes">0</strong></div>
+                        <div class="stat-item"><span>Sessões</span><strong id="focus-stats-today-sessions">0</strong></div>
+                        <div class="stat-item"><span>Semana (min)</span><strong id="focus-stats-week-minutes">0</strong></div>
+                    </div>
+                </div>
+            </div>
+            <div class="timeboxing-card">
+                <header class="todo-header">
+                    <h2>Timeboxing de Hoje</h2>
+                </header>
+                <div class="todo-body">
+                    <form id="timeboxing-form" class="add-task-container">
+                        <input type="text" id="tb-label" class="soft-input" placeholder="Bloco (ex.: Estudar Inglês)">
+                        <input type="time" id="tb-start" class="soft-input" style="max-width: 12rem;">
+                        <input type="number" id="tb-duration" class="soft-input" placeholder="min" style="max-width: 9rem;">
+                        <button type="submit" class="soft-button"><i class='bx bx-plus'></i></button>
+                    </form>
+                    <ul id="timeboxing-list"></ul>
+                </div>
+            </div>
+            <div class="review-card">
+                <header class="todo-header">
+                    <h2>Review do Dia</h2>
+                </header>
+                <div class="todo-body">
+                    <div id="review-form-view">
+                        <form id="review-form" style="display:flex; flex-direction:column; gap:1rem;">
+                            <textarea id="review-good" class="soft-textarea" placeholder="O que foi bem?"></textarea>
+                            <textarea id="review-delay" class="soft-textarea" placeholder="O que adiar?"></textarea>
+                            <textarea id="review-learn" class="soft-textarea" placeholder="Aprendizado do dia"></textarea>
+                            <button type="submit" class="soft-button">Salvar Review</button>
+                        </form>
+                    </div>
+                    <div id="review-completed-view" style="display:none;">
+                        <p><strong>Foi bem:</strong></p>
+                        <p id="review-good-view"></p>
+                        <p style="margin-top:1rem;"><strong>Adiar:</strong></p>
+                        <p id="review-delay-view"></p>
+                        <p style="margin-top:1rem;"><strong>Aprendizado:</strong></p>
+                        <p id="review-learn-view"></p>
+                        <button id="edit-review-btn" class="soft-button gray" style="margin-top:1rem;"><i class='bx bxs-pencil'></i> Editar</button>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <section id="financas" class="page"><h1>Finanças</h1><p>Seu controle financeiro completo.</p></section>
@@ -220,6 +286,69 @@
                </div>
            </div>
         </section>
+
+        <section id="fitness" class="page">
+            <h1>Fitness</h1>
+            <div class="fitness-card">
+                <header class="todo-header">
+                    <h2>Treinos</h2>
+                </header>
+                <div class="todo-body">
+                    <form id="workout-form" class="add-task-container">
+                        <input type="text" id="workout-type" class="soft-input" placeholder="Tipo (ex.: Corrida, Força)">
+                        <input type="number" id="workout-minutes" class="soft-input" placeholder="Min" style="max-width: 9rem;">
+                        <input type="number" id="workout-rpe" class="soft-input" placeholder="RPE" style="max-width: 9rem;">
+                        <button type="submit" class="soft-button"><i class='bx bx-plus'></i></button>
+                    </form>
+                    <ul id="workout-list"></ul>
+                </div>
+            </div>
+            <div class="fitness-card">
+                <header class="todo-header">
+                    <h2>Alongamento</h2>
+                </header>
+                <div class="todo-body">
+                    <div class="add-task-container">
+                        <select id="stretch-preset" class="soft-input" style="max-width: 18rem;">
+                            <option value="pescoço">Pescoço</option>
+                            <option value="ombros">Ombros</option>
+                            <option value="lombar">Lombar</option>
+                        </select>
+                        <button id="start-stretch-btn" class="soft-button">Iniciar</button>
+                    </div>
+                    <ul id="stretch-steps"></ul>
+                </div>
+            </div>
+            <div class="fitness-card">
+                <header class="todo-header">
+                    <h2>Respiração</h2>
+                </header>
+                <div class="todo-body">
+                    <div class="add-task-container">
+                        <select id="breath-protocol" class="soft-input" style="max-width: 18rem;">
+                            <option value="box">Box 4-4-4-4</option>
+                            <option value="478">4-7-8</option>
+                            <option value="coerente">Coerente 6 bpm</option>
+                        </select>
+                        <input type="number" id="breath-rounds" class="soft-input" placeholder="Séries" style="max-width: 9rem;">
+                        <button id="start-breath-btn" class="soft-button">Começar</button>
+                    </div>
+                    <div id="breath-display" class="breath-display"></div>
+                </div>
+            </div>
+            <div class="fitness-card">
+                <header class="todo-header">
+                    <h2>Sol / Ar Livre</h2>
+                </header>
+                <div class="todo-body">
+                    <div class="add-task-container">
+                        <input type="number" id="outdoor-minutes" class="soft-input" placeholder="Minutos" style="max-width: 9rem;">
+                        <button id="save-outdoor-btn" class="soft-button">Salvar</button>
+                    </div>
+                    <ul id="outdoor-history"></ul>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Modals -->
@@ -306,6 +435,7 @@
             <button class="nav-button" data-target="financas"><i class='bx bx-wallet'></i><span>Finanças</span></button>
             <button class="nav-button" data-target="bem-estar"><i class='bx bx-heart'></i><span>Bem-estar</span></button>
             <button class="nav-button" data-target="ajustes"><i class='bx bx-cog'></i><span>Ajustes</span></button>
+            <button class="nav-button" data-target="fitness"><i class='bx bx-dumbbell'></i><span>Fitness</span></button>
         </nav>
     </footer>
 

@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
             Mood.init();
             Journal.init();
             Metrics.init();
+            FocusExtras.init();
+            Fitness.init();
 
             // Lógica de inicialização corrigida
             const content = document.querySelector('.content');
@@ -33,7 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const adjustedDate = new Date(date.getTime() + userTimezoneOffset);
             return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(adjustedDate);
         };
-        return { saveToLocalStorage, loadFromLocalStorage, getTodayString, formatDateToBR };
+        const escapeHTML = (str) => {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        };
+        return { saveToLocalStorage, loadFromLocalStorage, getTodayString, formatDateToBR, escapeHTML };
     })();
 
     // --- MÓDULO DE NAVEGAÇÃO ---
@@ -65,6 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (targetId === 'foco') {
                 Goals.render();
                 Tasks.render();
+                FocusExtras.renderStats();
+            } else if (targetId === 'fitness') {
+                // Fitness não requer re-render explícito além do próprio estado inicial
             }
         };
 
@@ -228,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const getTimes = () => Utils.loadFromLocalStorage('pomodoroTimes', { focus: 25, shortBreak: 5, longBreak: 15 });
         const saveTimes = () => { const times = { focus: parseInt(focusTimeInput.value) || 25, shortBreak: parseInt(shortBreakTimeInput.value) || 5, longBreak: parseInt(longBreakTimeInput.value) || 15 }; Utils.saveToLocalStorage('pomodoroTimes', times); setTimerForCurrentCycle(); };
         const updateDisplay = () => { if (!timerDisplay) return; const minutes = Math.floor(totalSeconds / 60), seconds = totalSeconds % 60; timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`; document.title = `${timerDisplay.textContent} - Life OS`; };
-        const switchCycle = () => { currentCycle = (currentCycle === 'focus') ? ((++pomodoroCount % 4 === 0) ? 'longBreak' : 'shortBreak') : 'focus'; Utils.saveToLocalStorage('pomodoro_pomodoroCount', pomodoroCount); Utils.saveToLocalStorage('pomodoro_currentCycle', currentCycle); setTimerForCurrentCycle(); };
+        const switchCycle = () => { currentCycle = (currentCycle === 'focus') ? ((++pomodoroCount % 4 === 0) ? 'longBreak' : 'shortBreak') : 'focus'; if (currentCycle !== 'focus') { const times = getTimes(); FocusExtras.onFocusSessionComplete(times.focus); } Utils.saveToLocalStorage('pomodoro_pomodoroCount', pomodoroCount); Utils.saveToLocalStorage('pomodoro_currentCycle', currentCycle); setTimerForCurrentCycle(); };
         const setTimerForCurrentCycle = () => { isPaused = true; clearInterval(timer); const times = getTimes(); switch (currentCycle) { case 'focus': totalSeconds = times.focus * 60; timerStatus.textContent = "Hora de Focar!"; break; case 'shortBreak': totalSeconds = times.shortBreak * 60; timerStatus.textContent = "Pausa Curta"; break; case 'longBreak': totalSeconds = times.longBreak * 60; timerStatus.textContent = "Pausa Longa"; break; } updateDisplay(); };
         const init = () => { const times = getTimes(); focusTimeInput.value = times.focus; shortBreakTimeInput.value = times.shortBreak; longBreakTimeInput.value = times.longBreak; focusTimeInput.addEventListener('change', saveTimes); shortBreakTimeInput.addEventListener('change', saveTimes); longBreakTimeInput.addEventListener('change', saveTimes); startBtn.addEventListener('click', () => { if (isPaused) { isPaused = false; timer = setInterval(() => { if (--totalSeconds >= 0) updateDisplay(); else switchCycle(); }, 1000); } }); pauseBtn.addEventListener('click', () => { isPaused = true; clearInterval(timer); }); resetBtn.addEventListener('click', setTimerForCurrentCycle); setTimerForCurrentCycle(); };
         return { init };
@@ -522,7 +532,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const hours = Math.floor(todayData.sleep.totalMinutes / 60);
                 const minutes = todayData.sleep.totalMinutes % 60;
                 sleepTotalEl.textContent = `${hours}h ${minutes}m`;
-                sleepFeedbackEl.textContent = getFeedback(hours, SLEEP_FEEDBACK);
+                const quality = todayData.sleep.quality ? ` • Qualidade: ${todayData.sleep.quality}/5` : '';
+                sleepFeedbackEl.textContent = `${getFeedback(hours, SLEEP_FEEDBACK)}${quality}`;
             } else {
                 sleepTrackerEl.classList.remove('answered');
                 sleepForm.reset();
@@ -544,12 +555,13 @@ document.addEventListener('DOMContentLoaded', () => {
             historyTitle.textContent = `Histórico de ${type}`;
 
             if (type === 'Hidratação') {
-                entries = allData.filter(d => d.water > 0).map(d => ({ date: d.date, value: `${d.water} / ${Utils.loadFromLocalStorage('waterGoal', 8)} copos` }));
+                entries = allData.filter(d => d.water > 0).map(d => ({ date: d.date, value: `${d.water} / ${(d.waterGoal || Utils.loadFromLocalStorage('waterGoal', 8))} copos` }));
             } else { // Sono
                 entries = allData.filter(d => d.sleep).map(d => {
                     const h = Math.floor(d.sleep.totalMinutes / 60);
                     const m = d.sleep.totalMinutes % 60;
-                    return { date: d.date, value: `${h}h ${m}m` };
+                    const q = d.sleep.quality ? ` • Qualidade: ${d.sleep.quality}/5` : '';
+                    return { date: d.date, value: `${h}h ${m}m${q}` };
                 });
             }
 
@@ -575,6 +587,9 @@ document.addEventListener('DOMContentLoaded', () => {
             waterGoalInput.addEventListener('change', () => {
                 waterGoal = parseInt(waterGoalInput.value) || 8;
                 Utils.saveToLocalStorage('waterGoal', waterGoal);
+                const todayData = DailyData.getTodayData();
+                todayData.waterGoal = waterGoal;
+                DailyData.saveData();
                 render();
             });
 
@@ -598,10 +613,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 if (bedTimeInput.value && wakeTimeInput.value) {
                     const todayData = DailyData.getTodayData();
+                    const qualityPrompt = prompt('Qualidade do sono (1 a 5)?', '4');
+                    const quality = Math.max(1, Math.min(5, parseInt(qualityPrompt || '4')));
                     todayData.sleep = {
                         bedTime: bedTimeInput.value,
                         wakeTime: wakeTimeInput.value,
-                        totalMinutes: calculateSleep(bedTimeInput.value, wakeTimeInput.value)
+                        totalMinutes: calculateSleep(bedTimeInput.value, wakeTimeInput.value),
+                        quality
                     };
                     DailyData.saveData();
                     render();
@@ -627,6 +645,166 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         return { init, render };
+    })();
+
+    // --- MÓDULO FOCUS EXTRAS ---
+    const FocusExtras = (() => {
+        // MITs do Dia
+        const mitInput = document.getElementById('mit-input');
+        const addMitBtn = document.getElementById('add-mit-btn');
+        const mitsList = document.getElementById('mits-list');
+        const clearMitsBtn = document.getElementById('clear-mits-btn');
+        const carryoverMitsBtn = document.getElementById('carryover-mits-btn');
+        let mits = Utils.loadFromLocalStorage('mits', []);
+
+        const renderMits = () => { mitsList.innerHTML = mits.map((m, i) => `<li class="mit-item" data-index="${i}"><span>${Utils.escapeHTML(m.text)}</span><div class="task-item-buttons"><button class="soft-button icon-btn delete-mit-btn"><i class='bx bxs-trash'></i></button></div></li>`).join(''); };
+        const addMit = (text) => { const t = text?.trim(); if(!t) return; if (mits.length >= 3) return alert('Limite de 3 MITs.'); mits.push({ text: t }); Utils.saveToLocalStorage('mits', mits); renderMits(); };
+        const carryoverMits = () => { const today = Utils.getTodayString(); const key = `mits_${today}`; Utils.saveToLocalStorage(key, mits); // simples: só persistir snapshot do dia
+            // levar para amanhã
+            const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1); const tomorrowKey = `mits_${tomorrow.toISOString().split('T')[0]}`; Utils.saveToLocalStorage(tomorrowKey, mits); };
+
+        // Estatísticas de Foco (básico por sessão Pomodoro)
+        const statsTodayMinutesEl = document.getElementById('focus-stats-today-minutes');
+        const statsTodaySessionsEl = document.getElementById('focus-stats-today-sessions');
+        const statsWeekMinutesEl = document.getElementById('focus-stats-week-minutes');
+        let focusStats = Utils.loadFromLocalStorage('focusStats', { sessions: [] });
+        const addFocusSession = (minutes) => { focusStats.sessions.push({ date: Utils.getTodayString(), minutes }); Utils.saveToLocalStorage('focusStats', focusStats); renderStats(); };
+        const renderStats = () => {
+            const today = Utils.getTodayString();
+            const todaySessions = focusStats.sessions.filter(s => s.date === today);
+            const todayMinutes = todaySessions.reduce((acc, s) => acc + (s.minutes || 0), 0);
+            statsTodayMinutesEl && (statsTodayMinutesEl.textContent = String(todayMinutes));
+            statsTodaySessionsEl && (statsTodaySessionsEl.textContent = String(todaySessions.length));
+            const now = new Date();
+            const start = new Date(now); start.setDate(now.getDate() - 6);
+            const last7 = focusStats.sessions.filter(s => new Date(s.date) >= new Date(start.toISOString().split('T')[0]));
+            const weekMinutes = last7.reduce((acc, s) => acc + (s.minutes || 0), 0);
+            statsWeekMinutesEl && (statsWeekMinutesEl.textContent = String(weekMinutes));
+        };
+
+        // Timeboxing
+        const tbForm = document.getElementById('timeboxing-form');
+        const tbLabel = document.getElementById('tb-label');
+        const tbStart = document.getElementById('tb-start');
+        const tbDuration = document.getElementById('tb-duration');
+        const tbList = document.getElementById('timeboxing-list');
+        let timeboxes = Utils.loadFromLocalStorage('timeboxes', []);
+        const renderTimeboxes = () => { tbList.innerHTML = timeboxes.map((tb, i) => `<li class="timeboxing-item" data-index="${i}"><span>${Utils.escapeHTML(tb.label)} — ${tb.start} • ${tb.duration}m</span><div class="task-item-buttons"><button class="soft-button icon-btn delete-tb-btn"><i class='bx bxs-trash'></i></button></div></li>`).join(''); };
+
+        // Review do Dia
+        const reviewForm = document.getElementById('review-form');
+        const reviewFormView = document.getElementById('review-form-view');
+        const reviewCompletedView = document.getElementById('review-completed-view');
+        const reviewGood = document.getElementById('review-good');
+        const reviewDelay = document.getElementById('review-delay');
+        const reviewLearn = document.getElementById('review-learn');
+        const reviewGoodView = document.getElementById('review-good-view');
+        const reviewDelayView = document.getElementById('review-delay-view');
+        const reviewLearnView = document.getElementById('review-learn-view');
+        const editReviewBtn = document.getElementById('edit-review-btn');
+        let reviews = Utils.loadFromLocalStorage('reviews', {});
+
+        const init = () => {
+            // MITs
+            addMitBtn && addMitBtn.addEventListener('click', () => { addMit(mitInput.value); mitInput.value = ''; });
+            mitsList && mitsList.addEventListener('click', (e) => { const i = Number(e.target.closest('.mit-item')?.dataset.index); if(Number.isInteger(i)) { mits.splice(i,1); Utils.saveToLocalStorage('mits', mits); renderMits(); }});
+            clearMitsBtn && clearMitsBtn.addEventListener('click', () => { mits = []; Utils.saveToLocalStorage('mits', mits); renderMits(); });
+            carryoverMitsBtn && carryoverMitsBtn.addEventListener('click', carryoverMits);
+            renderMits();
+
+            // Timeboxing
+            tbForm && tbForm.addEventListener('submit', (e) => { e.preventDefault(); const label = tbLabel.value.trim(); if (!label) return; const start = tbStart.value || '--:--'; const duration = parseInt(tbDuration.value) || 30; timeboxes.push({ label, start, duration }); Utils.saveToLocalStorage('timeboxes', timeboxes); tbLabel.value=''; tbStart.value=''; tbDuration.value=''; renderTimeboxes(); });
+            tbList && tbList.addEventListener('click', (e) => { const i = Number(e.target.closest('.timeboxing-item')?.dataset.index); if(Number.isInteger(i)) { timeboxes.splice(i,1); Utils.saveToLocalStorage('timeboxes', timeboxes); renderTimeboxes(); }});
+            renderTimeboxes();
+
+            // Review
+            const today = Utils.getTodayString();
+            const todayReview = reviews[today];
+            if (todayReview) {
+                reviewFormView && (reviewFormView.style.display = 'none');
+                reviewCompletedView && (reviewCompletedView.style.display = 'block');
+                reviewGoodView && (reviewGoodView.textContent = todayReview.good || '');
+                reviewDelayView && (reviewDelayView.textContent = todayReview.delay || '');
+                reviewLearnView && (reviewLearnView.textContent = todayReview.learn || '');
+            }
+            reviewForm && reviewForm.addEventListener('submit', (e) => { e.preventDefault(); reviews[today] = { good: reviewGood.value.trim(), delay: reviewDelay.value.trim(), learn: reviewLearn.value.trim() }; Utils.saveToLocalStorage('reviews', reviews); reviewFormView.style.display = 'none'; reviewCompletedView.style.display = 'block'; reviewGoodView.textContent = reviews[today].good; reviewDelayView.textContent = reviews[today].delay; reviewLearnView.textContent = reviews[today].learn; });
+            editReviewBtn && editReviewBtn.addEventListener('click', () => { reviewFormView.style.display = 'block'; reviewCompletedView.style.display = 'none'; });
+
+            // Estatísticas iniciais
+            renderStats();
+        };
+
+        // Expor para Pomodoro somar sessões de foco
+        const onFocusSessionComplete = (minutes) => addFocusSession(minutes);
+
+        return { init, renderStats, onFocusSessionComplete };
+    })();
+
+    // --- MÓDULO FITNESS ---
+    const Fitness = (() => {
+        // Workouts simples
+        const workoutForm = document.getElementById('workout-form');
+        const workoutType = document.getElementById('workout-type');
+        const workoutMinutes = document.getElementById('workout-minutes');
+        const workoutRpe = document.getElementById('workout-rpe');
+        const workoutList = document.getElementById('workout-list');
+        let workouts = Utils.loadFromLocalStorage('workouts', []);
+        const renderWorkouts = () => { workoutList.innerHTML = workouts.map((w, i) => `<li class="workout-item" data-index="${i}"><span>${Utils.escapeHTML(w.type)} — ${w.minutes}m ${w.rpe?('• RPE '+w.rpe):''}</span><div class="task-item-buttons"><button class="soft-button icon-btn delete-workout-btn"><i class='bx bxs-trash'></i></button></div></li>`).join(''); };
+
+        // Respiração guiada (display)
+        const protocolSelect = document.getElementById('breath-protocol');
+        const breathRounds = document.getElementById('breath-rounds');
+        const startBreathBtn = document.getElementById('start-breath-btn');
+        const breathDisplay = document.getElementById('breath-display');
+        let breathTimer = null, currentStep = 0, remainingRounds = 0;
+        const PROTOCOLS = { box: [4,4,4,4], '478': [4,7,8], coerente: [5,5] };
+        const STEP_LABELS = { 3: ['Inspire','Segure','Expire','Segure'], 4: ['Inspire','Segure','Expire','Segure'] };
+        const stopBreath = () => { if (breathTimer) { clearTimeout(breathTimer); breathTimer = null; } breathDisplay && (breathDisplay.textContent = ''); };
+        const runBreath = (pattern) => {
+            if (remainingRounds <= 0) { stopBreath(); return; }
+            const stepSeconds = pattern[currentStep];
+            const label = (pattern.length === 4 ? STEP_LABELS[4][currentStep] : (pattern.length===3 ? ['Inspire','Segure','Expire'][currentStep] : ['Inspire','Expire'][currentStep]));
+            breathDisplay.textContent = `${label} • ${stepSeconds}s`;
+            currentStep = (currentStep + 1) % pattern.length;
+            if (currentStep === 0) remainingRounds -= 1;
+            breathTimer = setTimeout(() => runBreath(pattern), stepSeconds * 1000);
+        };
+
+        // Alongamento
+        const stretchPreset = document.getElementById('stretch-preset');
+        const startStretchBtn = document.getElementById('start-stretch-btn');
+        const stretchStepsList = document.getElementById('stretch-steps');
+        const STRETCH_PRESETS = {
+            'pescoço': ['Inclinação lateral 30s', 'Rotação lenta 30s', 'Flexão 30s'],
+            'ombros': ['Alcance cruzado 30s', 'Roda de ombro 30s', 'Alongar peitoral 30s'],
+            'lombar': ['Criança 30s', 'Gato-vaca 30s', 'Torção suave 30s']
+        };
+
+        // Sol/Ar Livre
+        const outdoorMinutes = document.getElementById('outdoor-minutes');
+        const saveOutdoorBtn = document.getElementById('save-outdoor-btn');
+        const outdoorHistory = document.getElementById('outdoor-history');
+        let outdoor = Utils.loadFromLocalStorage('outdoor', []);
+        const renderOutdoor = () => { outdoorHistory.innerHTML = outdoor.slice().reverse().map((o, i) => `<li class="outdoor-item"><span>${o.date} — ${o.minutes} min</span></li>`).join(''); };
+
+        const init = () => {
+            // Workouts
+            workoutForm && workoutForm.addEventListener('submit', (e) => { e.preventDefault(); const type = workoutType.value.trim() || 'Treino'; const minutes = parseInt(workoutMinutes.value) || 20; const rpe = parseInt(workoutRpe.value) || null; workouts.push({ date: Utils.getTodayString(), type, minutes, rpe }); Utils.saveToLocalStorage('workouts', workouts); workoutType.value=''; workoutMinutes.value=''; workoutRpe.value=''; renderWorkouts(); });
+            workoutList && workoutList.addEventListener('click', (e) => { const i = Number(e.target.closest('.workout-item')?.dataset.index); if(Number.isInteger(i)) { workouts.splice(i,1); Utils.saveToLocalStorage('workouts', workouts); renderWorkouts(); }});
+            renderWorkouts();
+
+            // Respiração
+            startBreathBtn && startBreathBtn.addEventListener('click', () => { stopBreath(); const proto = protocolSelect.value; const rounds = parseInt(breathRounds.value) || 4; currentStep = 0; remainingRounds = rounds; runBreath(PROTOCOLS[proto] || PROTOCOLS.box); });
+
+            // Alongamento
+            startStretchBtn && startStretchBtn.addEventListener('click', () => { const preset = stretchPreset.value; const steps = STRETCH_PRESETS[preset] || []; stretchStepsList.innerHTML = steps.map(s => `<li class="stretch-step"><span>${s}</span></li>`).join(''); });
+
+            // Sol
+            saveOutdoorBtn && saveOutdoorBtn.addEventListener('click', () => { const minutes = parseInt(outdoorMinutes.value) || 10; outdoor.push({ date: Utils.getTodayString(), minutes }); Utils.saveToLocalStorage('outdoor', outdoor); outdoorMinutes.value=''; renderOutdoor(); });
+            renderOutdoor();
+        };
+
+        return { init };
     })();
 
     // --- INICIALIZAÇÃO GERAL ---
