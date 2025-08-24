@@ -325,10 +325,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 * { scrollbar-width: none; -ms-overflow-style: none; }
 *::-webkit-scrollbar { width: 0; height: 0; }
 
-/* Cabeçalhos com ícone + título e menor margem entre cards */
-.todo-header, .pomodoro-header, .goals-header { gap: 0.8rem; }
-.todo-header i, .pomodoro-header i, .goals-header i { font-size: 2rem; color: var(--primary-color); }
-.focus-mits-card, .focus-stats-card, .timeboxing-card, .review-card { margin-top: 1.8rem; }
+/* Cabeçalhos harmonizados (mesmo dos Ajustes) */
+.todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header { display: flex; align-items: center; justify-content: space-between; }
+.todo-header i, .pomodoro-header i, .goals-header i, .habits-header i, .journal-header i { font-size: 2.4rem; color: var(--primary-color); }
+.todo-header h2, .goals-header h2, .journal-header h4 { margin: 0; }
+
+/* Pomodoro: anel de progresso circular (donut) */
+.timer-display-container { position: relative; background: conic-gradient(var(--primary-color) var(--progress, 0deg), var(--bg-color) 0); }
+.timer-display-container::after { content: ""; position: absolute; inset: 12%; border-radius: 50%; background-color: var(--component-bg); border: 1px solid var(--border-color); box-shadow: var(--soft-shadow-inset-sharp); }
+.timer-display-container > h2 { position: relative; z-index: 1; }
 
 /* Destaque do bloco atual do timeboxing */
 .timeboxing-item.now { border-color: var(--primary-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 25%, transparent); }
@@ -341,3 +346,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .sleep-week-bar.lv2 { background-color: #fd7e14; }
 .sleep-week-bar.lv3 { background-color: #0d6efd; }
 .sleep-week-bar.lv4 { background-color: #28a745; }
+
+/* Títulos alinhados à esquerda e ações à direita */
+.todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header, .water-header, .sleep-header { display: flex; align-items: center; justify-content: space-between; }
+.todo-header > i + h2, .goals-header > i + h2, .journal-header > i + h4, .sleep-header .metric-header h4 { margin-left: 0.8rem; }
+
+/* Metas: equilíbrio visual quando vazio */
+.goals-header { min-height: 56px; }
