@@ -293,3 +293,8 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 .stretch-step { justify-content: flex-start; gap: 0.8rem; }
 /* --- Fitness --- */
 #fitness .todo-header h2 { font-size: 1.8rem; font-weight: 600; }
+
+/* Overrides específicos */
+.focus-mits-card .add-task-container { flex-wrap: nowrap; }
+#mit-input { flex: 1 1 auto; min-width: 0; }
+.toggle-button.active .toggle-circle { transform: translateX(2.9rem); background-color: var(--primary-color); }

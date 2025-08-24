@@ -97,7 +97,7 @@
                 <div class="todo-body">
                     <form id="timeboxing-form" class="add-task-container">
                         <input type="text" id="tb-label" class="soft-input" placeholder="Bloco (ex.: Estudar Inglês)">
-                        <input type="text" id="tb-start" class="soft-input" style="max-width: 12rem;" readonly>
+                        <input type="time" id="tb-start" class="soft-input" style="max-width: 12rem;">
                         <input type="number" id="tb-duration" class="soft-input" placeholder="min" style="max-width: 9rem;">
                         <button type="submit" class="soft-button"><i class='bx bx-plus'></i></button>
                     </form>
@@ -175,11 +175,11 @@
                             <div class="sleep-inputs">
                                 <div>
                                     <label for="bed-time">Dormi às</label>
-                                    <input type="text" id="bed-time" class="soft-input" readonly>
+                                    <input type="time" id="bed-time" class="soft-input">
                                 </div>
                                 <div>
                                     <label for="wake-time">Acordei às</label>
-                                    <input type="text" id="wake-time" class="soft-input" readonly>
+                                    <input type="time" id="wake-time" class="soft-input">
                                 </div>
                             </div>
                             <button type="submit" id="save-sleep-btn" class="soft-button">Salvar Sono</button>
@@ -304,18 +304,6 @@
            </div>
             <div class="settings-card">
                 <header class="settings-card-header">
-                    <i class='bx bx-data'></i>
-                    <h2>Dados</h2>
-                </header>
-                <div class="settings-card-body">
-                    <div class="setting-row">
-                        <button id="export-data-btn" class="soft-button">Exportar Dados</button>
-                        <button id="import-data-btn" class="soft-button gray">Importar Dados</button>
-                    </div>
-                </div>
-            </div>
-            <div class="settings-card">
-                <header class="settings-card-header">
                     <i class='bx bx-toggle-left'></i>
                     <h2>Módulos</h2>
                 </header>
@@ -438,7 +426,7 @@
                 <label>Categorias:</label>
                 <div id="goal-category-container" class="category-container"></div>
                 <label for="goal-date-input">Data Alvo:</label>
-                <input type="text" id="goal-date-input" class="soft-input" readonly>
+                <input type="date" id="goal-date-input" class="soft-input">
                 <div class="modal-actions"><button type="button" id="cancel-goal-btn" class="soft-button gray">Cancelar</button><button type="submit" class="soft-button">Salvar</button></div>
             </form>
         </div>
@@ -515,33 +503,6 @@
                     <button type="button" id="sleep-quality-cancel" class="soft-button gray">Cancelar</button>
                     <button type="button" id="sleep-quality-confirm" class="soft-button">Confirmar</button>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div id="time-picker-modal" class="modal-backdrop hidden">
-        <div class="modal-content small">
-            <h3 class="modal-title-center">Selecionar Horário</h3>
-            <div style="display:flex; gap:1rem; justify-content:center; margin:1rem 0;">
-                <select id="tp-hour" class="soft-input" style="max-width:8rem;"></select>
-                <select id="tp-minute" class="soft-input" style="max-width:8rem;"></select>
-            </div>
-            <div class="modal-actions">
-                <button type="button" id="tp-cancel" class="soft-button gray">Cancelar</button>
-                <button type="button" id="tp-confirm" class="soft-button">Confirmar</button>
-            </div>
-        </div>
-    </div>
-    <div id="date-picker-modal" class="modal-backdrop hidden">
-        <div class="modal-content small">
-            <h3 class="modal-title-center">Selecionar Data</h3>
-            <div style="display:flex; gap:1rem; justify-content:center; margin:1rem 0;">
-                <select id="dp-year" class="soft-input" style="max-width:10rem;"></select>
-                <select id="dp-month" class="soft-input" style="max-width:10rem;"></select>
-                <select id="dp-day" class="soft-input" style="max-width:10rem;"></select>
-            </div>
-            <div class="modal-actions">
-                <button type="button" id="dp-cancel" class="soft-button gray">Cancelar</button>
-                <button type="button" id="dp-confirm" class="soft-button">Confirmar</button>
             </div>
         </div>
     </div>
