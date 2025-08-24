@@ -607,10 +607,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const MOOD_WEEK_JOKES = [ {max:1.9, text:'Semana pedindo feriado 😴'}, {max:2.9, text:'Precisamos de memes e sol ☀️'}, {max:3.9, text:'Ok, mas pode melhorar 👍'}, {max:4.5, text:'Clima excelente! 🚀'}, {max:5.1, text:'MVP do bom humor! 🏆'} ];
             const moodNote = moodAvgVal ? (MOOD_WEEK_JOKES.find(j=> moodAvgVal <= j.max)?.text || '') : '';
             weeklySummaryList.innerHTML = [
-                `<li>Água: ${totalWater} copos (${totalWaterMl} ml)</li>`,
+                `<li>Água: ${totalWater} passos (${totalWaterMl} ml)</li>`,
                 `<li>Sono médio: ${sleepAvg}</li>`,
                 `<li>Foco: ${focusMin} min • ${focusSes} sessões</li>`,
-                `<li>Humor médio: ${moodAvg} ${moodNote?('— '+moodNote):''}</li>`
+                `<li>Humor médio: ${moodAvg} ${moodNote?('- '+moodNote):''}</li>`
             ].join('');
         };
         const shareWeeklySummary = () => {

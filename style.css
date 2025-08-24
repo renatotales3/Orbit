@@ -330,30 +330,25 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .todo-header i, .pomodoro-header i, .goals-header i, .habits-header i { font-size: 2.4rem; color: var(--primary-color); margin-right: 1.2rem; }
 .todo-header h2, .goals-header h2, .journal-header h4 { margin: 0; }
 
-/* Pomodoro: anel de progresso circular (donut) */
-/* Donut mais fino e sem vazamento */
-.timer-display-container { position: relative; background: conic-gradient(var(--primary-color) var(--progress, 0deg), var(--component-bg) 0); }
-.timer-display-container::after { inset: 40%; }
-.timer-display-container > h2 { position: relative; z-index: 1; }
+/* Remover donut do Pomodoro: voltar para fundo simples */
+.timer-display-container { background: none; background-color: var(--bg-color); }
+.timer-display-container::after { display: none; }
 
-/* Destaque do bloco atual do timeboxing */
-.timeboxing-item.now { border-color: var(--primary-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 25%, transparent); }
-.timeboxing-item.now .tb-label { font-weight: 600; }
+/* Títulos à esquerda com ações à direita (agrupamento via margin-right:auto) */
+.todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header, .water-header, .sleep-header { display: flex; align-items: center; justify-content: space-between; }
+.todo-header h2, .pomodoro-header h2, .goals-header h2, .habits-header h2, .journal-header h4 { margin-right: auto; }
+.water-header .metric-header, .sleep-header .metric-header { display: flex; align-items: center; gap: 1.2rem; margin-right: auto; }
 
-/* Barras semanais de sono (compactas acima do card) */
-.sleep-week-bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.4rem; margin: 0 1.5rem 0.8rem; }
-.sleep-week-bar { height: 6px; border-radius: 4px; background-color: var(--divider-color); }
-.sleep-week-bar.lv1 { background-color: #dc3545; }
-.sleep-week-bar.lv2 { background-color: #fd7e14; }
-.sleep-week-bar.lv3 { background-color: #0d6efd; }
-.sleep-week-bar.lv4 { background-color: #28a745; }
+/* Ações MIT centralizadas */
+.focus-mits-card .todo-body > div:last-child { display: flex; justify-content: center; }
 
-/* Títulos alinhados à esquerda e ações à direita */
-/* Títulos à esquerda (como Ajustes) */
-.todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header, .water-header, .sleep-header { justify-content: flex-start; gap: 0.8rem; }
-
-/* Metas: equilíbrio visual quando vazio */
-.goals-header { min-height: 56px; }
+/* Padronização de cor dos ícones de ação */
+.soft-button.icon-btn, .soft-button.icon-btn i { color: var(--icon-color) !important; }
+.goal-actions button, .subtask-actions button { color: var(--icon-color) !important; }
 
 /* Mood note */
 .mood-note { text-align: center; font-size: 1.4rem; opacity: 0.9; margin-top: 1.6rem; margin-bottom: 0.8rem; }
+
+/* Header: título/ícone à esquerda, ações à direita */
+.todo-header > i + h2, .goals-header > i + h2, .habits-header > i + h2, .journal-header > i + h4 { margin-left: 1.2rem; }
+.todo-header .soft-button.icon-btn, .goals-header .soft-button, .habits-header .soft-button, .journal-header .soft-button, .water-header .soft-button.icon-btn, .sleep-header .soft-button.icon-btn { margin-left: auto; }
