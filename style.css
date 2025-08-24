@@ -304,3 +304,12 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 button, a, input, textarea, select { outline: none; }
 button:focus, a:focus, input:focus, textarea:focus, select:focus { outline: none; box-shadow: none; }
 button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid transparent; box-shadow: none; }
+
+/* Ajustes layout Dados */
+.settings-card-body .setting-row { gap: 1.2rem; }
+.settings-card-body .setting-row > label { flex: 1 1 auto; }
+.settings-card-body .setting-row > .soft-button { flex: 0 0 auto; }
+@media (max-width: 420px) {
+  .settings-card-body .setting-row { flex-wrap: wrap; }
+  .settings-card-body .setting-row > label { flex: 1 1 100%; }
+}

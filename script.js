@@ -571,10 +571,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const focusSpan = focusStats.sessions.filter(s=> new Date(s.date) >= new Date(start.toISOString().split('T')[0]));
             const focusMin = focusSpan.reduce((a,s)=> a + (s.minutes||0), 0);
             const focusSes = focusSpan.length;
+            const moodAvg = (()=>{ const vals = span.map(d=> parseInt(d.mood||0)).filter(Boolean); if(!vals.length) return '-'; const avg = (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1); return `${avg}/5`; })();
             weeklySummaryList.innerHTML = [
                 `<li>Água: ${totalWater} copos (${totalWaterMl} ml)</li>`,
                 `<li>Sono médio: ${sleepAvg}</li>`,
-                `<li>Foco: ${focusMin} min • ${focusSes} sessões</li>`
+                `<li>Foco: ${focusMin} min • ${focusSes} sessões</li>`,
+                `<li>Humor médio: ${moodAvg}</li>`
             ].join('');
         };
         const shareWeeklySummary = () => {
@@ -806,6 +808,57 @@ document.addEventListener('DOMContentLoaded', () => {
     })();
 
 
+
+    // --- MÓDULO TUTORIAL & DADOS ---
+    (() => {
+        const tutorialBtn = document.getElementById('open-tutorial-btn');
+        const tutorialModal = document.getElementById('tutorial-modal');
+        const tutorialContent = document.getElementById('tutorial-content');
+        const closeTutorialBtn = document.getElementById('close-tutorial-btn');
+        const closeTutorialBtnX = document.getElementById('close-tutorial-btn-x');
+        const purgeBtn = document.getElementById('purge-old-data-btn');
+        const resetBtn = document.getElementById('reset-all-data-btn');
+        const TUTORIAL_HTML = `
+<h4>Como usar o Life OS (Tutorial rápido)</h4>
+<p>O que é: seu hub diário de foco e bem‑estar. Tudo salvo no seu dispositivo.</p>
+<h5>Navegação</h5>
+<p>Use a barra inferior. O app lembra a última aba.</p>
+<h5>MITs do Dia</h5>
+<p>Até 3 tarefas. Adicione com “+”, toque no texto para editar, lixeira para excluir.</p>
+<h5>Timeboxing</h5>
+<p>Blocos com rótulo, início e duração. Edite tocando no rótulo.</p>
+<h5>Pomodoro</h5>
+<p>Inicie/pausa; as sessões contam nas estatísticas de foco.</p>
+<h5>Bem‑estar</h5>
+<p>Hidratação (copos e ml), sono (com qualidade), humor e reflexão do dia.</p>
+<h5>Resumo da Semana</h5>
+<p>Água, sono, foco e humor médios; compartilhe pelo botão.</p>
+<h5>Ajustes</h5>
+<p>Tema, tempos do Pomodoro, Hidratação (meta e ml), Dados e este Tutorial.</p>`;
+        if (tutorialContent && !tutorialContent.innerHTML) tutorialContent.innerHTML = TUTORIAL_HTML;
+        if (tutorialBtn && tutorialModal) tutorialBtn.addEventListener('click', (e) => { e.preventDefault(); tutorialModal.classList.remove('hidden'); });
+        if (closeTutorialBtn) closeTutorialBtn.addEventListener('click', (e)=>{ e.preventDefault(); tutorialModal.classList.add('hidden'); });
+        if (closeTutorialBtnX) closeTutorialBtnX.addEventListener('click', (e)=>{ e.preventDefault(); tutorialModal.classList.add('hidden'); });
+        if (tutorialModal) tutorialModal.addEventListener('click', (e)=>{ if (e.target === tutorialModal) tutorialModal.classList.add('hidden'); });
+
+        if (purgeBtn) purgeBtn.addEventListener('click', () => {
+            const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 180);
+            // dailyData
+            const all = Utils.loadFromLocalStorage('dailyData', []);
+            const kept = all.filter(d => new Date(d.date) >= new Date(cutoff.toISOString().split('T')[0]));
+            Utils.saveToLocalStorage('dailyData', kept);
+            // focusStats
+            const focusStats = Utils.loadFromLocalStorage('focusStats', { sessions: [] });
+            focusStats.sessions = focusStats.sessions.filter(s => new Date(s.date) >= new Date(cutoff.toISOString().split('T')[0]));
+            Utils.saveToLocalStorage('focusStats', focusStats);
+            alert('Histórico anterior a 180 dias limpo.');
+        });
+        if (resetBtn) resetBtn.addEventListener('click', () => {
+            if (!confirm('Isso apagará todos os dados locais. Continuar?')) return;
+            localStorage.clear();
+            location.reload();
+        });
+    })();
 
     // --- INICIALIZAÇÃO GERAL ---
     App.init();
