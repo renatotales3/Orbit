@@ -97,6 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 Goals.render();
                 Tasks.render();
                 FocusExtras.renderStats();
+            } else if (targetId === 'financas') {
+                Finance.renderAll && Finance.renderAll();
             }
         };
 
@@ -1040,8 +1042,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const renderFilters = () => {
             if (!periodChips || !categoryFilter) return;
-            periodChips.innerHTML = ['today','week','month'].map(p=>`<button type="button" class="category-btn ${currentPeriod===p?'active':''}" data-period="${p}">${p==='today'?'Hoje':p==='week'?'Semana':'Mês'}</button>`).join('');
+            const periods = [
+                { key:'today', label:'Hoje' },
+                { key:'week', label:'Semana' },
+                { key:'month', label:'Mês' }
+            ];
+            periodChips.innerHTML = periods.map(p=>`<button type="button" class="category-btn ${currentPeriod===p.key?'active':''}" data-period="${p.key}">${p.label}</button>`).join('');
             categoryFilter.innerHTML = ['Todas',...CATS].map(c=>`<option ${currentCategory===c?'selected':''}>${c}</option>`).join('');
+            const quickAmounts = [10,25,50,100,200,500];
+            const qa = document.getElementById('fin-quick-amounts');
+            if (qa) qa.innerHTML = quickAmounts.map(v=>`<button type="button" class="category-btn" data-qa="${v}">+${v}</button>`).join('');
+            const qc = document.getElementById('fin-quick-cats');
+            if (qc) qc.innerHTML = CATS.slice(0,5).map(c=>`<button type="button" class="category-btn" data-qc="${c}">${c}</button>`).join('');
         };
 
         const renderSummary = () => {
@@ -1138,8 +1150,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const init = () => {
             if (!periodChips) return; // aba pode não estar montada
             // filtros
-            periodChips.addEventListener('click', (e)=>{ const btn=e.target.closest('.category-btn'); if(!btn) return; currentPeriod = btn.dataset.period; Utils.saveToLocalStorage('fin_period', currentPeriod); renderAll(); });
+            periodChips.addEventListener('click', (e)=>{ const btn=e.target.closest('.category-btn'); if(!btn) return; if (btn.dataset.period) { currentPeriod = btn.dataset.period; Utils.saveToLocalStorage('fin_period', currentPeriod); renderAll(); } });
             categoryFilter.addEventListener('change', ()=>{ currentCategory = categoryFilter.value; Utils.saveToLocalStorage('fin_category', currentCategory); renderAll(); });
+            const qa = document.getElementById('fin-quick-amounts');
+            qa && qa.addEventListener('click', (e)=>{ const b=e.target.closest('[data-qa]'); if(!b) return; const val=Number(b.dataset.qa); openModal(txModal); document.getElementById('tr-value').value = String(val); });
+            const qc = document.getElementById('fin-quick-cats');
+            qc && qc.addEventListener('click', (e)=>{ const b=e.target.closest('[data-qc]'); if(!b) return; const cat=b.dataset.qc; openModal(txModal); document.getElementById('tr-category').value = cat; });
 
             // transações
             txOpenBtn && txOpenBtn.addEventListener('click', ()=> openModal(txModal));

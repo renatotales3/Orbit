@@ -251,7 +251,7 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 /* --- Modal Styles --- */
 .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 1; transition: opacity 0.3s ease; }
 .modal-backdrop.hidden { opacity: 0; pointer-events: none; }
-.modal-content { background-color: var(--component-bg); border: 1px solid var(--border-color); padding: 2rem; border-radius: 1.6rem; width: 90%; max-width: 50rem; box-shadow: var(--shadow); }
+.modal-content { background-color: var(--component-bg); border: 1px solid var(--border-color); padding: 2rem; border-radius: 1.6rem; width: 90%; max-width: 50rem; box-shadow: var(--shadow); display:flex; flex-direction:column; gap:1.2rem; }
 #goal-form, #habit-form { display: flex; flex-direction: column; gap: 1.6rem; }
 .picker-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr)); gap: 1rem; }
 .picker-option { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
@@ -296,8 +296,11 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 
 /* --- Finanças --- */
 .finance-card { background-color: var(--component-bg); border: 1px solid var(--border-color); border-radius: 1.6rem; box-shadow: var(--shadow); margin-top: 1.8rem; }
+.finance-card .todo-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--divider-color); }
+.finance-card .todo-header h2 { margin-right: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.finance-card .todo-header .soft-button { margin-left: auto; }
 .finance-card .todo-body { padding: 1.5rem; }
-.finance-list { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
+.finance-list { list-style: none; display: flex; flex-direction: column; gap: 1rem; padding: 0; margin: 0; }
 .finance-item { background-color: var(--component-bg); border: 1px solid var(--border-color); border-radius: 1.2rem; padding: 1.2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .finance-item .left { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
 .finance-item .title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -308,6 +311,12 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 .finance-amount.out { color: #dc3545; }
 .progress-bar-outer { width: 100%; height: 8px; background-color: var(--bg-color); border-radius: 6px; box-shadow: var(--soft-shadow-inset-sharp); overflow: hidden; }
 .progress-bar-inner { height: 100%; background-color: var(--primary-color); width: 0%; transition: width 0.3s ease; }
+
+/* Improve finance body spacing and grids */
+.finance-card .todo-body .stats-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; }
+.stat-item { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 1rem; padding: 1rem; text-align: center; }
+.stat-item span { display: block; font-size: 1.2rem; opacity: .8; }
+.stat-item strong { font-size: 1.6rem; }
 
 /* Overrides específicos */
 .focus-mits-card .add-task-container { flex-wrap: nowrap; }
@@ -360,6 +369,22 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 /* Header: título/ícone à esquerda, ações à direita */
 .todo-header > i + h2, .goals-header > i + h2, .habits-header > i + h2, .journal-header > i + h4 { margin-left: 1.2rem; }
 .todo-header .soft-button.icon-btn, .goals-header .soft-button, .habits-header .soft-button, .journal-header .soft-button, .water-header .soft-button.icon-btn, .sleep-header .soft-button.icon-btn { margin-left: auto; }
+
+/* Buttons text clipping fix */
+.soft-button { white-space: nowrap; }
+
+/* Chips row wrapping */
+#fin-period-chips { display: flex; gap: .6rem; flex-wrap: wrap; }
+#fin-period-chips .category-btn { padding: 0.6rem 1rem; font-size: 1.3rem; }
+
+/* Lists spacing */
+.finance-list { padding: 0; margin: 0; }
+
+/* Responsive tweaks */
+@media (max-width: 480px) {
+  .finance-card .todo-body .stats-grid { grid-template-columns: 1fr; }
+  .modal-content { width: 92%; }
+}
 
 @media (max-width: 420px) {
   .content { padding: 1.4rem; padding-bottom: 9rem; }
