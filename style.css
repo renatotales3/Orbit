@@ -324,3 +324,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 /* Ocultar barras de rolagem globalmente */
 * { scrollbar-width: none; -ms-overflow-style: none; }
 *::-webkit-scrollbar { width: 0; height: 0; }
+
+/* Cabeçalhos com ícone + título e menor margem entre cards */
+.todo-header, .pomodoro-header, .goals-header { gap: 0.8rem; }
+.todo-header i, .pomodoro-header i, .goals-header i { font-size: 2rem; color: var(--primary-color); }
+.focus-mits-card, .focus-stats-card, .timeboxing-card, .review-card { margin-top: 1.8rem; }
+
+/* Destaque do bloco atual do timeboxing */
+.timeboxing-item.now { border-color: var(--primary-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 25%, transparent); }
+.timeboxing-item.now .tb-label { font-weight: 600; }
+
+/* Barras semanais de sono (compactas acima do card) */
+.sleep-week-bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.4rem; margin: 0 1.5rem 0.8rem; }
+.sleep-week-bar { height: 6px; border-radius: 4px; background-color: var(--divider-color); }
+.sleep-week-bar.lv1 { background-color: #dc3545; }
+.sleep-week-bar.lv2 { background-color: #fd7e14; }
+.sleep-week-bar.lv3 { background-color: #0d6efd; }
+.sleep-week-bar.lv4 { background-color: #28a745; }

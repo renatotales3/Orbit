@@ -20,112 +20,114 @@
 
         <section id="foco" class="page">
             <h1>Foco</h1>
-            <div class="pomodoro-app">
-                <header class="pomodoro-header">
-                    <h2>Pomodoro</h2>
-                </header>
-                <div class="pomodoro-timer">
-                    <div class="timer-display-container"><h2 id="timer-display">25:00</h2></div>
-                    <p id="timer-status">Hora de Focar!</p>
-                    <div class="pomodoro-controls">
-                        <button id="start-btn" class="soft-button pomodoro-btn" aria-label="Iniciar timer"><i class='bx bx-play'></i></button>
-                        <button id="pause-btn" class="soft-button pomodoro-btn" aria-label="Pausar timer"><i class='bx bx-pause'></i></button>
-                        <button id="reset-btn" class="soft-button pomodoro-btn" aria-label="Reiniciar timer"><i class='bx bx-reset'></i></button>
-                    </div>
-                </div>
-            </div>
-            <div class="todo-app">
-                <header class="todo-header">
-                    <h2>Tarefas do Dia</h2>
-                    <button id="clear-completed-tasks-btn" class="soft-button icon-btn hidden" title="Limpar Concluídas">
-                        <i class='bx bxs-eraser'></i>
-                    </button>
-                </header>
-                <div class="todo-body">
-                    <div class="add-task-container">
-                        <input type="text" id="task-input" class="soft-input" placeholder="Adicionar tarefa...">
-                        <div class="priority-selector-wrapper">
-                            <button id="task-priority-btn" class="soft-button priority-btn" aria-label="Selecionar Prioridade">
-                                <i class='bx bxs-circle priority-indicator-btn priority-3'></i>
-                            </button>
-                            <div id="priority-picker" class="priority-picker hidden"></div>
+            <div class="foco-grid-container">
+                <div class="pomodoro-app">
+                    <header class="pomodoro-header">
+                        <i class='bx bx-timer'></i><h2>Pomodoro</h2>
+                    </header>
+                    <div class="pomodoro-timer">
+                        <div class="timer-display-container"><h2 id="timer-display">25:00</h2></div>
+                        <p id="timer-status">Hora de Focar!</p>
+                        <div class="pomodoro-controls">
+                            <button id="start-btn" class="soft-button pomodoro-btn" aria-label="Iniciar timer"><i class='bx bx-play'></i></button>
+                            <button id="pause-btn" class="soft-button pomodoro-btn" aria-label="Pausar timer"><i class='bx bx-pause'></i></button>
+                            <button id="reset-btn" class="soft-button pomodoro-btn" aria-label="Reiniciar timer"><i class='bx bx-reset'></i></button>
                         </div>
-                        <button id="add-task-btn" class="soft-button" aria-label="Adicionar Tarefa"><i class='bx bx-plus'></i></button>
-                    </div>
-                    <ul id="task-list"></ul>
-                </div>
-            </div>
-            <div class="goals-app">
-                <header class="goals-header">
-                    <h2>Minhas Metas</h2>
-                    <button id="add-goal-modal-btn" class="soft-button"><i class='bx bx-plus'></i> Nova Meta</button>
-                </header>
-                <ul id="goals-list"></ul>
-            </div>
-            <div class="focus-mits-card">
-                <header class="todo-header">
-                    <h2>MITs do Dia</h2>
-                </header>
-                <div class="todo-body">
-                    <div class="add-task-container">
-                        <input type="text" id="mit-input" class="soft-input" placeholder="Adicionar MIT...">
-                        <button id="add-mit-btn" class="soft-button" aria-label="Adicionar MIT"><i class='bx bx-plus'></i></button>
-                    </div>
-                    <ul id="mits-list"></ul>
-                    <p style="font-size:1.2rem; opacity:0.7; margin-top:0.5rem;">Máx. 3 itens</p>
-                    <div style="margin-top:1rem; display:flex; gap:1rem;">
-                        <button id="carryover-mits-btn" class="soft-button gray">Levar para amanhã</button>
-                        <button id="clear-mits-btn" class="soft-button danger">Limpar MITs</button>
                     </div>
                 </div>
-            </div>
-            <div class="focus-stats-card">
-                <header class="todo-header">
-                    <h2>Estatísticas de Foco</h2>
-                </header>
-                <div class="todo-body">
-                    <div class="stats-grid">
-                        <div class="stat-item"><span>Hoje (min)</span><strong id="focus-stats-today-minutes">0</strong></div>
-                        <div class="stat-item"><span>Sessões</span><strong id="focus-stats-today-sessions">0</strong></div>
-                        <div class="stat-item"><span>Semana (min)</span><strong id="focus-stats-week-minutes">0</strong></div>
+                <div class="todo-app">
+                    <header class="todo-header">
+                        <i class='bx bx-list-check'></i><h2>Tarefas do Dia</h2>
+                        <button id="clear-completed-tasks-btn" class="soft-button icon-btn hidden" title="Limpar Concluídas">
+                            <i class='bx bxs-eraser'></i>
+                        </button>
+                    </header>
+                    <div class="todo-body">
+                        <div class="add-task-container">
+                            <input type="text" id="task-input" class="soft-input" placeholder="Adicionar tarefa...">
+                            <div class="priority-selector-wrapper">
+                                <button id="task-priority-btn" class="soft-button priority-btn" aria-label="Selecionar Prioridade">
+                                    <i class='bx bxs-circle priority-indicator-btn priority-3'></i>
+                                </button>
+                                <div id="priority-picker" class="priority-picker hidden"></div>
+                            </div>
+                            <button id="add-task-btn" class="soft-button" aria-label="Adicionar Tarefa"><i class='bx bx-plus'></i></button>
+                        </div>
+                        <ul id="task-list"></ul>
                     </div>
                 </div>
-            </div>
-            <div class="timeboxing-card">
-                <header class="todo-header">
-                    <h2>Timeboxing de Hoje</h2>
-                </header>
-                <div class="todo-body">
-                    <form id="timeboxing-form" class="add-task-container">
-                        <input type="text" id="tb-label" class="soft-input" placeholder="Bloco (ex.: Inglês)">
-                        <input type="time" id="tb-start" class="soft-input" style="max-width: 12rem;">
-                        <input type="number" id="tb-duration" class="soft-input" placeholder="min" style="max-width: 9rem;">
-                        <button type="submit" class="soft-button"><i class='bx bx-plus'></i></button>
-                    </form>
-                    <ul id="timeboxing-list"></ul>
+                <div class="goals-app">
+                    <header class="goals-header">
+                        <i class='bx bx-bullseye'></i><h2>Minhas Metas</h2>
+                        <button id="add-goal-modal-btn" class="soft-button"><i class='bx bx-plus'></i> Nova Meta</button>
+                    </header>
+                    <ul id="goals-list"></ul>
                 </div>
-            </div>
-            <div class="review-card">
-                <header class="todo-header">
-                    <h2>Review do Dia</h2>
-                </header>
-                <div class="todo-body">
-                    <div id="review-form-view">
-                        <form id="review-form" style="display:flex; flex-direction:column; gap:1rem;">
-                            <textarea id="review-good" class="soft-textarea" placeholder="Foi bem?"></textarea>
-                            <textarea id="review-delay" class="soft-textarea" placeholder="Adiar?"></textarea>
-                            <textarea id="review-learn" class="soft-textarea" placeholder="Aprendizado?"></textarea>
-                            <button type="submit" class="soft-button">Salvar Review</button>
+                <div class="focus-mits-card">
+                    <header class="todo-header">
+                        <i class='bx bx-star'></i><h2>MITs do Dia</h2>
+                    </header>
+                    <div class="todo-body">
+                        <div class="add-task-container">
+                            <input type="text" id="mit-input" class="soft-input" placeholder="Adicionar MIT...">
+                            <button id="add-mit-btn" class="soft-button" aria-label="Adicionar MIT"><i class='bx bx-plus'></i></button>
+                        </div>
+                        <ul id="mits-list"></ul>
+                        <p style="font-size:1.2rem; opacity:0.7; margin-top:0.5rem;">Máx. 3 itens</p>
+                        <div style="margin-top:1rem; display:flex; gap:1rem;">
+                            <button id="carryover-mits-btn" class="soft-button gray">Levar para amanhã</button>
+                            <button id="clear-mits-btn" class="soft-button danger">Limpar MITs</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="focus-stats-card">
+                    <header class="todo-header">
+                        <i class='bx bx-bar-chart'></i><h2>Estatísticas de Foco</h2>
+                    </header>
+                    <div class="todo-body">
+                        <div class="stats-grid">
+                            <div class="stat-item"><span>Hoje (min)</span><strong id="focus-stats-today-minutes">0</strong></div>
+                            <div class="stat-item"><span>Sessões</span><strong id="focus-stats-today-sessions">0</strong></div>
+                            <div class="stat-item"><span>Semana (min)</span><strong id="focus-stats-week-minutes">0</strong></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeboxing-card">
+                    <header class="todo-header">
+                        <i class='bx bx-time-five'></i><h2>Timeboxing de Hoje</h2>
+                    </header>
+                    <div class="todo-body">
+                        <form id="timeboxing-form" class="add-task-container">
+                            <input type="text" id="tb-label" class="soft-input" placeholder="Bloco (ex.: Inglês)">
+                            <input type="time" id="tb-start" class="soft-input" style="max-width: 12rem;">
+                            <input type="number" id="tb-duration" class="soft-input" placeholder="min" style="max-width: 9rem;">
+                            <button type="submit" class="soft-button"><i class='bx bx-plus'></i></button>
                         </form>
+                        <ul id="timeboxing-list"></ul>
                     </div>
-                    <div id="review-completed-view" style="display:none;">
-                        <p><strong>Foi bem:</strong></p>
-                        <p id="review-good-view"></p>
-                        <p style="margin-top:1rem;"><strong>Adiar:</strong></p>
-                        <p id="review-delay-view"></p>
-                        <p style="margin-top:1rem;"><strong>Aprendizado:</strong></p>
-                        <p id="review-learn-view"></p>
-                        <button id="edit-review-btn" class="soft-button gray" style="margin-top:1rem;"><i class='bx bxs-pencil'></i> Editar</button>
+                </div>
+                <div class="review-card">
+                    <header class="todo-header">
+                        <i class='bx bx-notepad'></i><h2>Review do Dia</h2>
+                    </header>
+                    <div class="todo-body">
+                        <div id="review-form-view">
+                            <form id="review-form" style="display:flex; flex-direction:column; gap:1rem;">
+                                <textarea id="review-good" class="soft-textarea" placeholder="Foi bem?"></textarea>
+                                <textarea id="review-delay" class="soft-textarea" placeholder="Adiar?"></textarea>
+                                <textarea id="review-learn" class="soft-textarea" placeholder="Aprendizado?"></textarea>
+                                <button type="submit" class="soft-button">Salvar Review</button>
+                            </form>
+                        </div>
+                        <div id="review-completed-view" style="display:none;">
+                            <p><strong>Foi bem:</strong></p>
+                            <p id="review-good-view"></p>
+                            <p style="margin-top:1rem;"><strong>Adiar:</strong></p>
+                            <p id="review-delay-view"></p>
+                            <p style="margin-top:1rem;"><strong>Aprendizado:</strong></p>
+                            <p id="review-learn-view"></p>
+                            <button id="edit-review-btn" class="soft-button gray" style="margin-top:1rem;"><i class='bx bxs-pencil'></i> Editar</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -185,6 +187,7 @@
                         <i class='bx bx-history'></i>
                     </button>
                 </header>
+                <div class="sleep-week-bars" id="sleep-week-bars"></div>
                 <div class="sleep-body-container">
                     <div id="sleep-form-view" class="metric-body sleep-body">
                         <form id="sleep-form">
@@ -297,14 +300,14 @@
                </header>
                <div class="settings-card-body">
                    <div class="setting-row">
-                       <label for="water-goal">Meta de Copos de Água</label>
-                       <input type="number" id="water-goal" class="soft-input" min="1">
-                   </div>
-                   <div class="setting-row">
-                       <label for="water-cup-ml">Tamanho do copo (ml)</label>
-                       <input type="number" id="water-cup-ml" class="soft-input" min="50" step="10">
-                   </div>
-                </div>
+                        <label for="water-goal">Meta de Água (em unidades)</label>
+                        <input type="number" id="water-goal" class="soft-input" min="1">
+                    </div>
+                    <div class="setting-row">
+                        <label for="water-cup-ml">Unidade (ml por passo)</label>
+                        <input type="number" id="water-cup-ml" class="soft-input" min="50" step="10">
+                    </div>
+                 </div>
             </div>
             <div class="settings-card">
                 <header class="settings-card-header">

@@ -554,7 +554,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const todayData = DailyData.getTodayData();
 
             waterCountEl.textContent = todayData.water || 0;
-            waterGoalTextEl.textContent = `/ ${waterGoal} copos (${waterCupMl} ml)`;
+            const totalMl = (todayData.water || 0) * waterCupMl;
+            const goalMl = waterGoal * waterCupMl;
+            waterGoalTextEl.textContent = `= ${totalMl} ml / ${goalMl} ml`;
             const waterPercentage = Math.min(100, ((todayData.water || 0) / waterGoal) * 100);
             waterProgressEl.value = waterPercentage;
             waterFeedbackEl.textContent = getFeedback(waterPercentage, WATER_FEEDBACK);
@@ -570,6 +572,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 sleepTrackerEl.classList.remove('answered');
                 sleepForm.reset();
             }
+            renderSleepWeekBars();
+        };
+        const renderSleepWeekBars = () => {
+            const container = document.getElementById('sleep-week-bars'); if (!container) return;
+            const all = DailyData.getAllData();
+            const now = new Date(); const start = new Date(now); start.setDate(now.getDate()-6);
+            const days = [];
+            for (let i=0;i<7;i++){ const d=new Date(start); d.setDate(start.getDate()+i); const key=d.toISOString().split('T')[0]; const entry = all.find(x=>x.date===key); const min = entry?.sleep?.totalMinutes||0; const h = Math.round(min/60); let lv='lv1'; if (h>=7 && h<8) lv='lv3'; else if (h>=8) lv='lv4'; else if (h>=5) lv='lv2'; days.push(`<div class="sleep-week-bar ${lv}" title="${h}h"></div>`); }
+            container.innerHTML = days.join('');
         };
         const renderWeeklySummary = () => {
             if (!weeklySummaryList) return;
@@ -749,7 +760,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const tbDuration = document.getElementById('tb-duration');
         const tbList = document.getElementById('timeboxing-list');
         let timeboxes = Utils.loadFromLocalStorage('timeboxes', []);
-        const renderTimeboxes = () => { tbList.innerHTML = timeboxes.map((tb, i) => `<li class="timeboxing-item" data-index="${i}"><span class="tb-label">${Utils.escapeHTML(tb.label)}</span><span> — ${tb.start} • ${tb.duration}m</span><div class="task-item-buttons"><button class="soft-button icon-btn delete-tb-btn"><i class='bx bxs-trash'></i></button></div></li>`).join(''); };
+        const renderTimeboxes = () => { tbList.innerHTML = timeboxes.map((tb, i) => `<li class="timeboxing-item" data-index="${i}"><span class="tb-label">${Utils.escapeHTML(tb.label)}</span><span> — ${tb.start} • ${tb.duration}m</span><div class="task-item-buttons"><button class="soft-button icon-btn delete-tb-btn"><i class='bx bxs-trash'></i></button></div></li>`).join(''); updateNowHighlight(); };
+        const getMinutesFromHHMM = (s) => { const [h, m] = (s || '00:00').split(':').map(Number); return (h||0)*60 + (m||0); };
+        const updateNowHighlight = () => { if (!tbList) return; const now = new Date(); const nowMin = now.getHours()*60 + now.getMinutes(); tbList.querySelectorAll('.timeboxing-item').forEach(li => { const i = Number(li.dataset.index); const tb = timeboxes[i]; if (!tb) return; const start = getMinutesFromHHMM(tb.start); const dur = parseInt(tb.duration)||0; const active = nowMin >= start && nowMin < (start + dur); li.classList.toggle('now', !!active); }); };
 
         // Review do Dia
         const reviewForm = document.getElementById('review-form');
@@ -795,7 +808,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const commit = () => { timeboxes[i].label = input.value.trim() || current; Utils.saveToLocalStorage('timeboxes', timeboxes); renderTimeboxes(); };
                 input.addEventListener('blur', commit); input.addEventListener('keypress', ev => { if (ev.key==='Enter') { commit(); }});
             });
-            renderTimeboxes();
+            renderTimeboxes(); updateNowHighlight(); setInterval(updateNowHighlight, 60000);
 
             // Review
             const today = Utils.getTodayString();
@@ -820,8 +833,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return { init, renderStats, onFocusSessionComplete };
     })();
 
-
-
     // --- MÓDULO TUTORIAL & DADOS ---
     (() => {
         const tutorialBtn = document.getElementById('open-tutorial-btn');
@@ -839,7 +850,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <ul>
   <li>Use a barra inferior para trocar de aba.</li>
   <li>O app lembra a última aba aberta automaticamente.</li>
-</ul>
+  </ul>
 
 <h4>Foco</h4>
 <h5>MITs do Dia (até 3)</h5>
@@ -848,72 +859,71 @@ document.addEventListener('DOMContentLoaded', () => {
   <li>Editar: toque no texto (ex.: "Revisar proposta") e altere para "Revisar proposta final".</li>
   <li>Levar para amanhã: toque em "Levar para amanhã" para copiar a lista.</li>
   <li>Limite: ao tentar cadastrar o 4º, o app avisa para priorizar.</li>
-</ul>
+  </ul>
 <h5>Timeboxing</h5>
 <ul>
   <li>Exemplo: rótulo "Inglês", início 08:00, duração 30.</li>
   <li>Editar rótulo: toque no texto e confirme com Enter.</li>
-</ul>
+  </ul>
 <h5>Pomodoro</h5>
 <ul>
   <li>Defina tempos em Ajustes &gt; Pomodoro.</li>
   <li>As sessões contam em Estatísticas de Foco.</li>
-</ul>
+  </ul>
 
 <h4>Bem‑estar</h4>
 <h5>Hidratação</h5>
 <ul>
-  <li>Ajuste sua meta de copos e o tamanho do copo (ml) em Ajustes.</li>
-  <li>Exemplo: meta 8 copos de 250 ml (2 L/dia).</li>
-  <li>Use +/– para registrar a ingestão.</li>
-</ul>
+  <li>Ajuste a meta em unidades e a unidade em ml por passo.</li>
+  <li>Exemplo: meta 8 passos de 250 ml (2 L/dia).</li>
+  <li>Use +/– para registrar.</li>
+  </ul>
 <h5>Sono</h5>
 <ul>
-  <li>Registre dormi/accordei e escolha a qualidade (1–5).</li>
+  <li>Registre dormi/acordei e escolha a qualidade (1–5).</li>
   <li>Exemplo: 22:30 a 06:30 = 8h; qualidade 4/5.</li>
-</ul>
+  </ul>
 <h5>Humor</h5>
 <ul>
-  <li>Toque no emoji que representa seu humor de hoje (1–5).</li>
-</ul>
+  <li>Toque no emoji que representa seu humor (1–5).</li>
+  </ul>
 <h5>Reflexão do Dia</h5>
 <ul>
   <li>Responda a pergunta diária. Ex.: "Ponto alto do dia?" → "Treino concluído".</li>
-</ul>
+  </ul>
 
 <h4>Resumo da Semana</h4>
 <ul>
-  <li>Mostra água total (e ml), sono médio, foco (min/sessões) e humor médio.</li>
+  <li>Mostra água total (ml), sono médio, foco (min/sessões) e humor médio.</li>
   <li>Compartilhe com o botão (ex.: WhatsApp).</li>
-</ul>
+  </ul>
 
 <h4>Metas</h4>
 <ul>
   <li>Crie metas com categorias e subtarefas.</li>
-  <li>Envie subtarefas ao Foco &gt; Tarefas (priorize na hora).</li>
-</ul>
+  <li>Envie subtarefas ao Foco &gt; Tarefas.</li>
+  </ul>
 
 <h4>Hábitos</h4>
 <ul>
   <li>Crie com ícone/cor e marque os dias da semana.</li>
   <li>O contador mostra sua sequência (streak).</li>
-</ul>
+  </ul>
 
 <h4>Ajustes</h4>
 <ul>
-  <li>Aparência: tema claro/escuro e cor de destaque.</li>
+  <li>Aparência: tema e cor de destaque.</li>
   <li>Pomodoro: tempos de foco e pausas.</li>
-  <li>Hidratação: meta de copos e tamanho do copo (ml).</li>
+  <li>Hidratação: meta (unidades) e unidade (ml por passo).</li>
   <li>Dados: limpar históricos antigos e resetar tudo (cuidado).</li>
-  <li>Tutorial: você está aqui.</li>
-</ul>
+  </ul>
 
 <h4>Dicas</h4>
 <ul>
   <li>Use MITs para garantir o essencial do dia.</li>
-  <li>Mantenha rótulos curtos (melhor visual em telas estreitas).</li>
-  <li>Revise seu resumo no domingo e ajuste metas/hábitos.</li>
-</ul>`;
+  <li>Mantenha rótulos curtos.</li>
+  <li>Revise seu resumo no domingo.</li>
+  </ul>`;
         if (tutorialContent && !tutorialContent.innerHTML) tutorialContent.innerHTML = TUTORIAL_HTML;
         if (tutorialBtn && tutorialModal) tutorialBtn.addEventListener('click', (e) => { e.preventDefault(); tutorialModal.classList.remove('hidden'); });
         if (closeTutorialBtn) closeTutorialBtn.addEventListener('click', (e)=>{ e.preventDefault(); tutorialModal.classList.add('hidden'); });
@@ -933,7 +943,6 @@ document.addEventListener('DOMContentLoaded', () => {
             Utils.showNotice('Histórico anterior a 180 dias limpo.');
         });
         if (resetBtn) resetBtn.addEventListener('click', () => {
-            // pequena confirmação no mesmo modal de aviso
             const proceed = () => { localStorage.clear(); location.reload(); };
             const modal = document.getElementById('app-notice-modal');
             const titleEl = document.getElementById('app-notice-title');
