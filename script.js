@@ -809,16 +809,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Alongamento
             startStretchBtn && startStretchBtn.addEventListener('click', () => { const preset = stretchPreset.value; const steps = STRETCH_PRESETS[preset] || []; stretchStepsList.innerHTML = steps.map(s => `<li class="stretch-step"><span>${s}</span></li>`).join(''); });
 
-            // Sons de foco (white noise)
-            const soundPreset = document.getElementById('sound-preset');
+            // Sons de foco (natureza única)
             const soundVolume = document.getElementById('sound-volume');
             const soundPlay = document.getElementById('sound-play');
             const soundStop = document.getElementById('sound-stop');
-            const SOUND_SOURCES = { rain: 'assets/sounds/rain.mp3', cafe: 'assets/sounds/cafe.mp3', wind: 'assets/sounds/wind.mp3', waves: 'assets/sounds/waves.mp3' };
+            const SOUND_SRC = 'assets/sounds/nature.ogg';
             let audioEl = null; let audioCtx = null; let noiseNode = null;
             const stopSound = () => { if (audioEl) { audioEl.pause(); audioEl.src = ''; audioEl = null; } if (noiseNode) { noiseNode.stop(); noiseNode.disconnect(); noiseNode = null; } if (audioCtx) { try { audioCtx.close(); } catch(_){} audioCtx = null; } };
             const playNoiseFallback = () => { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); const bufferSize = 2 * audioCtx.sampleRate; const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const output = noiseBuffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) { output[i] = Math.random() * 2 - 1; } noiseNode = audioCtx.createBufferSource(); noiseNode.buffer = noiseBuffer; noiseNode.loop = true; const gain = audioCtx.createGain(); gain.gain.value = parseFloat(soundVolume.value || '0.5'); noiseNode.connect(gain).connect(audioCtx.destination); noiseNode.start(0); } catch(_){} };
-            soundPlay && soundPlay.addEventListener('click', async () => { stopSound(); const src = SOUND_SOURCES[soundPreset.value] || SOUND_SOURCES.rain; audioEl = new Audio(src); audioEl.loop = true; audioEl.volume = parseFloat(soundVolume.value || '0.5'); try { await audioEl.play(); } catch(e) { // tentativa de desbloqueio: play vazio e retry
+            soundPlay && soundPlay.addEventListener('click', async () => { stopSound(); const src = SOUND_SRC; audioEl = new Audio(src); audioEl.loop = true; audioEl.volume = parseFloat(soundVolume.value || '0.5'); try { await audioEl.play(); } catch(e) { // tentativa de desbloqueio: play vazio e retry
             try { const unlock = new Audio(); unlock.play().catch(()=>{}); } catch(_) {}
             try { await audioEl.play(); } catch(e2) { playNoiseFallback(); }
         } });
