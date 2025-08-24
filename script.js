@@ -39,7 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 return defaultValue;
             }
         };
-        const getTodayString = () => new Date().toISOString().split('T')[0];
+        const getTodayString = () => {
+            const now = new Date();
+            const brasiliaOffset = -3; // UTC-3
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const brasiliaTime = new Date(utc + (brasiliaOffset * 3600000));
+            return brasiliaTime.toISOString().split('T')[0];
+        };
         const formatDateToBR = (dateString) => {
             try {
                 if (!dateString) return 'N/A';
@@ -115,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 Tasks.render();
                 FocusExtras.renderStats();
             } else if (targetId === 'financas') {
-                Finance.render();
+                Finance && Finance.render();
             }
         };
 
@@ -1267,6 +1273,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const cancelTransactionBtn = document.getElementById('cancel-transaction-btn');
         const deleteTransactionBtn = document.getElementById('delete-transaction-btn');
         
+        // Modais de filtro
+        const periodModal = document.getElementById('finance-period-modal');
+        const categoryModal = document.getElementById('finance-category-modal');
+        const periodFilterBtn = document.getElementById('finance-period-filter-btn');
+        const categorySummaryFilterBtn = document.getElementById('finance-category-summary-filter-btn');
+        const transactionsFilterBtn = document.getElementById('finance-transactions-filter-btn');
+        const closePeriodModalBtn = document.getElementById('close-period-modal-btn');
+        const closePeriodModalFooterBtn = document.getElementById('close-period-modal-footer-btn');
+        const closeCategoryModalBtn = document.getElementById('close-category-modal-btn');
+        const closeCategoryModalFooterBtn = document.getElementById('close-category-modal-footer-btn');
+        const clearCategoryFilterBtn = document.getElementById('clear-category-filter-btn');
+        const categoryFilterGrid = document.getElementById('finance-category-filter-grid');
+        
         // Form elements
         const transactionTypeButtons = document.querySelectorAll('.finance-type-btn');
         const transactionAmount = document.getElementById('transaction-amount');
@@ -1281,10 +1300,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const balanceEl = document.getElementById('finance-balance');
         const progressFill = document.getElementById('finance-progress-fill');
         const progressText = document.getElementById('finance-progress-text');
+        const summaryTitle = document.getElementById('finance-summary-title');
         
         // Filter elements
         const periodChips = document.getElementById('finance-period-chips');
-        const categoryFilter = document.getElementById('finance-category-filter');
         const transactionsList = document.getElementById('finance-transactions-list');
         
         // Data
@@ -1314,8 +1333,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const formatDate = (dateString) => {
             try {
-                const date = new Date(dateString);
-                const today = new Date();
+                const date = new Date(dateString + 'T12:00:00'); // Add time to avoid timezone issues
+                const now = new Date();
+                const brasiliaOffset = -3;
+                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                const today = new Date(utc + (brasiliaOffset * 3600000));
                 const yesterday = new Date(today);
                 yesterday.setDate(yesterday.getDate() - 1);
                 
@@ -1332,6 +1354,17 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) {
                 return dateString;
             }
+        };
+
+        const getCurrentMonthYear = () => {
+            const now = new Date();
+            const brasiliaOffset = -3;
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const brasiliaTime = new Date(utc + (brasiliaOffset * 3600000));
+            return brasiliaTime.toLocaleDateString('pt-BR', { 
+                month: 'long', 
+                year: 'numeric' 
+            });
         };
 
         const getPeriodRange = () => {
@@ -1384,6 +1417,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const renderSummary = () => {
             const filteredTransactions = getFilteredTransactions();
             
+            // Update title based on period
+            if (summaryTitle) {
+                let title = 'Resumo ';
+                switch (currentPeriod) {
+                    case 'today':
+                        title += 'de Hoje';
+                        break;
+                    case 'week':
+                        title += 'da Semana';
+                        break;
+                    case 'month':
+                    default:
+                        title += `de ${getCurrentMonthYear()}`;
+                        break;
+                }
+                summaryTitle.textContent = title;
+            }
+            
             const totalIncome = filteredTransactions
                 .filter(t => t.type === 'income')
                 .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
@@ -1420,13 +1471,19 @@ document.addEventListener('DOMContentLoaded', () => {
             `).join('');
         };
 
-        const renderCategoryFilter = () => {
-            if (!categoryFilter) return;
+        const renderCategoryFilterGrid = () => {
+            if (!categoryFilterGrid) return;
             
-            categoryFilter.innerHTML = `
-                <option value="all">Todas as categorias</option>
-                ${categories.map(cat => `
-                    <option value="${cat.id}" ${currentCategory === cat.id ? 'selected' : ''}>${cat.name}</option>
+            categoryFilterGrid.innerHTML = `
+                <button type="button" class="finance-category-btn ${currentCategory === 'all' ? 'active' : ''}" data-category="all">
+                    <i class='bx bx-category finance-category-icon'></i>
+                    <span>Todas</span>
+                </button>
+                ${categories.map(category => `
+                    <button type="button" class="finance-category-btn ${currentCategory === category.id ? 'active' : ''}" data-category="${category.id}">
+                        <i class='bx ${category.icon} finance-category-icon'></i>
+                        <span>${category.name}</span>
+                    </button>
                 `).join('')}
             `;
         };
@@ -1494,11 +1551,39 @@ document.addEventListener('DOMContentLoaded', () => {
         const render = () => {
             renderSummary();
             renderCategories();
-            renderCategoryFilter();
+            renderCategoryFilterGrid();
             renderTransactions();
         };
 
         // Modal functions
+        const openPeriodModal = () => {
+            if (!periodModal) return;
+            periodModal.classList.remove('hidden');
+        };
+
+        const closePeriodModal = () => {
+            if (!periodModal) return;
+            periodModal.classList.add('hidden');
+        };
+
+        const openCategoryModal = () => {
+            if (!categoryModal) return;
+            renderCategoryFilterGrid();
+            categoryModal.classList.remove('hidden');
+        };
+
+        const closeCategoryModal = () => {
+            if (!categoryModal) return;
+            categoryModal.classList.add('hidden');
+        };
+
+        const clearCategoryFilter = () => {
+            currentCategory = 'all';
+            Utils.saveToLocalStorage('finance_category', currentCategory);
+            renderCategoryFilterGrid();
+            render();
+        };
+
         const openTransactionModal = (transaction = null) => {
             if (!transactionModal) return;
             
@@ -1609,7 +1694,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const init = () => {
             if (!financeSection) return; // Finance tab não existe
             
-            // Modal events
+            // Modal events - Transaction
             if (addTransactionBtn) {
                 addTransactionBtn.addEventListener('click', () => openTransactionModal());
             }
@@ -1629,6 +1714,52 @@ document.addEventListener('DOMContentLoaded', () => {
             if (transactionModal) {
                 transactionModal.addEventListener('click', (e) => {
                     if (e.target === transactionModal) closeTransactionModal();
+                });
+            }
+
+            // Modal events - Period Filter
+            if (periodFilterBtn) {
+                periodFilterBtn.addEventListener('click', openPeriodModal);
+            }
+
+            if (closePeriodModalBtn) {
+                closePeriodModalBtn.addEventListener('click', closePeriodModal);
+            }
+
+            if (closePeriodModalFooterBtn) {
+                closePeriodModalFooterBtn.addEventListener('click', closePeriodModal);
+            }
+
+            if (periodModal) {
+                periodModal.addEventListener('click', (e) => {
+                    if (e.target === periodModal) closePeriodModal();
+                });
+            }
+
+            // Modal events - Category Filter
+            if (categorySummaryFilterBtn) {
+                categorySummaryFilterBtn.addEventListener('click', openCategoryModal);
+            }
+
+            if (transactionsFilterBtn) {
+                transactionsFilterBtn.addEventListener('click', openCategoryModal);
+            }
+
+            if (closeCategoryModalBtn) {
+                closeCategoryModalBtn.addEventListener('click', closeCategoryModal);
+            }
+
+            if (closeCategoryModalFooterBtn) {
+                closeCategoryModalFooterBtn.addEventListener('click', closeCategoryModal);
+            }
+
+            if (clearCategoryFilterBtn) {
+                clearCategoryFilterBtn.addEventListener('click', clearCategoryFilter);
+            }
+
+            if (categoryModal) {
+                categoryModal.addEventListener('click', (e) => {
+                    if (e.target === categoryModal) closeCategoryModal();
                 });
             }
             
@@ -1681,16 +1812,22 @@ document.addEventListener('DOMContentLoaded', () => {
                         periodBtn.classList.add('active');
                         
                         render();
+                        closePeriodModal();
                     }
                 });
             }
             
-            // Category filter
-            if (categoryFilter) {
-                categoryFilter.addEventListener('change', () => {
-                    currentCategory = categoryFilter.value;
-                    Utils.saveToLocalStorage('finance_category', currentCategory);
-                    render();
+            // Category filter modal
+            if (categoryFilterGrid) {
+                categoryFilterGrid.addEventListener('click', (e) => {
+                    const categoryBtn = e.target.closest('.finance-category-btn');
+                    if (categoryBtn) {
+                        currentCategory = categoryBtn.dataset.category;
+                        Utils.saveToLocalStorage('finance_category', currentCategory);
+                        renderCategoryFilterGrid();
+                        render();
+                        closeCategoryModal();
+                    }
                 });
             }
             

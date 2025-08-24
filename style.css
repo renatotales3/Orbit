@@ -759,34 +759,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     display: block;
 }
 
-/* Finance Controls */
-.finance-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.finance-filters {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
+/* Finance period chips */
 .finance-period-chips {
     display: flex;
     gap: 0.8rem;
-}
-
-.finance-category-filter {
-    flex: 1;
-    min-width: 200px;
-}
-
-.finance-add-btn {
-    align-self: flex-start;
-    gap: 0.8rem;
+    margin-bottom: 1.5rem;
 }
 
 /* Transaction Cards */
@@ -1038,22 +1015,48 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     margin-bottom: 0;
 }
 
-/* Finance add button custom styling */
-.finance-add-btn {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-    width: auto;
-    height: auto;
-    padding: 1.2rem 2rem;
-    border-radius: 1.2rem;
-    font-size: 1.4rem;
+/* Finance add section */
+.finance-add-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
 }
 
-.finance-add-btn:hover {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    opacity: 0.9;
+/* Finance summary actions */
+.finance-summary-actions {
+    display: flex;
+    gap: 0.8rem;
+}
+
+/* Finance action buttons (save button) */
+.finance-save-btn {
+    background-color: #10B981 !important;
+    color: white !important;
+    border-color: #10B981 !important;
+}
+
+.finance-save-btn:hover {
+    background-color: #059669 !important;
+    border-color: #059669 !important;
+}
+
+.finance-action-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Finance modal scroll fix */
+.modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Category filter grid */
+.finance-category-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 /* Responsive */

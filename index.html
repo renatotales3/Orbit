@@ -257,8 +257,15 @@
             <!-- Resumo Financeiro -->
             <div class="finance-summary-card">
                 <header class="finance-summary-header">
-                    <h2>Resumo do Mês</h2>
-                    <button id="finance-period-btn" class="soft-button finance-period-btn">Janeiro 2024</button>
+                    <h2 id="finance-summary-title">Resumo do Mês</h2>
+                    <div class="finance-summary-actions">
+                        <button id="finance-period-filter-btn" class="soft-button icon-btn" title="Filtrar Período">
+                            <i class='bx bx-calendar'></i>
+                        </button>
+                        <button id="finance-category-summary-filter-btn" class="soft-button icon-btn" title="Filtrar Categorias">
+                            <i class='bx bx-filter-alt'></i>
+                        </button>
+                    </div>
                 </header>
                 <div class="finance-summary-grid">
                     <div class="finance-summary-item income">
@@ -282,20 +289,10 @@
                 </div>
             </div>
 
-            <!-- Filtros e Ações -->
-            <div class="finance-controls">
-                <div class="finance-filters">
-                    <div class="finance-period-chips" id="finance-period-chips">
-                        <button class="category-btn active" data-period="month">Mês</button>
-                        <button class="category-btn" data-period="week">Semana</button>
-                        <button class="category-btn" data-period="today">Hoje</button>
-                    </div>
-                    <select id="finance-category-filter" class="soft-input finance-category-filter">
-                        <option value="all">Todas as categorias</option>
-                    </select>
-                </div>
-                <button id="add-transaction-btn" class="soft-button add-btn finance-add-btn">
-                    <i class='bx bx-plus'></i> Adicionar
+            <!-- Ação de Adicionar -->
+            <div class="finance-add-section">
+                <button id="add-transaction-btn" class="soft-button add-btn">
+                    <i class='bx bx-plus'></i>
                 </button>
             </div>
 
@@ -303,7 +300,7 @@
             <div class="finance-transactions-card">
                 <header class="finance-transactions-header">
                     <h3>Transações</h3>
-                    <button id="finance-clear-filters" class="soft-button icon-btn" title="Limpar Filtros">
+                    <button id="finance-transactions-filter-btn" class="soft-button icon-btn" title="Filtrar Transações">
                         <i class='bx bx-filter-alt'></i>
                     </button>
                 </header>
@@ -574,12 +571,45 @@
 
                 <div class="modal-actions">
                     <button type="button" id="delete-transaction-btn" class="soft-button danger hidden">Excluir</button>
-                    <div>
+                    <div class="finance-action-buttons">
                         <button type="button" id="cancel-transaction-btn" class="soft-button gray">Cancelar</button>
-                        <button type="submit" class="soft-button">Salvar</button>
+                        <button type="submit" class="soft-button finance-save-btn">Salvar</button>
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div id="finance-period-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3>Filtrar por Período</h3>
+                <button id="close-period-modal-btn" class="soft-button icon-btn md close-btn"><i class='bx bx-x'></i></button>
+            </header>
+            <div class="finance-period-chips" id="finance-period-chips">
+                <button class="category-btn active" data-period="month">Mês</button>
+                <button class="category-btn" data-period="week">Semana</button>
+                <button class="category-btn" data-period="today">Hoje</button>
+            </div>
+            <div class="modal-actions">
+                <button type="button" id="close-period-modal-footer-btn" class="soft-button gray">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="finance-category-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3>Filtrar por Categoria</h3>
+                <button id="close-category-modal-btn" class="soft-button icon-btn md close-btn"><i class='bx bx-x'></i></button>
+            </header>
+            <div class="finance-category-filter-grid" id="finance-category-filter-grid">
+                <!-- Categorias de filtro serão inseridas aqui -->
+            </div>
+            <div class="modal-actions">
+                <button type="button" id="clear-category-filter-btn" class="soft-button gray">Limpar Filtro</button>
+                <button type="button" id="close-category-modal-footer-btn" class="soft-button">Fechar</button>
+            </div>
         </div>
     </div>
 
