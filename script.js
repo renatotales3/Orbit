@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
             Journal.init();
             Metrics.init();
             FocusExtras.init();
-            Finance.init();
             // Fitness removido
             // Fitness.init && Fitness.init();
 
@@ -1714,4 +1713,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return { init, render };
     })();
+
+    // Inicializar Finance após definição
+    Finance.init();
 });
