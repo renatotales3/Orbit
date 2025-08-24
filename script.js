@@ -51,7 +51,20 @@ document.addEventListener('DOMContentLoaded', () => {
             div.appendChild(document.createTextNode(str));
             return div.innerHTML;
         };
-        return { saveToLocalStorage, loadFromLocalStorage, getTodayString, formatDateToBR, escapeHTML };
+        // Modal simples de aviso
+        const showNotice = (message, title = 'Aviso') => {
+            const modal = document.getElementById('app-notice-modal');
+            const titleEl = document.getElementById('app-notice-title');
+            const textEl = document.getElementById('app-notice-text');
+            const okBtn = document.getElementById('app-notice-ok');
+            if (!modal || !titleEl || !textEl || !okBtn) return;
+            titleEl.textContent = title; textEl.textContent = message;
+            modal.classList.remove('hidden');
+            const close = ()=> modal.classList.add('hidden');
+            okBtn.onclick = close;
+            modal.onclick = (e)=>{ if (e.target === modal) close(); };
+        };
+        return { saveToLocalStorage, loadFromLocalStorage, getTodayString, formatDateToBR, escapeHTML, showNotice };
     })();
 
     // --- MÓDULO DE NAVEGAÇÃO ---
@@ -571,7 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const focusSpan = focusStats.sessions.filter(s=> new Date(s.date) >= new Date(start.toISOString().split('T')[0]));
             const focusMin = focusSpan.reduce((a,s)=> a + (s.minutes||0), 0);
             const focusSes = focusSpan.length;
-            const moodAvg = (()=>{ const vals = span.map(d=> parseInt(d.mood||0)).filter(Boolean); if(!vals.length) return '-'; const avg = (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1); return `${avg}/5`; })();
+            const moodAvg = (()=>{ const vals = span.map(d=> Number(d.mood||0)).filter(v=> v>0); if(!vals.length) return '-'; const avg = (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1); return `${avg}/5`; })();
             weeklySummaryList.innerHTML = [
                 `<li>Água: ${totalWater} copos (${totalWaterMl} ml)</li>`,
                 `<li>Sono médio: ${sleepAvg}</li>`,
@@ -705,7 +718,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let mits = Utils.loadFromLocalStorage('mits', []);
 
         const renderMits = () => { mitsList.innerHTML = mits.map((m, i) => `<li class="mit-item" data-index="${i}"><span class="mit-text">${Utils.escapeHTML(m.text)}</span><div class="task-item-buttons"><button class="soft-button icon-btn delete-mit-btn"><i class='bx bxs-trash'></i></button></div></li>`).join(''); };
-        const addMit = (text) => { const t = text?.trim(); if(!t) return; if (mits.length >= 3) return alert('Limite de 3 MITs.'); mits.push({ text: t }); Utils.saveToLocalStorage('mits', mits); renderMits(); };
+        const addMit = (text) => { const t = text?.trim(); if(!t) return; if (mits.length >= 3) { Utils.showNotice('Limite de 3 MITs. Conclua ou limpe antes de adicionar novos.'); return; } mits.push({ text: t }); Utils.saveToLocalStorage('mits', mits); renderMits(); };
         const carryoverMits = () => { const today = Utils.getTodayString(); const key = `mits_${today}`; Utils.saveToLocalStorage(key, mits); // simples: só persistir snapshot do dia
             // levar para amanhã
             const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1); const tomorrowKey = `mits_${tomorrow.toISOString().split('T')[0]}`; Utils.saveToLocalStorage(tomorrowKey, mits); };
@@ -851,12 +864,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const focusStats = Utils.loadFromLocalStorage('focusStats', { sessions: [] });
             focusStats.sessions = focusStats.sessions.filter(s => new Date(s.date) >= new Date(cutoff.toISOString().split('T')[0]));
             Utils.saveToLocalStorage('focusStats', focusStats);
-            alert('Histórico anterior a 180 dias limpo.');
+            Utils.showNotice('Histórico anterior a 180 dias limpo.');
         });
         if (resetBtn) resetBtn.addEventListener('click', () => {
-            if (!confirm('Isso apagará todos os dados locais. Continuar?')) return;
-            localStorage.clear();
-            location.reload();
+            // pequena confirmação no mesmo modal de aviso
+            const proceed = () => { localStorage.clear(); location.reload(); };
+            const modal = document.getElementById('app-notice-modal');
+            const titleEl = document.getElementById('app-notice-title');
+            const textEl = document.getElementById('app-notice-text');
+            const okBtn = document.getElementById('app-notice-ok');
+            if (!modal || !titleEl || !textEl || !okBtn) { proceed(); return; }
+            titleEl.textContent = 'Confirmar'; textEl.textContent = 'Isso apagará todos os dados locais. Continuar?';
+            modal.classList.remove('hidden');
+            okBtn.onclick = proceed;
+            modal.onclick = (e)=>{ if (e.target === modal) modal.classList.add('hidden'); };
         });
     })();
 

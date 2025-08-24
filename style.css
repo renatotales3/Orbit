@@ -76,7 +76,7 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 .settings-card-header { display: flex; align-items: center; gap: 1.2rem; padding: 1.6rem; border-bottom: 1px solid var(--divider-color); }
 .settings-card-header i { font-size: 2.4rem; color: var(--primary-color); }
 .settings-card-header h2 { font-size: 1.8rem; font-weight: 600; }
-.settings-card-body { display: flex; flex-direction: column; gap: 1.6rem; padding: 1.6rem; }
+.settings-card-body { display: flex; flex-direction: column; gap: 1.6rem; padding: 1.6rem; overflow: hidden; }
 .setting-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
 .setting-row label { font-weight: 500; flex-shrink: 0; }
 .setting-row.column { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
