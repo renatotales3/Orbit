@@ -117,12 +117,13 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
     align-items: center; 
     background-color: var(--component-bg); 
     border-top: 1px solid var(--border-color); 
-    padding: var(--space-md) 0; 
+    padding: 1.6rem 0; 
     box-shadow: var(--shadow); 
+    min-height: 7rem;
 }
 .bottom-nav .nav-button { background: none; border: none; color: var(--icon-color); display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: color 0.3s ease; }
-.bottom-nav .nav-button i { font-size: var(--text-xl); margin-bottom: var(--space-xs); }
-.bottom-nav .nav-button span { font-size: var(--text-xs); }
+.bottom-nav .nav-button i { font-size: 2.6rem; margin-bottom: 0.6rem; }
+.bottom-nav .nav-button span { font-size: 1.2rem; }
 .bottom-nav .nav-button.active { color: var(--primary-color); }
 
 /* --- Página de Ajustes --- */
@@ -153,8 +154,9 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 .timer-display-container { width: 20rem; height: 20rem; border-radius: 50%; background-color: var(--bg-color); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; box-shadow: var(--soft-shadow-inset-sharp); }
 .pomodoro-controls { 
     display: flex; 
-    gap: var(--space-md); 
-    margin-top: var(--space-sm); 
+    gap: 2rem; 
+    margin-top: 1.5rem; 
+    justify-content: center;
 }
 .pomodoro-btn { 
     width: 6rem; 
@@ -436,20 +438,23 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 .picker-label { font-size: 1.1rem; color: var(--icon-color); }
 .color-swatch { width: 100%; height: 100%; border-radius: 50%; }
 .category-container { 
-    display: flex; 
-    flex-wrap: wrap; 
-    gap: var(--space-sm); 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); 
+    gap: 1.2rem; 
+    margin: 1rem 0;
 }
 .category-btn { 
     background-color: var(--bg-color); 
     color: var(--text-color); 
-    padding: var(--space-sm) var(--space-md); 
-    border-radius: var(--radius-sm); 
+    padding: 1rem 1.6rem; 
+    border-radius: 1rem; 
     border: 1px solid var(--border-color); 
     cursor: pointer; 
     box-shadow: var(--shadow); 
     transition: all 0.2s ease; 
-    font-size: var(--text-sm); 
+    font-size: 1.4rem; 
+    text-align: center;
+    font-weight: 500;
 }
 .category-btn.active { box-shadow: var(--soft-shadow-inset-sharp); }
 .modal-actions { 
@@ -569,7 +574,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 /* Headers finais: layout flex padrão com tokens */
 
 /* Remover ícones de todos os cabeçalhos (somente ícones líderes) */
-.settings-card-header > i, .todo-header > i, .pomodoro-header > i, .goals-header > i, .habits-header > i, .journal-header > i { display: none !important; }
+.settings-card-header > i, .todo-header > i, .pomodoro-header > i, .goals-header > i, .habits-header > i, .journal-header > i, .water-header .metric-header > i, .sleep-header .metric-header > i { display: none !important; }
 /* Títulos sem recuo extra */
 .todo-header h2, .pomodoro-header h2, .goals-header h2, .habits-header h2, .journal-header h4, .settings-card-header h2, .water-header h4, .sleep-header h4 { margin-left: 0 !important; }
 

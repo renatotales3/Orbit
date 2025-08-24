@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const Mood = (() => {
         const moodOptionsContainer = document.getElementById('mood-options');
         const MOODS = { 5: { icon: 'bxs-happy-heart-eyes', label: 'Ótimo', class: 'mood-5' }, 4: { icon: 'bxs-smile', label: 'Bom', class: 'mood-4' }, 3: { icon: 'bxs-meh', label: 'Normal', class: 'mood-3' }, 2: { icon: 'bxs-meh-alt', label: 'Ruim', class: 'mood-2' }, 1: { icon: 'bxs-sad', label: 'Terrível', class: 'mood-1' } };
-        const MOOD_JOKES = { 5: 'Astronauta do bom humor', 4: 'Café passado na hora', 3: 'Modo avião (mas com Wi‑Fi)', 2: 'Precisando de um meme urgente', 1: 'Chamando reforços: cochilo e água' };
+        const MOOD_JOKES = { 5: 'Energia radiante e contagiante', 4: 'Equilibrio e bem-estar em harmonia', 3: 'Serenidade em estado natural', 2: 'Momento de pausa e cuidado', 1: 'Gentileza consigo mesmo é essencial' };
         const moodNoteEl = document.createElement('p'); moodNoteEl.className = 'mood-note';
 
         const render = () => {
@@ -663,7 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const MOOD_WEEK_JOKES = [ {max:1.9, text:'Semana pedindo feriado'}, {max:2.9, text:'Precisamos de memes e sol'}, {max:3.9, text:'Ok, mas pode melhorar'}, {max:4.5, text:'Clima excelente'}, {max:5.1, text:'MVP do bom humor'} ];
             const moodNote = moodAvgVal ? (MOOD_WEEK_JOKES.find(j=> moodAvgVal <= j.max)?.text || '') : '';
             weeklySummaryList.innerHTML = [
-                `<li>Água: ${totalWater} passos (${totalWaterMl} ml)</li>`,
+                `<li>Água: ${totalWater} copos (${totalWaterMl} ml)</li>`,
                 `<li>Sono médio: ${sleepAvg}</li>`,
                 `<li>Foco: ${focusMin} min • ${focusSes} sessões</li>`,
                 `<li>Humor médio: ${moodAvg} ${moodNote?('- '+moodNote):''}</li>`
@@ -941,7 +941,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <h5>Hidratação</h5>
 <ul>
   <li>Ajuste a meta em unidades e a unidade em ml por passo.</li>
-  <li>Exemplo: meta 8 passos de 250 ml (2 L/dia).</li>
+  <li>Exemplo: meta 8 copos de 250 ml (2 L/dia).</li>
   <li>Use +/– para registrar.</li>
   </ul>
 <h5>Sono</h5>
