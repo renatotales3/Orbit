@@ -390,8 +390,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const Mood = (() => {
         const moodOptionsContainer = document.getElementById('mood-options');
         const MOODS = { 5: { icon: 'bxs-happy-heart-eyes', label: 'Ótimo', class: 'mood-5' }, 4: { icon: 'bxs-smile', label: 'Bom', class: 'mood-4' }, 3: { icon: 'bxs-meh', label: 'Normal', class: 'mood-3' }, 2: { icon: 'bxs-meh-alt', label: 'Ruim', class: 'mood-2' }, 1: { icon: 'bxs-sad', label: 'Terrível', class: 'mood-1' } };
-        const MOOD_JOKES = { 5: 'Astronauta do bom humor 🚀', 4: 'Café passado na hora ☕', 3: 'Modo avião (mas com Wi‑Fi) ✈️', 2: 'Precisa de um meme urgente 📉', 1: 'Chamando reforços: cochilo e água 🆘' };
-        const moodNoteEl = document.createElement('p'); moodNoteEl.style.textAlign='center'; moodNoteEl.style.fontSize='1.2rem'; moodNoteEl.style.opacity='0.8';
+        const MOOD_JOKES = { 5: 'Astronauta do bom humor', 4: 'Café passado na hora', 3: 'Modo avião (mas com Wi‑Fi)', 2: 'Precisando de um meme urgente', 1: 'Chamando reforços: cochilo e água' };
+        const moodNoteEl = document.createElement('p'); moodNoteEl.className = 'mood-note';
 
         const render = () => {
              moodOptionsContainer.innerHTML = Object.keys(MOODS).sort((a, b) => b - a).map(key => `<div class="mood-option"><button class="mood-btn ${MOODS[key].class}" data-mood="${key}"><i class='bx ${MOODS[key].icon}'></i></button><span class="mood-label">${MOODS[key].label}</span></div>`).join('');

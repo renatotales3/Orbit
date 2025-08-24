@@ -325,15 +325,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 * { scrollbar-width: none; -ms-overflow-style: none; }
 *::-webkit-scrollbar { width: 0; height: 0; }
 
-/* Cabeçalhos harmonizados (mesmo dos Ajustes) */
-.todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header { display: flex; align-items: center; justify-content: space-between; }
-.todo-header i, .pomodoro-header i, .goals-header i, .habits-header i, .journal-header i { font-size: 2.4rem; color: var(--primary-color); }
+/* Cabeçalhos com título à esquerda e ações à direita (gap 1.2rem) */
+.todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header, .water-header, .sleep-header { display: flex; align-items: center; justify-content: space-between; }
+.todo-header i, .pomodoro-header i, .goals-header i, .habits-header i { font-size: 2.4rem; color: var(--primary-color); margin-right: 1.2rem; }
 .todo-header h2, .goals-header h2, .journal-header h4 { margin: 0; }
 
 /* Pomodoro: anel de progresso circular (donut) */
 /* Donut mais fino e sem vazamento */
-.timer-display-container { position: relative; background: conic-gradient(var(--primary-color) var(--progress, 0deg), transparent 0); }
-.timer-display-container::after { inset: 22%; }
+.timer-display-container { position: relative; background: conic-gradient(var(--primary-color) var(--progress, 0deg), var(--component-bg) 0); }
+.timer-display-container::after { inset: 40%; }
 .timer-display-container > h2 { position: relative; z-index: 1; }
 
 /* Destaque do bloco atual do timeboxing */
@@ -354,3 +354,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 /* Metas: equilíbrio visual quando vazio */
 .goals-header { min-height: 56px; }
+
+/* Mood note */
+.mood-note { text-align: center; font-size: 1.4rem; opacity: 0.9; margin-top: 1.6rem; margin-bottom: 0.8rem; }
