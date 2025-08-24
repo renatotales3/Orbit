@@ -809,16 +809,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Alongamento
             startStretchBtn && startStretchBtn.addEventListener('click', () => { const preset = stretchPreset.value; const steps = STRETCH_PRESETS[preset] || []; stretchStepsList.innerHTML = steps.map(s => `<li class="stretch-step"><span>${s}</span></li>`).join(''); });
 
-            // Sons de foco (natureza única)
-            const soundVolume = document.getElementById('sound-volume');
-            const soundPlay = document.getElementById('sound-play');
-            const soundStop = document.getElementById('sound-stop');
-            let audioCtx = null; let noiseNode = null; let masterGain = null; let lfo = null; let lfoGain = null; let filter = null;
-            const stopSound = () => { try { lfo?.stop(); } catch(_){} try { noiseNode?.stop(); } catch(_){} lfo?.disconnect(); lfoGain?.disconnect(); noiseNode?.disconnect(); filter?.disconnect(); masterGain?.disconnect(); lfo = lfoGain = noiseNode = filter = masterGain = null; if (audioCtx) { try { audioCtx.close(); } catch(_){} audioCtx = null; } };
-            const startNature = () => { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); const bufferSize = 2 * audioCtx.sampleRate; const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const output = noiseBuffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) { output[i] = Math.random() * 2 - 1; } noiseNode = audioCtx.createBufferSource(); noiseNode.buffer = noiseBuffer; noiseNode.loop = true; filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 900; const hp = audioCtx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 50; masterGain = audioCtx.createGain(); const baseVol = parseFloat(soundVolume.value || '0.5'); masterGain.gain.value = baseVol * 0.5; lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 0.12; lfoGain = audioCtx.createGain(); lfoGain.gain.value = baseVol * 0.4; lfo.connect(lfoGain).connect(masterGain.gain); noiseNode.connect(filter).connect(hp).connect(masterGain).connect(audioCtx.destination); noiseNode.start(); lfo.start(); } catch(_){} };
-            soundPlay && soundPlay.addEventListener('click', () => { stopSound(); startNature(); });
-            soundStop && soundStop.addEventListener('click', stopSound);
-            soundVolume && soundVolume.addEventListener('input', () => { const vol = parseFloat(soundVolume.value || '0.5'); if (masterGain) masterGain.gain.value = vol * 0.5; if (lfoGain) lfoGain.gain.value = vol * 0.4; });
+            // Sons de foco removido
+            // (mantido espaço para futura reintrodução)
 
             // Nutrição leve
             const nutritionForm = document.getElementById('nutrition-form');
