@@ -813,17 +813,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const soundVolume = document.getElementById('sound-volume');
             const soundPlay = document.getElementById('sound-play');
             const soundStop = document.getElementById('sound-stop');
-            const SOUND_SRC = 'assets/sounds/nature.ogg';
-            let audioEl = null; let audioCtx = null; let noiseNode = null;
-            const stopSound = () => { if (audioEl) { audioEl.pause(); audioEl.src = ''; audioEl = null; } if (noiseNode) { noiseNode.stop(); noiseNode.disconnect(); noiseNode = null; } if (audioCtx) { try { audioCtx.close(); } catch(_){} audioCtx = null; } };
-            const playNoiseFallback = () => { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); const bufferSize = 2 * audioCtx.sampleRate; const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const output = noiseBuffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) { output[i] = Math.random() * 2 - 1; } noiseNode = audioCtx.createBufferSource(); noiseNode.buffer = noiseBuffer; noiseNode.loop = true; const gain = audioCtx.createGain(); gain.gain.value = parseFloat(soundVolume.value || '0.5'); noiseNode.connect(gain).connect(audioCtx.destination); noiseNode.start(0); } catch(_){} };
-            soundPlay && soundPlay.addEventListener('click', async () => { stopSound(); const src = SOUND_SRC; audioEl = new Audio(src); audioEl.loop = true; audioEl.volume = parseFloat(soundVolume.value || '0.5'); try { await audioEl.play(); } catch(e) { // tentativa de desbloqueio: play vazio e retry
-            try { const unlock = new Audio(); unlock.play().catch(()=>{}); } catch(_) {}
-            try { await audioEl.play(); } catch(e2) { playNoiseFallback(); }
-        } });
+            let audioCtx = null; let noiseNode = null; let masterGain = null; let lfo = null; let lfoGain = null; let filter = null;
+            const stopSound = () => { try { lfo?.stop(); } catch(_){} try { noiseNode?.stop(); } catch(_){} lfo?.disconnect(); lfoGain?.disconnect(); noiseNode?.disconnect(); filter?.disconnect(); masterGain?.disconnect(); lfo = lfoGain = noiseNode = filter = masterGain = null; if (audioCtx) { try { audioCtx.close(); } catch(_){} audioCtx = null; } };
+            const startNature = () => { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); const bufferSize = 2 * audioCtx.sampleRate; const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const output = noiseBuffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) { output[i] = Math.random() * 2 - 1; } noiseNode = audioCtx.createBufferSource(); noiseNode.buffer = noiseBuffer; noiseNode.loop = true; filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 900; const hp = audioCtx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 50; masterGain = audioCtx.createGain(); const baseVol = parseFloat(soundVolume.value || '0.5'); masterGain.gain.value = baseVol * 0.5; lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 0.12; lfoGain = audioCtx.createGain(); lfoGain.gain.value = baseVol * 0.4; lfo.connect(lfoGain).connect(masterGain.gain); noiseNode.connect(filter).connect(hp).connect(masterGain).connect(audioCtx.destination); noiseNode.start(); lfo.start(); } catch(_){} };
+            soundPlay && soundPlay.addEventListener('click', () => { stopSound(); startNature(); });
             soundStop && soundStop.addEventListener('click', stopSound);
-            soundVolume && soundVolume.addEventListener('input', () => { const vol = parseFloat(soundVolume.value || '0.5'); if (audioEl) audioEl.volume = vol; if (audioCtx && !audioEl) { const gainNodes = []; // simplistic: recreate context
-                stopSound(); playNoiseFallback(); } });
+            soundVolume && soundVolume.addEventListener('input', () => { const vol = parseFloat(soundVolume.value || '0.5'); if (masterGain) masterGain.gain.value = vol * 0.5; if (lfoGain) lfoGain.gain.value = vol * 0.4; });
 
             // Nutrição leve
             const nutritionForm = document.getElementById('nutrition-form');
