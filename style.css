@@ -357,3 +357,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .soft-button { padding: 0.8rem 1.4rem; }
   .pomodoro-btn { width: 5.6rem; height: 5.6rem; }
 }
+
+/* Correção final: títulos à esquerda, ações à direita, com gap 1.2rem */
+.todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header, .water-header, .sleep-header { display: flex; align-items: center; justify-content: flex-start; gap: 1.2rem; }
