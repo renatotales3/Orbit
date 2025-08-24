@@ -19,16 +19,37 @@ html {
     --danger-border: #dc3545;
 }
 :root[data-theme="dark"] {
-    --bg-color: #191919; --text-color: #EAEAEA; --primary-color: #EAEAEA;
-    --component-bg: #2F2F2F; --icon-color: #868e96; --gray-color: #6c757d;
-    --shadow: 3px 3px 6px #121212, -3px -3px 6px #3a3a3a;
-    --soft-shadow-inset-sharp: inset 2px 2px 4px #101010, inset -2px -2px 4px #3a3a3a;
-    --border-color: #444;
-    --divider-color: #3a3a3a;
-    --danger-bg: #a12c34;
+    --bg-color: #0F0F11; --text-color: #F8F9FA; --primary-color: #6C7EFF;
+    --component-bg: #1A1B1E; --icon-color: #A0A4B8; --gray-color: #6C757D;
+    --shadow: 0px 4px 20px rgba(0, 0, 0, 0.4), 0px 1px 3px rgba(0, 0, 0, 0.2);
+    --soft-shadow-inset-sharp: inset 2px 2px 4px rgba(0, 0, 0, 0.3), inset -2px -2px 4px rgba(255, 255, 255, 0.02);
+    --border-color: #2A2D35;
+    --divider-color: #26282E;
+    --danger-bg: #E63946;
     --danger-text: white;
-    --danger-border: #a12c34;
+    --danger-border: #E63946;
 }
+/* Dark Mode Premium Enhancements */
+:root[data-theme="dark"] .modal-content {
+    box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.6), 0px 4px 16px rgba(0, 0, 0, 0.3);
+}
+:root[data-theme="dark"] .soft-button {
+    border-color: #343A46;
+}
+:root[data-theme="dark"] .soft-button:hover {
+    background-color: #242731;
+    border-color: #4A5568;
+}
+:root[data-theme="dark"] .category-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: 0px 4px 12px rgba(108, 126, 255, 0.3);
+}
+:root[data-theme="dark"] .progress-bar {
+    background: linear-gradient(90deg, var(--primary-color), #8B95FF);
+}
+
 /* Ajuste rosa como opção do tema escuro na paleta JS (feito em script) */
 #stretch-display { display: none; }
 #stretch-display.active { display: flex; }
@@ -105,6 +126,10 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 }
 .soft-button.danger { background-color: var(--danger-bg); color: var(--danger-text); border-color: var(--danger-border); }
 .soft-input, .soft-textarea { width: 100%; border: 1px solid var(--border-color); padding: 1.6rem; border-radius: 1.2rem; background-color: var(--bg-color); color: var(--text-color); font-size: 1.6rem; box-shadow: var(--soft-shadow-inset-sharp); }
+/* Melhor espaçamento para inputs com setinhas (date/time) */
+input[type="date"], input[type="time"], input[type="datetime-local"] { 
+    padding-right: 2.4rem !important; 
+}
 .soft-input:focus, .soft-textarea:focus { outline: none; }
 .soft-button.icon-btn { padding: 0; width: 3.5rem; height: 3.5rem; font-size: 2rem; border-radius: 50%; color: var(--icon-color); }
 .soft-button.icon-btn i { margin: 0; }
@@ -162,7 +187,7 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
     width: 6rem; 
     height: 6rem; 
     border-radius: 50%; 
-    font-size: calc(var(--text-xl) + 0.4rem); 
+    font-size: 3.2rem; 
     padding: 0; 
 }
 
@@ -248,22 +273,17 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
     flex-direction: column; 
     align-items: center; 
     justify-content: center; 
-    padding: var(--space-xl) var(--space-lg); 
+    padding: 3rem 2rem; 
     text-align: center; 
     opacity: 0.7; 
 }
-.empty-state i { 
-    font-size: calc(var(--text-xl) * 2); 
-    margin-bottom: var(--space-md); 
-    opacity: 0.5; 
-}
 .empty-state h4 { 
-    font-size: var(--text-lg); 
-    margin-bottom: var(--space-sm); 
+    font-size: 1.8rem; 
+    margin-bottom: 1rem; 
     font-weight: 500; 
 }
 .empty-state p { 
-    font-size: var(--text-sm); 
+    font-size: 1.4rem; 
     opacity: 0.8; 
     max-width: 30rem; 
 }

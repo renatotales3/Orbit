@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const lightPalette = document.getElementById('light-theme-palette');
         const darkPalette = document.getElementById('dark-theme-palette');
         const LIGHT_THEME_COLORS = ['#007AFF', '#34C759', '#FF9500', '#AF52DE', '#FF3B30', '#17A2B8', '#FF69B4'];
-        const DARK_THEME_COLORS = ['#EAEAEA', '#F0D55D', '#48E5C2', '#FF69B4', '#FF6B6B', '#3399FF', '#FD7E14'];
+        const DARK_THEME_COLORS = ['#6C7EFF', '#FD7E14', '#48E5C2', '#FF69B4', '#FF6B6B', '#F0D55D', '#8B95FF'];
         const applyTheme = (theme) => { htmlElement.setAttribute('data-theme', theme); Utils.saveToLocalStorage('theme', theme); applyAccentColor(); };
         const applyAccentColor = () => { const currentTheme = htmlElement.getAttribute('data-theme'); const colors = currentTheme === 'light' ? LIGHT_THEME_COLORS : DARK_THEME_COLORS; const savedColor = Utils.loadFromLocalStorage(`${currentTheme}AccentColor`, colors[0]); htmlElement.style.setProperty('--primary-color', savedColor); const palette = document.getElementById(`${currentTheme}-theme-palette`); palette.querySelector('.color-swatch.active')?.classList.remove('active'); palette.querySelector(`.color-swatch[data-color="${savedColor}"]`)?.classList.add('active'); };
         const renderColorPickers = () => { lightPalette.innerHTML = LIGHT_THEME_COLORS.map(color => `<div class="color-swatch" data-color="${color}" style="background-color:${color}"></div>`).join(''); darkPalette.innerHTML = DARK_THEME_COLORS.map(color => `<div class="color-swatch" data-color="${color}" style="background-color:${color}"></div>`).join(''); };
@@ -192,7 +192,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sortedTasks.length === 0) {
                 taskList.innerHTML = `
                     <div class="empty-state">
-                        <i class='bx bx-list-ul'></i>
                         <h4>Nenhuma tarefa ainda</h4>
                         <p>Adicione sua primeira tarefa do dia para começar a organizar seu foco.</p>
                     </div>
@@ -326,7 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (goals.length === 0) {
                 goalsList.innerHTML = `
                     <div class="empty-state">
-                        <i class='bx bx-target-lock'></i>
                         <h4>Nenhuma meta definida</h4>
                         <p>Crie sua primeira meta para começar a acompanhar seus objetivos.</p>
                     </div>
