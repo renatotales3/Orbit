@@ -325,22 +325,19 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 * { scrollbar-width: none; -ms-overflow-style: none; }
 *::-webkit-scrollbar { width: 0; height: 0; }
 
-/* Cabeçalhos com título à esquerda e ações à direita (gap 1.2rem) */
-.todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header, .water-header, .sleep-header { display: flex; align-items: center; justify-content: space-between; }
-.todo-header i, .pomodoro-header i, .goals-header i, .habits-header i { font-size: 2.4rem; color: var(--primary-color); margin-right: 1.2rem; }
-.todo-header h2, .goals-header h2, .journal-header h4 { margin: 0; }
+/* Headers: layout robusto e espaçamento padrão */
+.todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header, .water-header, .sleep-header { flex-wrap: nowrap; }
+/* Apenas o ícone à esquerda herda a cor primária */
+.todo-header > i, .pomodoro-header > i, .goals-header > i, .habits-header > i, .journal-header > i { color: var(--primary-color); font-size: 2.4rem; }
+/* Espaço entre ícone e título como Ajustes */
+.todo-header > i + h2, .pomodoro-header > i + h2, .goals-header > i + h2, .habits-header > i + h2, .journal-header > i + h4 { margin-left: 1.2rem; }
+/* Título ocupa restante, sem quebrar layout */
+.todo-header h2, .pomodoro-header h2, .goals-header h2, .habits-header h2, .journal-header h4 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+/* Ações travadas à direita */
+.todo-header .soft-button.icon-btn, .goals-header .soft-button, .habits-header .soft-button, .journal-header .soft-button, .water-header .soft-button.icon-btn, .sleep-header .soft-button.icon-btn { margin-left: auto; flex-shrink: 0; }
 
-/* Remover donut do Pomodoro: voltar para fundo simples */
-.timer-display-container { background: none; background-color: var(--bg-color); }
-.timer-display-container::after { display: none; }
-
-/* Títulos à esquerda com ações à direita (agrupamento via margin-right:auto) */
-.todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header, .water-header, .sleep-header { display: flex; align-items: center; justify-content: space-between; }
-.todo-header h2, .pomodoro-header h2, .goals-header h2, .habits-header h2, .journal-header h4 { margin-right: auto; }
-.water-header .metric-header, .sleep-header .metric-header { display: flex; align-items: center; gap: 1.2rem; margin-right: auto; }
-
-/* Ações MIT centralizadas */
-.focus-mits-card .todo-body > div:last-child { display: flex; justify-content: center; }
+/* MIT: alinhar botões extremos e deixar meio vago */
+.focus-mits-card .todo-body > div:last-child { justify-content: space-between; }
 
 /* Padronização de cor dos ícones de ação */
 .soft-button.icon-btn, .soft-button.icon-btn i { color: var(--icon-color) !important; }
@@ -352,3 +349,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 /* Header: título/ícone à esquerda, ações à direita */
 .todo-header > i + h2, .goals-header > i + h2, .habits-header > i + h2, .journal-header > i + h4 { margin-left: 1.2rem; }
 .todo-header .soft-button.icon-btn, .goals-header .soft-button, .habits-header .soft-button, .journal-header .soft-button, .water-header .soft-button.icon-btn, .sleep-header .soft-button.icon-btn { margin-left: auto; }
+
+@media (max-width: 420px) {
+  .content { padding: 1.4rem; padding-bottom: 9rem; }
+  .todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header, .water-header, .sleep-header { gap: 0.8rem; }
+  .todo-header > i + h2, .pomodoro-header > i + h2, .goals-header > i + h2, .habits-header > i + h2, .journal-header > i + h4 { margin-left: 0.8rem; }
+  .soft-button { padding: 0.8rem 1.4rem; }
+  .pomodoro-btn { width: 5.6rem; height: 5.6rem; }
+}
