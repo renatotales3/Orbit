@@ -252,6 +252,69 @@
 
         </section>
 
+        <section id="financas" class="page">
+            
+            <!-- Resumo Financeiro -->
+            <div class="finance-summary-card">
+                <header class="finance-summary-header">
+                    <h2>Resumo do Mês</h2>
+                    <button id="finance-period-btn" class="soft-button finance-period-btn">Janeiro 2024</button>
+                </header>
+                <div class="finance-summary-grid">
+                    <div class="finance-summary-item income">
+                        <span class="finance-label">Entradas</span>
+                        <span id="finance-total-income" class="finance-value">R$ 0,00</span>
+                    </div>
+                    <div class="finance-summary-item expense">
+                        <span class="finance-label">Saídas</span>
+                        <span id="finance-total-expense" class="finance-value">R$ 0,00</span>
+                    </div>
+                    <div class="finance-summary-item balance">
+                        <span class="finance-label">Saldo</span>
+                        <span id="finance-balance" class="finance-value">R$ 0,00</span>
+                    </div>
+                </div>
+                <div class="finance-progress-container">
+                    <div class="finance-progress-bar">
+                        <div id="finance-progress-fill" class="finance-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <span id="finance-progress-text" class="finance-progress-text">0% do orçamento usado</span>
+                </div>
+            </div>
+
+            <!-- Filtros e Ações -->
+            <div class="finance-controls">
+                <div class="finance-filters">
+                    <div class="finance-period-chips" id="finance-period-chips">
+                        <button class="category-btn active" data-period="month">Mês</button>
+                        <button class="category-btn" data-period="week">Semana</button>
+                        <button class="category-btn" data-period="today">Hoje</button>
+                    </div>
+                    <select id="finance-category-filter" class="soft-input finance-category-filter">
+                        <option value="all">Todas as categorias</option>
+                    </select>
+                </div>
+                <button id="add-transaction-btn" class="soft-button add-btn finance-add-btn">
+                    <i class='bx bx-plus'></i> Adicionar
+                </button>
+            </div>
+
+            <!-- Lista de Transações -->
+            <div class="finance-transactions-card">
+                <header class="finance-transactions-header">
+                    <h3>Transações</h3>
+                    <button id="finance-clear-filters" class="soft-button icon-btn" title="Limpar Filtros">
+                        <i class='bx bx-filter-alt'></i>
+                    </button>
+                </header>
+                <div class="finance-transactions-body">
+                    <ul id="finance-transactions-list" class="finance-transactions-list">
+                        <!-- Transações serão inseridas aqui -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+
         <section id="ajustes" class="page">
             <h1>Ajustes</h1>
             <div class="settings-card">
@@ -454,12 +517,79 @@
         </div>
     </div>
 
+    <div id="transaction-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3 id="transaction-modal-title">Nova Transação</h3>
+                <button id="close-transaction-btn" class="soft-button icon-btn md close-btn"><i class='bx bx-x'></i></button>
+            </header>
+            <form id="transaction-form">
+                <div class="finance-type-selector">
+                    <label>Tipo:</label>
+                    <div class="finance-type-buttons">
+                        <button type="button" class="finance-type-btn active" data-type="expense">
+                            <i class='bx bx-minus-circle'></i> Despesa
+                        </button>
+                        <button type="button" class="finance-type-btn" data-type="income">
+                            <i class='bx bx-plus-circle'></i> Receita
+                        </button>
+                    </div>
+                </div>
+
+                <div class="finance-amount-section">
+                    <label for="transaction-amount">Valor:</label>
+                    <div class="finance-amount-input-container">
+                        <span class="finance-currency">R$</span>
+                        <input type="number" id="transaction-amount" class="finance-amount-input" placeholder="0,00" step="0.01" min="0" required>
+                    </div>
+                </div>
+
+                <div class="finance-quick-amounts" id="finance-quick-amounts">
+                    <button type="button" class="category-btn" data-amount="10">+10</button>
+                    <button type="button" class="category-btn" data-amount="25">+25</button>
+                    <button type="button" class="category-btn" data-amount="50">+50</button>
+                    <button type="button" class="category-btn" data-amount="100">+100</button>
+                    <button type="button" class="category-btn" data-amount="200">+200</button>
+                    <button type="button" class="category-btn" data-amount="500">+500</button>
+                </div>
+
+                <div class="finance-category-section">
+                    <label>Categoria:</label>
+                    <div id="finance-category-grid" class="finance-category-grid">
+                        <!-- Categorias serão inseridas aqui -->
+                    </div>
+                </div>
+
+                <div class="finance-form-row">
+                    <div class="finance-form-field">
+                        <label for="transaction-date">Data:</label>
+                        <input type="date" id="transaction-date" class="soft-input" required>
+                    </div>
+                </div>
+
+                <div class="finance-form-field">
+                    <label for="transaction-description">Descrição (opcional):</label>
+                    <input type="text" id="transaction-description" class="soft-input" placeholder="Ex: Almoço executivo">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="delete-transaction-btn" class="soft-button danger hidden">Excluir</button>
+                    <div>
+                        <button type="button" id="cancel-transaction-btn" class="soft-button gray">Cancelar</button>
+                        <button type="submit" class="soft-button">Salvar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <footer class="bottom-nav">
         <nav>
             <button class="nav-button" data-target="inicio"><i class='bx bx-home-alt'></i><span>Início</span></button>
             <button class="nav-button" data-target="foco"><i class='bx bx-crosshair'></i><span>Foco</span></button>
             <button class="nav-button" data-target="bem-estar"><i class='bx bx-heart'></i><span>Bem-estar</span></button>
+            <button class="nav-button" data-target="financas"><i class='bx bx-wallet'></i><span>Finanças</span></button>
             <button class="nav-button" data-target="ajustes"><i class='bx bx-cog'></i><span>Ajustes</span></button>
         </nav>
     </footer>

@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
             Journal.init();
             Metrics.init();
             FocusExtras.init();
+            Finance.init();
             // Fitness removido
             // Fitness.init && Fitness.init();
 
@@ -114,6 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 Goals.render();
                 Tasks.render();
                 FocusExtras.renderStats();
+            } else if (targetId === 'financas') {
+                Finance.render();
             }
         };
 
@@ -1253,4 +1256,462 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return { init, renderAll };
     })(); */
+
+    // --- MÓDULO DE FINANÇAS ---
+    const Finance = (() => {
+        // Elementos DOM
+        const financeSection = document.getElementById('financas');
+        const addTransactionBtn = document.getElementById('add-transaction-btn');
+        const transactionModal = document.getElementById('transaction-modal');
+        const transactionForm = document.getElementById('transaction-form');
+        const closeTransactionBtn = document.getElementById('close-transaction-btn');
+        const cancelTransactionBtn = document.getElementById('cancel-transaction-btn');
+        const deleteTransactionBtn = document.getElementById('delete-transaction-btn');
+        
+        // Form elements
+        const transactionTypeButtons = document.querySelectorAll('.finance-type-btn');
+        const transactionAmount = document.getElementById('transaction-amount');
+        const transactionDate = document.getElementById('transaction-date');
+        const transactionDescription = document.getElementById('transaction-description');
+        const quickAmounts = document.getElementById('finance-quick-amounts');
+        const categoryGrid = document.getElementById('finance-category-grid');
+        
+        // Summary elements
+        const totalIncomeEl = document.getElementById('finance-total-income');
+        const totalExpenseEl = document.getElementById('finance-total-expense');
+        const balanceEl = document.getElementById('finance-balance');
+        const progressFill = document.getElementById('finance-progress-fill');
+        const progressText = document.getElementById('finance-progress-text');
+        
+        // Filter elements
+        const periodChips = document.getElementById('finance-period-chips');
+        const categoryFilter = document.getElementById('finance-category-filter');
+        const transactionsList = document.getElementById('finance-transactions-list');
+        
+        // Data
+        let transactions = Utils.loadFromLocalStorage('finance_transactions', []);
+        let categories = Utils.loadFromLocalStorage('finance_categories', [
+            { id: 'alimentacao', name: 'Alimentação', icon: 'bx-restaurant', color: '#F59E0B' },
+            { id: 'transporte', name: 'Transporte', icon: 'bx-car', color: '#3B82F6' },
+            { id: 'moradia', name: 'Moradia', icon: 'bx-home', color: '#8B5CF6' },
+            { id: 'lazer', name: 'Lazer', icon: 'bx-game', color: '#EC4899' },
+            { id: 'saude', name: 'Saúde', icon: 'bx-plus-medical', color: '#10B981' },
+            { id: 'educacao', name: 'Educação', icon: 'bx-book', color: '#6366F1' },
+            { id: 'trabalho', name: 'Trabalho', icon: 'bx-briefcase', color: '#374151' },
+            { id: 'outros', name: 'Outros', icon: 'bx-dots-horizontal', color: '#6B7280' }
+        ]);
+        
+        let currentPeriod = Utils.loadFromLocalStorage('finance_period', 'month');
+        let currentCategory = Utils.loadFromLocalStorage('finance_category', 'all');
+        let editingTransaction = null;
+
+        // Utility functions
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value || 0);
+        };
+
+        const formatDate = (dateString) => {
+            try {
+                const date = new Date(dateString);
+                const today = new Date();
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (date.toDateString() === today.toDateString()) {
+                    return 'Hoje';
+                } else if (date.toDateString() === yesterday.toDateString()) {
+                    return 'Ontem';
+                } else {
+                    return date.toLocaleDateString('pt-BR', { 
+                        day: '2-digit', 
+                        month: 'short' 
+                    });
+                }
+            } catch (e) {
+                return dateString;
+            }
+        };
+
+        const getPeriodRange = () => {
+            const now = new Date();
+            let start, end;
+            
+            switch (currentPeriod) {
+                case 'today':
+                    start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+                    break;
+                case 'week':
+                    const dayOfWeek = now.getDay();
+                    start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOfWeek);
+                    end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (7 - dayOfWeek));
+                    break;
+                case 'month':
+                default:
+                    start = new Date(now.getFullYear(), now.getMonth(), 1);
+                    end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+                    break;
+            }
+            
+            return { start, end };
+        };
+
+        const isInCurrentPeriod = (dateString) => {
+            try {
+                const date = new Date(dateString);
+                const { start, end } = getPeriodRange();
+                return date >= start && date < end;
+            } catch (e) {
+                return false;
+            }
+        };
+
+        const getFilteredTransactions = () => {
+            return transactions.filter(transaction => {
+                const matchesPeriod = isInCurrentPeriod(transaction.date);
+                const matchesCategory = currentCategory === 'all' || transaction.categoryId === currentCategory;
+                return matchesPeriod && matchesCategory;
+            });
+        };
+
+        const getCategoryById = (id) => {
+            return categories.find(cat => cat.id === id) || { name: 'Outros', icon: 'bx-dots-horizontal', color: '#6B7280' };
+        };
+
+        // Render functions
+        const renderSummary = () => {
+            const filteredTransactions = getFilteredTransactions();
+            
+            const totalIncome = filteredTransactions
+                .filter(t => t.type === 'income')
+                .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+                
+            const totalExpense = filteredTransactions
+                .filter(t => t.type === 'expense')
+                .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+                
+            const balance = totalIncome - totalExpense;
+            
+            if (totalIncomeEl) totalIncomeEl.textContent = formatCurrency(totalIncome);
+            if (totalExpenseEl) totalExpenseEl.textContent = formatCurrency(totalExpense);
+            if (balanceEl) {
+                balanceEl.textContent = formatCurrency(balance);
+                balanceEl.parentElement.className = `finance-summary-item balance ${balance >= 0 ? 'income' : 'expense'}`;
+            }
+            
+            // Progress bar (gastos vs receitas)
+            if (progressFill && progressText) {
+                const percentage = totalIncome > 0 ? Math.min(100, (totalExpense / totalIncome) * 100) : 0;
+                progressFill.style.width = `${percentage}%`;
+                progressText.textContent = `${Math.round(percentage)}% dos gastos em relação às receitas`;
+            }
+        };
+
+        const renderCategories = () => {
+            if (!categoryGrid) return;
+            
+            categoryGrid.innerHTML = categories.map(category => `
+                <button type="button" class="finance-category-btn" data-category="${category.id}">
+                    <i class='bx ${category.icon} finance-category-icon'></i>
+                    <span>${category.name}</span>
+                </button>
+            `).join('');
+        };
+
+        const renderCategoryFilter = () => {
+            if (!categoryFilter) return;
+            
+            categoryFilter.innerHTML = `
+                <option value="all">Todas as categorias</option>
+                ${categories.map(cat => `
+                    <option value="${cat.id}" ${currentCategory === cat.id ? 'selected' : ''}>${cat.name}</option>
+                `).join('')}
+            `;
+        };
+
+        const renderTransactions = () => {
+            if (!transactionsList) return;
+            
+            const filteredTransactions = getFilteredTransactions();
+            
+            if (filteredTransactions.length === 0) {
+                transactionsList.innerHTML = `
+                    <div class="empty-state">
+                        <h4>Nenhuma transação encontrada</h4>
+                        <p>Adicione sua primeira transação para começar a acompanhar suas finanças.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Group by date
+            const groupedByDate = {};
+            filteredTransactions.forEach(transaction => {
+                const dateKey = transaction.date;
+                if (!groupedByDate[dateKey]) {
+                    groupedByDate[dateKey] = [];
+                }
+                groupedByDate[dateKey].push(transaction);
+            });
+            
+            // Sort dates descending
+            const sortedDates = Object.keys(groupedByDate).sort((a, b) => new Date(b) - new Date(a));
+            
+            const html = sortedDates.map(date => {
+                const dayTransactions = groupedByDate[date].sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
+                
+                return `
+                    <div class="finance-date-group">
+                        <h4 class="finance-date-header">${formatDate(date)}</h4>
+                        ${dayTransactions.map(transaction => {
+                            const category = getCategoryById(transaction.categoryId);
+                            return `
+                                <li class="finance-transaction-item" data-id="${transaction.id}">
+                                    <div class="finance-transaction-left">
+                                        <div class="finance-transaction-icon ${transaction.type}">
+                                            <i class='bx ${category.icon}'></i>
+                                        </div>
+                                        <div class="finance-transaction-info">
+                                            <div class="finance-transaction-category">${category.name}</div>
+                                            ${transaction.description ? `<div class="finance-transaction-description">${Utils.escapeHTML(transaction.description)}</div>` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="finance-transaction-amount ${transaction.type}">
+                                        ${transaction.type === 'income' ? '+' : '-'}${formatCurrency(Math.abs(parseFloat(transaction.amount) || 0))}
+                                    </div>
+                                </li>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }).join('');
+            
+            transactionsList.innerHTML = html;
+        };
+
+        const render = () => {
+            renderSummary();
+            renderCategories();
+            renderCategoryFilter();
+            renderTransactions();
+        };
+
+        // Modal functions
+        const openTransactionModal = (transaction = null) => {
+            if (!transactionModal) return;
+            
+            editingTransaction = transaction;
+            
+            // Reset form
+            transactionForm.reset();
+            
+            // Set today as default date
+            if (transactionDate) {
+                transactionDate.value = Utils.getTodayString();
+            }
+            
+            if (transaction) {
+                // Edit mode
+                document.getElementById('transaction-modal-title').textContent = 'Editar Transação';
+                deleteTransactionBtn.classList.remove('hidden');
+                
+                // Fill form with transaction data
+                if (transactionAmount) transactionAmount.value = transaction.amount;
+                if (transactionDate) transactionDate.value = transaction.date;
+                if (transactionDescription) transactionDescription.value = transaction.description || '';
+                
+                // Set transaction type
+                transactionTypeButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.type === transaction.type);
+                });
+                
+                // Set category
+                setTimeout(() => {
+                    const categoryBtn = categoryGrid.querySelector(`[data-category="${transaction.categoryId}"]`);
+                    if (categoryBtn) {
+                        categoryGrid.querySelectorAll('.finance-category-btn').forEach(btn => btn.classList.remove('active'));
+                        categoryBtn.classList.add('active');
+                    }
+                }, 100);
+            } else {
+                // Create mode
+                document.getElementById('transaction-modal-title').textContent = 'Nova Transação';
+                deleteTransactionBtn.classList.add('hidden');
+                
+                // Set default type to expense
+                transactionTypeButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.type === 'expense');
+                });
+            }
+            
+            transactionModal.classList.remove('hidden');
+            if (transactionAmount) transactionAmount.focus();
+        };
+
+        const closeTransactionModal = () => {
+            if (!transactionModal) return;
+            transactionModal.classList.add('hidden');
+            editingTransaction = null;
+        };
+
+        const saveTransaction = () => {
+            const type = document.querySelector('.finance-type-btn.active')?.dataset.type;
+            const amount = parseFloat(transactionAmount.value);
+            const date = transactionDate.value;
+            const description = transactionDescription.value.trim();
+            const categoryId = document.querySelector('.finance-category-btn.active')?.dataset.category;
+            
+            if (!type || !amount || amount <= 0 || !date || !categoryId) {
+                Utils.showNotice('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            const transactionData = {
+                id: editingTransaction ? editingTransaction.id : Date.now(),
+                type,
+                amount,
+                date,
+                description: description || null,
+                categoryId,
+                createdAt: editingTransaction ? editingTransaction.createdAt : new Date().toISOString()
+            };
+            
+            if (editingTransaction) {
+                // Update existing transaction
+                const index = transactions.findIndex(t => t.id === editingTransaction.id);
+                if (index !== -1) {
+                    transactions[index] = transactionData;
+                }
+            } else {
+                // Add new transaction
+                transactions.push(transactionData);
+            }
+            
+            Utils.saveToLocalStorage('finance_transactions', transactions);
+            closeTransactionModal();
+            render();
+        };
+
+        const deleteTransaction = () => {
+            if (!editingTransaction) return;
+            
+            Utils.showNotice('Tem certeza que deseja excluir esta transação?', () => {
+                transactions = transactions.filter(t => t.id !== editingTransaction.id);
+                Utils.saveToLocalStorage('finance_transactions', transactions);
+                closeTransactionModal();
+                render();
+            });
+        };
+
+        // Event handlers
+        const init = () => {
+            if (!financeSection) return; // Finance tab não existe
+            
+            // Modal events
+            if (addTransactionBtn) {
+                addTransactionBtn.addEventListener('click', () => openTransactionModal());
+            }
+            
+            if (closeTransactionBtn) {
+                closeTransactionBtn.addEventListener('click', closeTransactionModal);
+            }
+            
+            if (cancelTransactionBtn) {
+                cancelTransactionBtn.addEventListener('click', closeTransactionModal);
+            }
+            
+            if (deleteTransactionBtn) {
+                deleteTransactionBtn.addEventListener('click', deleteTransaction);
+            }
+            
+            if (transactionModal) {
+                transactionModal.addEventListener('click', (e) => {
+                    if (e.target === transactionModal) closeTransactionModal();
+                });
+            }
+            
+            // Form events
+            if (transactionForm) {
+                transactionForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    saveTransaction();
+                });
+            }
+            
+            // Type selector
+            transactionTypeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    transactionTypeButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
+            });
+            
+            // Quick amounts
+            if (quickAmounts) {
+                quickAmounts.addEventListener('click', (e) => {
+                    const amountBtn = e.target.closest('[data-amount]');
+                    if (amountBtn && transactionAmount) {
+                        transactionAmount.value = amountBtn.dataset.amount;
+                    }
+                });
+            }
+            
+            // Category selection
+            if (categoryGrid) {
+                categoryGrid.addEventListener('click', (e) => {
+                    const categoryBtn = e.target.closest('.finance-category-btn');
+                    if (categoryBtn) {
+                        categoryGrid.querySelectorAll('.finance-category-btn').forEach(btn => btn.classList.remove('active'));
+                        categoryBtn.classList.add('active');
+                    }
+                });
+            }
+            
+            // Period filters
+            if (periodChips) {
+                periodChips.addEventListener('click', (e) => {
+                    const periodBtn = e.target.closest('[data-period]');
+                    if (periodBtn) {
+                        currentPeriod = periodBtn.dataset.period;
+                        Utils.saveToLocalStorage('finance_period', currentPeriod);
+                        
+                        periodChips.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+                        periodBtn.classList.add('active');
+                        
+                        render();
+                    }
+                });
+            }
+            
+            // Category filter
+            if (categoryFilter) {
+                categoryFilter.addEventListener('change', () => {
+                    currentCategory = categoryFilter.value;
+                    Utils.saveToLocalStorage('finance_category', currentCategory);
+                    render();
+                });
+            }
+            
+            // Transaction list clicks
+            if (transactionsList) {
+                transactionsList.addEventListener('click', (e) => {
+                    const transactionItem = e.target.closest('.finance-transaction-item');
+                    if (transactionItem) {
+                        const transactionId = parseInt(transactionItem.dataset.id);
+                        const transaction = transactions.find(t => t.id === transactionId);
+                        if (transaction) {
+                            openTransactionModal(transaction);
+                        }
+                    }
+                });
+            }
+            
+            render();
+        };
+
+        return { init, render };
+    })();
 });
