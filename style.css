@@ -401,3 +401,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .settings-card-header > i, .todo-header > i, .pomodoro-header > i, .goals-header > i, .habits-header > i, .journal-header > i, .water-header .metric-header > i, .sleep-header .metric-header > i { display: none !important; }
 /* Títulos sem recuo extra */
 .todo-header h2, .pomodoro-header h2, .goals-header h2, .habits-header h2, .journal-header h4, .settings-card-header h2, .water-header h4, .sleep-header h4 { margin-left: 0 !important; }
+
+/* Modal chips layout */
+.modal-chips { display:flex; flex-direction: column; gap: .8rem; }
+.modal-chips .category-container { gap: .6rem; }
+.modal-actions { display:flex; justify-content: space-between; align-items:center; gap: 1rem; margin-top: 1.2rem; }
+.modal-actions .soft-button { min-width: 9rem; text-align: center; }
+
+/* Inline setting rows in modals */
+.modal-content .setting-row { flex-wrap: nowrap !important; }
+.modal-content .setting-row > label { white-space: nowrap; }
+.modal-content .setting-row > .soft-input { min-width: 10rem; }

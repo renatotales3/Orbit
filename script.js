@@ -41,10 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         const getTodayString = () => new Date().toISOString().split('T')[0];
         const formatDateToBR = (dateString) => {
-            const date = new Date(dateString);
-            const userTimezoneOffset = date.getTimezoneOffset() * 60000;
-            const adjustedDate = new Date(date.getTime() + userTimezoneOffset);
-            return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(adjustedDate);
+            try {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                if (Number.isNaN(date.getTime())) return 'N/A';
+                return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(date);
+            } catch (_) {
+                return 'N/A';
+            }
         };
         const escapeHTML = (str) => {
             const div = document.createElement('div');
@@ -1037,6 +1041,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const inRange = (dateStr) => {
             const { start, end } = getPeriodRange();
             const dd = new Date(dateStr);
+            if (Number.isNaN(dd.getTime())) return true; // tolerante a datas inválidas para não quebrar
             return dd >= start && dd < end;
         };
 
@@ -1161,7 +1166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             txOpenBtn && txOpenBtn.addEventListener('click', ()=> openModal(txModal));
             txCancelBtn && txCancelBtn.addEventListener('click', ()=> closeModal(txModal));
             txModal && txModal.addEventListener('click', (e)=>{ if (e.target===txModal) closeModal(txModal); });
-            txForm && txForm.addEventListener('submit', (e)=>{ e.preventDefault(); const tx = { type: document.getElementById('tr-type').value, value: Number(document.getElementById('tr-value').value||0), category: document.getElementById('tr-category').value.trim()||'Outros', date: document.getElementById('tr-date').value || Utils.getTodayString(), note: document.getElementById('tr-note').value.trim()||null }; addTransaction(tx); closeModal(txModal); txForm.reset(); });
+            txForm && txForm.addEventListener('submit', (e)=>{ e.preventDefault(); const tx = { type: document.getElementById('tr-type').value, value: Number(document.getElementById('tr-value').value||0), category: document.getElementById('tr-category').value.trim()||'Outros', date: document.getElementById('tr-date').value || Utils.getTodayString(), note: document.getElementById('tr-note').value.trim()||null }; addTransaction(tx); closeModal(txModal); txForm.reset(); renderAll(); });
             txList && txList.addEventListener('click', (e)=>{ const li=e.target.closest('.finance-item'); if (!li) return; const id = Number(li.dataset.id); if (e.target.closest('.del-tx')) deleteTransaction(id); if (e.target.closest('.edit-tx')) { // simples: abre modal com valores
                 const t = transactions.find(x=>x.id===id); if (!t) return; openModal(txModal); document.getElementById('tr-type').value=t.type; document.getElementById('tr-value').value=t.value; document.getElementById('tr-category').value=t.category; document.getElementById('tr-date').value=t.date; document.getElementById('tr-note').value=t.note||''; txForm.onsubmit = (ev)=>{ ev.preventDefault(); t.type=document.getElementById('tr-type').value; t.value=Number(document.getElementById('tr-value').value||0); t.category=document.getElementById('tr-category').value.trim()||'Outros'; t.date=document.getElementById('tr-date').value || Utils.getTodayString(); t.note=document.getElementById('tr-note').value.trim()||null; Utils.saveToLocalStorage('fin_transactions', transactions); closeModal(txModal); renderAll(); txForm.onsubmit=null; }; }});
 
@@ -1170,14 +1175,14 @@ document.addEventListener('DOMContentLoaded', () => {
             bdgCancelBtn && bdgCancelBtn.addEventListener('click', ()=> closeModal(bdgModal));
             bdgModal && bdgModal.addEventListener('click', (e)=>{ if (e.target===bdgModal) closeModal(bdgModal); });
             bdgForm && bdgForm.addEventListener('submit', (e)=>{ e.preventDefault(); const cat = document.getElementById('bdg-category').value.trim()||'Outros'; const amount = Number(document.getElementById('bdg-amount').value||0); saveBudget(cat, amount); closeModal(bdgModal); bdgForm.reset(); });
-            budgetsList && budgetsList.addEventListener('click', (e)=>{ const li=e.target.closest('.finance-item'); if(!li) return; const title = li.querySelector('.title')?.textContent?.trim(); if (e.target.closest('.del-bdg') && title) deleteBudget(title); });
+            budgetsList && budgetsList.addEventListener('click', (e)=>{ const li=e.target.closest('.finance-item'); if(!li) return; const titleEl = li.querySelector('.title'); const title = titleEl ? titleEl.textContent.trim() : null; if (e.target.closest('.del-bdg') && title) deleteBudget(title); });
 
             // savings
             svOpenBtn && svOpenBtn.addEventListener('click', ()=> openModal(svModal));
             svCancelBtn && svCancelBtn.addEventListener('click', ()=> closeModal(svModal));
             svModal && svModal.addEventListener('click', (e)=>{ if (e.target===svModal) closeModal(svModal); });
             svForm && svForm.addEventListener('submit', (e)=>{ e.preventDefault(); const data = { title: document.getElementById('sv-title').value.trim()||'Meta', target: Number(document.getElementById('sv-target').value||0), due: document.getElementById('sv-due').value||null, note: document.getElementById('sv-note').value.trim()||null }; addSavings(data); closeModal(svModal); svForm.reset(); });
-            savingsList && savingsList.addEventListener('click', (e)=>{ const li=e.target.closest('.finance-item'); if(!li) return; const id = Number(li.dataset.id); if (e.target.closest('.del-sv')) deleteSavings(id); if (e.target.closest('.add-sv')) { const val = prompt('Quanto adicionar?'); const n = Number(val||0); if (n>0) incSavings(id, n); }});
+            savingsList && savingsList.addEventListener('click', (e)=>{ const li=e.target.closest('.finance-item'); if(!li) return; const id = Number(li.dataset.id); if (e.target.closest('.del-sv')) deleteSavings(id); if (e.target.closest('.add-sv')) { const val = window.prompt('Quanto adicionar?'); const n = Number(val||0); if (n>0) incSavings(id, n); }});
 
             // recurring
             rcOpenBtn && rcOpenBtn.addEventListener('click', ()=> openModal(rcModal));
