@@ -133,7 +133,66 @@
             </div>
         </section>
 
-        <section id="financas" class="page"><h1>Finanças</h1><p>Seu controle financeiro completo.</p></section>
+        <section id="financas" class="page">
+            <h1>Finanças</h1>
+            <div class="finance-card">
+                <header class="todo-header">
+                    <h2>Adicionar Lançamento</h2>
+                    <button id="open-transaction-modal-btn" class="soft-button">Novo</button>
+                </header>
+                <div class="todo-body">
+                    <div class="setting-row" style="justify-content:flex-start; gap:1rem;">
+                        <div id="fin-period-chips" class="category-container"></div>
+                        <select id="fin-category-filter" class="soft-input" style="max-width:16rem;"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="finance-card">
+                <header class="todo-header">
+                    <h2>Resumo do Mês</h2>
+                </header>
+                <div class="todo-body">
+                    <div class="stats-grid">
+                        <div class="stat-item"><span>Entradas</span><strong id="fin-sum-in">R$ 0,00</strong></div>
+                        <div class="stat-item"><span>Saídas</span><strong id="fin-sum-out">R$ 0,00</strong></div>
+                        <div class="stat-item"><span>Saldo</span><strong id="fin-balance">R$ 0,00</strong></div>
+                    </div>
+                    <p id="fin-variance" style="text-align:center; margin-top:1rem; opacity:0.8;"></p>
+                </div>
+            </div>
+            <div class="finance-card">
+                <header class="todo-header">
+                    <h2>Lançamentos</h2>
+                </header>
+                <div class="todo-body">
+                    <ul id="fin-transactions-list" class="finance-list"></ul>
+                </div>
+            </div>
+            <div class="finance-card">
+                <header class="todo-header"><h2>Orçamentos por Categoria</h2><button id="open-budget-modal-btn" class="soft-button">Definir</button></header>
+                <div class="todo-body">
+                    <ul id="fin-budgets-list" class="finance-list"></ul>
+                </div>
+            </div>
+            <div class="finance-card">
+                <header class="todo-header"><h2>Metas de Poupança</h2><button id="open-savings-modal-btn" class="soft-button">Nova Meta</button></header>
+                <div class="todo-body">
+                    <ul id="fin-savings-list" class="finance-list"></ul>
+                </div>
+            </div>
+            <div class="finance-card">
+                <header class="todo-header"><h2>Recorrências</h2><button id="open-recurring-modal-btn" class="soft-button">Nova</button></header>
+                <div class="todo-body">
+                    <ul id="fin-recurring-list" class="finance-list"></ul>
+                </div>
+            </div>
+            <div class="finance-card">
+                <header class="todo-header"><h2>Contas a Pagar</h2><button id="open-bill-modal-btn" class="soft-button">Nova Conta</button></header>
+                <div class="todo-body">
+                    <ul id="fin-bills-list" class="finance-list"></ul>
+                </div>
+            </div>
+        </section>
 
         <section id="bem-estar" class="page">
             <h1>Bem-estar</h1>
@@ -451,6 +510,86 @@
             <div class="modal-actions">
                 <button type="button" id="close-tutorial-btn" class="soft-button gray">Fechar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Finance Modals -->
+    <div id="transaction-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h3>Novo Lançamento</h3>
+            <form id="transaction-form" style="display:flex; flex-direction:column; gap:1rem;">
+                <div class="setting-row">
+                    <label>Tipo</label>
+                    <select id="tr-type" class="soft-input" style="max-width:12rem;"><option value="in">Entrada</option><option value="out">Saída</option></select>
+                </div>
+                <input type="number" id="tr-value" class="soft-input" placeholder="Valor" step="0.01">
+                <input type="text" id="tr-category" class="soft-input" placeholder="Categoria">
+                <input type="date" id="tr-date" class="soft-input">
+                <input type="text" id="tr-note" class="soft-input" placeholder="Nota (opcional)">
+                <div class="modal-actions">
+                    <button type="button" id="tr-cancel" class="soft-button gray">Cancelar</button>
+                    <button type="submit" class="soft-button">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="budget-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h3>Orçamento por Categoria</h3>
+            <form id="budget-form" style="display:flex; flex-direction:column; gap:1rem;">
+                <input type="text" id="bdg-category" class="soft-input" placeholder="Categoria">
+                <input type="number" id="bdg-amount" class="soft-input" placeholder="Valor mensal" step="0.01">
+                <div class="modal-actions">
+                    <button type="button" id="bdg-cancel" class="soft-button gray">Cancelar</button>
+                    <button type="submit" class="soft-button">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="savings-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h3>Meta de Poupança</h3>
+            <form id="savings-form" style="display:flex; flex-direction:column; gap:1rem;">
+                <input type="text" id="sv-title" class="soft-input" placeholder="Título">
+                <input type="number" id="sv-target" class="soft-input" placeholder="Meta (valor)" step="0.01">
+                <input type="month" id="sv-due" class="soft-input">
+                <input type="text" id="sv-note" class="soft-input" placeholder="Nota (opcional)">
+                <div class="modal-actions">
+                    <button type="button" id="sv-cancel" class="soft-button gray">Cancelar</button>
+                    <button type="submit" class="soft-button">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="recurring-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h3>Transação Recorrente</h3>
+            <form id="recurring-form" style="display:flex; flex-direction:column; gap:1rem;">
+                <div class="setting-row"><label>Tipo</label><select id="rc-type" class="soft-input" style="max-width:12rem;"><option value="in">Entrada</option><option value="out">Saída</option></select></div>
+                <input type="number" id="rc-value" class="soft-input" placeholder="Valor" step="0.01">
+                <input type="text" id="rc-category" class="soft-input" placeholder="Categoria">
+                <input type="number" id="rc-day" class="soft-input" placeholder="Dia do mês" min="1" max="31" style="max-width:12rem;">
+                <input type="text" id="rc-note" class="soft-input" placeholder="Nota (opcional)">
+                <div class="modal-actions">
+                    <button type="button" id="rc-cancel" class="soft-button gray">Cancelar</button>
+                    <button type="submit" class="soft-button">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="bill-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h3>Conta a Pagar</h3>
+            <form id="bill-form" style="display:flex; flex-direction:column; gap:1rem;">
+                <input type="text" id="bl-title" class="soft-input" placeholder="Título">
+                <input type="number" id="bl-value" class="soft-input" placeholder="Valor" step="0.01">
+                <input type="date" id="bl-due" class="soft-input">
+                <input type="text" id="bl-category" class="soft-input" placeholder="Categoria (opcional)">
+                <div class="modal-actions">
+                    <button type="button" id="bl-cancel" class="soft-button gray">Cancelar</button>
+                    <button type="submit" class="soft-button">Salvar</button>
+                </div>
+            </form>
         </div>
     </div>
 
