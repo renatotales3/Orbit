@@ -356,3 +356,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 /* Correção final: títulos à esquerda, ações à direita, com gap 1.2rem */
 .todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header, .water-header, .sleep-header { display: flex; align-items: center; justify-content: flex-start; gap: 1.2rem; }
+
+/* Remover ícones de todos os cabeçalhos */
+.settings-card-header i, .todo-header i, .pomodoro-header i, .goals-header i, .habits-header i, .journal-header i, .water-header i, .sleep-header i { display: none !important; }
+/* Títulos sem recuo extra */
+.todo-header h2, .pomodoro-header h2, .goals-header h2, .habits-header h2, .journal-header h4, .settings-card-header h2, .water-header h4, .sleep-header h4 { margin-left: 0 !important; }
