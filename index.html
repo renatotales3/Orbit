@@ -231,6 +231,23 @@
                 </header>
                 <ul id="habits-list"></ul>
             </div>
+            <div id="female-health-card" class="fitness-card hidden">
+                <header class="todo-header">
+                    <h2>Saúde Feminina</h2>
+                </header>
+                <div class="todo-body">
+                    <form id="female-health-form" class="add-task-container" style="flex-wrap:wrap;">
+                        <input type="text" id="fh-last-period" class="soft-input" placeholder="Último início (YYYY-MM-DD)" readonly>
+                        <input type="number" id="fh-cycle-length" class="soft-input" placeholder="Ciclo (dias)" style="max-width: 12rem;">
+                        <button type="submit" class="soft-button">Salvar</button>
+                    </form>
+                    <div class="stats-grid" style="margin-top:1rem;">
+                        <div class="stat-item"><span>Fase</span><strong id="fh-phase">-</strong></div>
+                        <div class="stat-item"><span>Dia do ciclo</span><strong id="fh-day">-</strong></div>
+                        <div class="stat-item"><span>Sugestão</span><strong id="fh-tip">-</strong></div>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <section id="ajustes" class="page">
@@ -285,6 +302,30 @@
                    </div>
                </div>
            </div>
+            <div class="settings-card">
+                <header class="settings-card-header">
+                    <i class='bx bx-data'></i>
+                    <h2>Dados</h2>
+                </header>
+                <div class="settings-card-body">
+                    <div class="setting-row">
+                        <button id="export-data-btn" class="soft-button">Exportar Dados</button>
+                        <button id="import-data-btn" class="soft-button gray">Importar Dados</button>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-card">
+                <header class="settings-card-header">
+                    <i class='bx bx-toggle-left'></i>
+                    <h2>Módulos</h2>
+                </header>
+                <div class="settings-card-body">
+                    <div class="setting-row">
+                        <label for="toggle-female-health">Saúde Feminina</label>
+                        <button id="toggle-female-health" class="toggle-button"><div class="toggle-circle"></div></button>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <section id="fitness" class="page">
@@ -327,7 +368,9 @@
                             <option value="lombar">Lombar</option>
                         </select>
                         <button id="start-stretch-btn" class="soft-button">Iniciar</button>
+                        <button id="stop-stretch-btn" class="soft-button gray">Parar</button>
                     </div>
+                    <div id="stretch-display" class="breath-display"><div class="breath-progress-bar"></div></div>
                     <ul id="stretch-steps"></ul>
                 </div>
             </div>
@@ -360,9 +403,23 @@
                             <option value="Jantar">Jantar</option>
                             <option value="Lanche">Lanche</option>
                         </select>
-                        <input type="number" id="meal-quality" class="soft-input" placeholder="Qualidade 1-5" style="max-width: 12rem;">
-                        <input type="number" id="meal-satiety" class="soft-input" placeholder="Saciedade 1-5" style="max-width: 12rem;">
-                        <input type="text" id="meal-notes" class="soft-input" placeholder="Notas (opcional)">
+                        <div id="meal-quality-chips" class="category-container" style="flex:0 0 100%;">
+                            <span style="font-weight:500;">Qualidade</span>
+                            <button type="button" class="category-btn" data-value="1">1</button>
+                            <button type="button" class="category-btn" data-value="2">2</button>
+                            <button type="button" class="category-btn" data-value="3">3</button>
+                            <button type="button" class="category-btn" data-value="4">4</button>
+                            <button type="button" class="category-btn" data-value="5">5</button>
+                        </div>
+                        <div id="meal-satiety-chips" class="category-container" style="flex:0 0 100%;">
+                            <span style="font-weight:500;">Saciedade</span>
+                            <button type="button" class="category-btn" data-value="1">1</button>
+                            <button type="button" class="category-btn" data-value="2">2</button>
+                            <button type="button" class="category-btn" data-value="3">3</button>
+                            <button type="button" class="category-btn" data-value="4">4</button>
+                            <button type="button" class="category-btn" data-value="5">5</button>
+                        </div>
+                        <input type="text" id="meal-notes" class="soft-input" placeholder="Notas (opcional)" style="flex:1 1 100%;">
                         <button type="submit" class="soft-button"><i class='bx bx-plus'></i></button>
                     </form>
                     <ul id="meal-list"></ul>

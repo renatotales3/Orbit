@@ -29,6 +29,9 @@ html {
     --danger-text: white;
     --danger-border: #a12c34;
 }
+/* Ajuste rosa como opção do tema escuro na paleta JS (feito em script) */
+#stretch-display { display: none; }
+#stretch-display.active { display: flex; }
 
 body { background-color: var(--bg-color); color: var(--text-color); font-size: 1.6rem; }
 
