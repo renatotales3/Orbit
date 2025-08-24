@@ -294,29 +294,6 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 /* --- Fitness --- */
 #fitness .todo-header h2 { font-size: 1.8rem; font-weight: 600; }
 
-/* --- Finanças --- */
-.finance-card { background-color: var(--component-bg); border: 1px solid var(--border-color); border-radius: 1.6rem; box-shadow: var(--shadow); margin-top: 1.8rem; }
-.finance-card .todo-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--divider-color); }
-.finance-card .todo-header h2 { margin-right: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.finance-card .todo-header .soft-button { margin-left: auto; }
-.finance-card .todo-body { padding: 1.5rem; }
-.finance-list { list-style: none; display: flex; flex-direction: column; gap: 1rem; padding: 0; margin: 0; }
-.finance-item { background-color: var(--component-bg); border: 1px solid var(--border-color); border-radius: 1.2rem; padding: 1.2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.finance-item .left { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
-.finance-item .title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.finance-item .meta { font-size: 1.2rem; opacity: 0.8; }
-.finance-item .actions { display: flex; gap: 0.6rem; }
-.finance-amount { font-weight: 700; }
-.finance-amount.in { color: #28a745; }
-.finance-amount.out { color: #dc3545; }
-.progress-bar-outer { width: 100%; height: 8px; background-color: var(--bg-color); border-radius: 6px; box-shadow: var(--soft-shadow-inset-sharp); overflow: hidden; }
-.progress-bar-inner { height: 100%; background-color: var(--primary-color); width: 0%; transition: width 0.3s ease; }
-
-/* Improve finance body spacing and grids */
-.finance-card .todo-body .stats-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; }
-.stat-item { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 1rem; padding: 1rem; text-align: center; }
-.stat-item span { display: block; font-size: 1.2rem; opacity: .8; }
-.stat-item strong { font-size: 1.6rem; }
 
 /* Overrides específicos */
 .focus-mits-card .add-task-container { flex-wrap: nowrap; }
@@ -373,19 +350,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 /* Buttons text clipping fix */
 .soft-button { white-space: nowrap; }
 
-/* Chips row wrapping */
-#fin-period-chips { display: flex; gap: .6rem; flex-wrap: wrap; }
-#fin-period-chips .category-btn { padding: 0.6rem 1rem; font-size: 1.3rem; }
-
-/* Lists spacing */
-.finance-list { padding: 0; margin: 0; }
-
-/* Responsive tweaks */
-@media (max-width: 480px) {
-  .finance-card .todo-body .stats-grid { grid-template-columns: 1fr; }
-  .modal-content { width: 92%; }
-}
-
 @media (max-width: 420px) {
   .content { padding: 1.4rem; padding-bottom: 9rem; }
   .todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header, .water-header, .sleep-header { gap: 0.8rem; }
@@ -402,11 +366,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 /* Títulos sem recuo extra */
 .todo-header h2, .pomodoro-header h2, .goals-header h2, .habits-header h2, .journal-header h4, .settings-card-header h2, .water-header h4, .sleep-header h4 { margin-left: 0 !important; }
 
-/* Modal chips layout */
-.modal-chips { display:flex; flex-direction: column; gap: .8rem; }
-.modal-chips .category-container { gap: .6rem; }
-.modal-actions { display:flex; justify-content: space-between; align-items:center; gap: 1rem; margin-top: 1.2rem; }
-.modal-actions .soft-button { min-width: 9rem; text-align: center; }
+/* Modal chips layout (removido com finanças) */
 
 /* Inline setting rows in modals */
 .modal-content .setting-row { flex-wrap: nowrap !important; }

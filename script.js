@@ -101,8 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 Goals.render();
                 Tasks.render();
                 FocusExtras.renderStats();
-            } else if (targetId === 'financas') {
-                Finance.renderAll && Finance.renderAll();
             }
         };
 
@@ -975,8 +973,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- INICIALIZAÇÃO GERAL ---
     App.init();
 
-    // --- MÓDULO FINANÇAS ---
-    const Finance = (() => {
+    // --- MÓDULO FINANÇAS (removido) ---
+    /* const Finance = (() => {
         const periodChips = document.getElementById('fin-period-chips');
         const categoryFilter = document.getElementById('fin-category-filter');
         const sumInEl = document.getElementById('fin-sum-in');
@@ -1204,8 +1202,5 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         return { init, renderAll };
-    })();
-
-    // Init Finance on load so filters are ready when switching tabs
-    Finance.init && Finance.init();
+    })(); */
 });
