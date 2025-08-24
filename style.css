@@ -46,8 +46,36 @@ html {
     border-color: var(--primary-color);
     box-shadow: 0px 4px 12px rgba(108, 126, 255, 0.3);
 }
+:root[data-theme="light"] .category-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: 0px 4px 12px rgba(0, 122, 255, 0.25);
+}
 :root[data-theme="dark"] .progress-bar {
     background: linear-gradient(90deg, var(--primary-color), #8B95FF);
+}
+
+/* Mais elementos com cor primária estratégica */
+.soft-button.add-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+.soft-button.add-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+.priority-tag-1 {
+    background-color: var(--primary-color) !important;
+}
+.day-circle.current {
+    border-color: var(--primary-color);
+    box-shadow: 0px 0px 0px 3px rgba(var(--primary-color), 0.2);
+}
+.picker-button.active {
+    border-color: var(--primary-color);
+    box-shadow: 0px 0px 8px rgba(var(--primary-color), 0.3);
 }
 
 /* Ajuste rosa como opção do tema escuro na paleta JS (feito em script) */
@@ -128,11 +156,29 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 .soft-input, .soft-textarea { width: 100%; border: 1px solid var(--border-color); padding: 1.6rem; border-radius: 1.2rem; background-color: var(--bg-color); color: var(--text-color); font-size: 1.6rem; box-shadow: var(--soft-shadow-inset-sharp); }
 /* Melhor espaçamento para inputs com setinhas (date/time) */
 input[type="date"], input[type="time"], input[type="datetime-local"] { 
-    padding-right: 2.4rem !important; 
+    padding-right: 3.2rem !important; 
 }
 .soft-input:focus, .soft-textarea:focus { outline: none; }
 .soft-button.icon-btn { padding: 0; width: 3.5rem; height: 3.5rem; font-size: 2rem; border-radius: 50%; color: var(--icon-color); }
 .soft-button.icon-btn i { margin: 0; }
+
+/* Botões de ação padronizados */
+.soft-button.add-btn {
+    width: 5rem;
+    height: 5rem;
+    padding: 0;
+    font-size: 2.4rem;
+    border-radius: 1.2rem;
+}
+
+.soft-button.metric-control-btn {
+    width: 4.5rem;
+    height: 4.5rem;
+    padding: 0;
+    font-size: 2.2rem;
+    border-radius: 1.2rem;
+    flex-shrink: 0;
+}
 
 /* --- Navegação --- */
 .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; }
@@ -216,7 +262,7 @@ input[type="date"], input[type="time"], input[type="datetime-local"] {
 .water-display { text-align: center; }
 .water-display span:first-child { font-size: 3.2rem; font-weight: 600; }
 .water-display span:last-child { font-size: 1.4rem; }
-.metric-control-btn { width: 4rem; height: 4rem; font-size: 2.2rem; flex-shrink: 0; }
+
 .water-footer { padding: 0 1.5rem 1.5rem; }
 #water-progress { width: 100%; height: 1rem; -webkit-appearance: none; appearance: none; }
 #water-progress::-webkit-progress-bar { background-color: var(--bg-color); border-radius: 0.5rem; box-shadow: var(--soft-shadow-inset-sharp); }
@@ -273,13 +319,13 @@ input[type="date"], input[type="time"], input[type="datetime-local"] {
     flex-direction: column; 
     align-items: center; 
     justify-content: center; 
-    padding: 3rem 2rem; 
+    padding: 2rem; 
     text-align: center; 
     opacity: 0.7; 
 }
 .empty-state h4 { 
     font-size: 1.8rem; 
-    margin-bottom: 1rem; 
+    margin-bottom: 0.8rem; 
     font-weight: 500; 
 }
 .empty-state p { 
@@ -324,10 +370,11 @@ input[type="date"], input[type="time"], input[type="datetime-local"] {
 :root[data-theme="dark"] #timer-status { color: var(--primary-color); opacity: 0.8; }
 .priority-selector-wrapper { position: relative; flex: 0 0 auto; }
 .priority-btn { 
-    width: var(--btn-icon-lg); 
-    height: var(--btn-icon-lg); 
+    width: 5rem; 
+    height: 5rem; 
     padding: 0; 
-    font-size: var(--text-lg); 
+    font-size: 2rem; 
+    border-radius: 1.2rem;
 }
 .priority-indicator-btn { font-size: 1.6rem; color: transparent; background-clip: text; -webkit-background-clip: text; }
 .priority-picker { 

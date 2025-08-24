@@ -51,7 +51,7 @@
                                 </button>
                                 <div id="priority-picker" class="priority-picker hidden"></div>
                             </div>
-                            <button id="add-task-btn" class="soft-button icon-btn lg" aria-label="Adicionar Tarefa"><i class='bx bx-plus'></i></button>
+                            <button id="add-task-btn" class="soft-button add-btn" aria-label="Adicionar Tarefa"><i class='bx bx-plus'></i></button>
                         </div>
                         <ul id="task-list"></ul>
                     </div>
@@ -70,7 +70,7 @@
                     <div class="todo-body">
                         <div class="add-task-container">
                             <input type="text" id="mit-input" class="soft-input" placeholder="Adicionar MIT...">
-                            <button id="add-mit-btn" class="soft-button icon-btn lg" aria-label="Adicionar MIT"><i class='bx bx-plus'></i></button>
+                            <button id="add-mit-btn" class="soft-button add-btn" aria-label="Adicionar MIT"><i class='bx bx-plus'></i></button>
                         </div>
                         <ul id="mits-list"></ul>
                         <p style="font-size:1.2rem; opacity:0.7; margin-top:0.5rem;">Máx. 3 itens</p>
@@ -101,7 +101,7 @@
                             <input type="text" id="tb-label" class="soft-input" placeholder="Bloco (ex.: Inglês)">
                             <input type="time" id="tb-start" class="soft-input" style="max-width: 12rem;">
                             <input type="number" id="tb-duration" class="soft-input" placeholder="min" style="max-width: 9rem;">
-                            <button type="submit" class="soft-button icon-btn lg"><i class='bx bx-plus'></i></button>
+                            <button type="submit" class="soft-button add-btn"><i class='bx bx-plus'></i></button>
                         </form>
                         <ul id="timeboxing-list"></ul>
                     </div>
@@ -149,12 +149,12 @@
                     </button>
                 </header>
                 <div class="water-body">
-                    <button id="decrease-water-btn" class="soft-button icon-btn md metric-control-btn"><i class='bx bx-minus'></i></button>
+                    <button id="decrease-water-btn" class="soft-button metric-control-btn"><i class='bx bx-minus'></i></button>
                     <div class="water-display">
                         <span id="water-count">0</span>
                         <span id="water-goal-text">/ 8 copos</span>
                     </div>
-                    <button id="increase-water-btn" class="soft-button icon-btn md metric-control-btn"><i class='bx bx-plus'></i></button>
+                    <button id="increase-water-btn" class="soft-button metric-control-btn"><i class='bx bx-plus'></i></button>
                 </div>
                 <div class="water-footer">
                     <progress id="water-progress" value="0" max="100"></progress>

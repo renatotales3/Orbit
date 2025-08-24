@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const textEl = item.querySelector('.mit-text'); if (!textEl) return;
                 const i = Number(item.dataset.index); if(!Number.isInteger(i)) return;
                 const current = mits[i].text;
-                const input = document.createElement('input'); input.type='text'; input.className='soft-input'; input.value=current;
+                const input = document.createElement('input'); input.type='text'; input.className='soft-input'; input.value=current; input.style.maxWidth='200px';
                 textEl.replaceWith(input); input.focus();
                 const commit = () => { mits[i].text = input.value.trim() || current; Utils.saveToLocalStorage('mits', mits); renderMits(); };
                 input.addEventListener('blur', commit); input.addEventListener('keypress', ev => { if (ev.key==='Enter') { commit(); }});
@@ -867,7 +867,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const labelEl = item.querySelector('.tb-label'); if(!labelEl) return;
                 const i = Number(item.dataset.index); if(!Number.isInteger(i)) return;
                 const current = timeboxes[i].label;
-                const input = document.createElement('input'); input.type='text'; input.className='soft-input'; input.value=current;
+                const input = document.createElement('input'); input.type='text'; input.className='soft-input'; input.value=current; input.style.maxWidth='180px';
                 labelEl.replaceWith(input); input.focus();
                 const commit = () => { timeboxes[i].label = input.value.trim() || current; Utils.saveToLocalStorage('timeboxes', timeboxes); renderTimeboxes(); };
                 input.addEventListener('blur', commit); input.addEventListener('keypress', ev => { if (ev.key==='Enter') { commit(); }});
