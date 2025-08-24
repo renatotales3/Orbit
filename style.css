@@ -67,10 +67,12 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 .content { 
     flex-grow: 1; 
     overflow-y: auto; 
-    padding: var(--space-lg); 
+    padding: 2rem 1.5rem; 
     padding-bottom: 10rem;
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
+    max-width: 90rem;
+    margin: 0 auto;
 }
 .content.js-loaded {
     opacity: 1;
@@ -81,14 +83,11 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 
 /* --- Títulos das Páginas --- */
 .page h1 { 
-    font-weight: 600; 
-    font-size: var(--text-xl); 
-    margin-bottom: var(--space-xl); 
-    text-align: center; 
+    display: none; /* Removido - redundante com navbar */
 }
 
 /* --- Componentes Genéricos --- */
-.soft-button { background-color: var(--component-bg); border: 1px solid var(--border-color); padding: 1rem 2rem; border-radius: 1.2rem; color: var(--text-color); font-weight: 500; cursor: pointer; box-shadow: var(--shadow); transition: all 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; gap: 0.8rem; }
+.soft-button { background-color: var(--component-bg); border: 1px solid var(--border-color); padding: 1.2rem 2.4rem; border-radius: 1.2rem; color: var(--text-color); font-weight: 500; cursor: pointer; box-shadow: var(--shadow); transition: all 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; gap: 0.8rem; white-space: nowrap; }
 .soft-button:active { transform: scale(0.98); box-shadow: var(--soft-shadow-inset-sharp); }
 .soft-button.loading { position: relative; pointer-events: none; opacity: 0.7; }
 .soft-button.loading::after { 
@@ -290,7 +289,7 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
     .foco-grid-container { 
         display: grid; 
         grid-template-columns: 1fr 1fr; 
-        gap: var(--space-xl); 
+        gap: 2.5rem; 
         align-items: start; 
     }
     .goals-app, .todo-app, .pomodoro-app { margin-bottom: 0; }
@@ -396,29 +395,29 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
 .modal-content { 
     background-color: var(--component-bg); 
     border: 1px solid var(--border-color); 
-    padding: var(--space-lg); 
-    border-radius: var(--radius-lg); 
+    padding: 2.4rem; 
+    border-radius: 1.6rem; 
     width: 90%; 
     max-width: 50rem; 
-    box-shadow: var(--shadow); 
+    box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.15); 
     display: flex; 
     flex-direction: column; 
-    gap: var(--space-md); 
+    gap: 1.6rem; 
 }
 #goal-form, #habit-form { 
     display: flex; 
     flex-direction: column; 
-    gap: var(--space-md); 
+    gap: 1.6rem; 
 }
 .picker-container { 
     display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(var(--btn-icon-lg), 1fr)); 
-    gap: var(--space-sm); 
+    grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr)); 
+    gap: 1rem; 
 }
 .picker-option { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
 .picker-button { 
-    width: var(--btn-icon-md); 
-    height: var(--btn-icon-md); 
+    width: 4.5rem; 
+    height: 4.5rem; 
     border-radius: 50%; 
     border: 2px solid transparent; 
     background-color: var(--bg-color); 
@@ -429,7 +428,7 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    font-size: var(--text-xl); 
+    font-size: 2.4rem; 
 }
 .picker-button:has(.color-swatch) { background-color: transparent; box-shadow: none; }
 .picker-button i { color: inherit; }
@@ -457,8 +456,10 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
     display: flex; 
     justify-content: space-between; 
     align-items: center; 
-    gap: var(--space-sm); 
-    margin-top: var(--space-md); 
+    gap: 1.2rem; 
+    margin-top: 1.6rem; 
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--divider-color);
 }
 #habit-modal .modal-actions > div { display: flex; gap: 1rem; }
 #confirmation-modal .modal-actions { justify-content: flex-end; }
@@ -468,13 +469,13 @@ body { background-color: var(--bg-color); color: var(--text-color); font-size: 1
     display: flex; 
     justify-content: space-between; 
     align-items: center; 
-    margin-bottom: var(--space-md); 
+    margin-bottom: 1.6rem; 
 }
 .close-btn { 
     padding: 0; 
-    width: var(--btn-icon-md); 
-    height: var(--btn-icon-md); 
-    font-size: var(--text-lg); 
+    width: 4rem; 
+    height: 4rem; 
+    font-size: 2rem; 
     border-radius: 50%; 
 }
 .modal-content.small { max-width: 30rem; }
@@ -553,21 +554,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 @media (max-width: 420px) {
   .content { 
-    padding: var(--space-sm); 
+    padding: 1.4rem 1rem; 
     padding-bottom: 9rem; 
   }
-  .todo-header, .pomodoro-header, .goals-header, .habits-header, .journal-header, .water-header, .sleep-header { 
-    gap: var(--space-sm); 
-  }
   .soft-button { 
-    padding: var(--space-sm) var(--space-md); 
+    padding: 1rem 1.8rem; 
   }
   .pomodoro-btn { 
     width: 5.6rem; 
     height: 5.6rem; 
-  }
-  :root {
-    --space-md: 1.2rem; /* Reduzir padding em mobile */
   }
 }
 
