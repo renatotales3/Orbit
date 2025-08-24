@@ -501,6 +501,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const historyList = document.getElementById('metrics-history-list');
         const closeHistoryBtn = document.getElementById('close-metrics-history-btn');
         const closeHistoryBtnX = document.getElementById('close-metrics-history-btn-x');
+        // Sleep quality modal
+        const sleepQualityModal = document.getElementById('sleep-quality-modal');
+        const sleepQualityInput = document.getElementById('sleep-quality-input');
+        const sleepQualityCancel = document.getElementById('sleep-quality-cancel');
+        const sleepQualityConfirm = document.getElementById('sleep-quality-confirm');
+        let pendingSleepData = null;
 
         let waterGoal = Utils.loadFromLocalStorage('waterGoal', 8);
 
@@ -612,19 +618,17 @@ document.addEventListener('DOMContentLoaded', () => {
             sleepForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 if (bedTimeInput.value && wakeTimeInput.value) {
-                    const todayData = DailyData.getTodayData();
-                    const qualityPrompt = prompt('Qualidade do sono (1 a 5)?', '4');
-                    const quality = Math.max(1, Math.min(5, parseInt(qualityPrompt || '4')));
-                    todayData.sleep = {
+                    pendingSleepData = {
                         bedTime: bedTimeInput.value,
                         wakeTime: wakeTimeInput.value,
-                        totalMinutes: calculateSleep(bedTimeInput.value, wakeTimeInput.value),
-                        quality
+                        totalMinutes: calculateSleep(bedTimeInput.value, wakeTimeInput.value)
                     };
-                    DailyData.saveData();
-                    render();
+                    sleepQualityInput.value = '4';
+                    sleepQualityModal.classList.remove('hidden');
                 }
             });
+            sleepQualityCancel && sleepQualityCancel.addEventListener('click', () => { pendingSleepData = null; sleepQualityModal.classList.add('hidden'); });
+            sleepQualityConfirm && sleepQualityConfirm.addEventListener('click', () => { if (!pendingSleepData) return; const quality = Math.max(1, Math.min(5, parseInt(sleepQualityInput.value || '4'))); const todayData = DailyData.getTodayData(); todayData.sleep = { ...pendingSleepData, quality }; DailyData.saveData(); pendingSleepData = null; sleepQualityModal.classList.add('hidden'); render(); });
 
             editSleepBtn.addEventListener('click', () => {
                 const todayData = DailyData.getTodayData();
@@ -707,14 +711,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const init = () => {
             // MITs
             addMitBtn && addMitBtn.addEventListener('click', () => { addMit(mitInput.value); mitInput.value = ''; });
-            mitsList && mitsList.addEventListener('click', (e) => { const i = Number(e.target.closest('.mit-item')?.dataset.index); if(Number.isInteger(i)) { mits.splice(i,1); Utils.saveToLocalStorage('mits', mits); renderMits(); }});
+            mitsList && mitsList.addEventListener('click', (e) => { const deleteBtn = e.target.closest('.delete-mit-btn'); if (!deleteBtn) return; const i = Number(e.target.closest('.mit-item')?.dataset.index); if(Number.isInteger(i)) { mits.splice(i,1); Utils.saveToLocalStorage('mits', mits); renderMits(); }});
             clearMitsBtn && clearMitsBtn.addEventListener('click', () => { mits = []; Utils.saveToLocalStorage('mits', mits); renderMits(); });
             carryoverMitsBtn && carryoverMitsBtn.addEventListener('click', carryoverMits);
             renderMits();
 
             // Timeboxing
             tbForm && tbForm.addEventListener('submit', (e) => { e.preventDefault(); const label = tbLabel.value.trim(); if (!label) return; const start = tbStart.value || '--:--'; const duration = parseInt(tbDuration.value) || 30; timeboxes.push({ label, start, duration }); Utils.saveToLocalStorage('timeboxes', timeboxes); tbLabel.value=''; tbStart.value=''; tbDuration.value=''; renderTimeboxes(); });
-            tbList && tbList.addEventListener('click', (e) => { const i = Number(e.target.closest('.timeboxing-item')?.dataset.index); if(Number.isInteger(i)) { timeboxes.splice(i,1); Utils.saveToLocalStorage('timeboxes', timeboxes); renderTimeboxes(); }});
+            tbList && tbList.addEventListener('click', (e) => { const deleteBtn = e.target.closest('.delete-tb-btn'); if (!deleteBtn) return; const i = Number(e.target.closest('.timeboxing-item')?.dataset.index); if(Number.isInteger(i)) { timeboxes.splice(i,1); Utils.saveToLocalStorage('timeboxes', timeboxes); renderTimeboxes(); }});
             renderTimeboxes();
 
             // Review
@@ -747,9 +751,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const workoutType = document.getElementById('workout-type');
         const workoutMinutes = document.getElementById('workout-minutes');
         const workoutRpe = document.getElementById('workout-rpe');
+        const workoutNotes = document.getElementById('workout-notes');
+        const workoutPreset = document.getElementById('workout-preset');
         const workoutList = document.getElementById('workout-list');
+        const workoutWeekMinEl = document.getElementById('workout-week-min');
+        const workoutWeekSessionsEl = document.getElementById('workout-week-sessions');
+        const workoutTopTypeEl = document.getElementById('workout-top-type');
         let workouts = Utils.loadFromLocalStorage('workouts', []);
-        const renderWorkouts = () => { workoutList.innerHTML = workouts.map((w, i) => `<li class="workout-item" data-index="${i}"><span>${Utils.escapeHTML(w.type)} — ${w.minutes}m ${w.rpe?('• RPE '+w.rpe):''}</span><div class="task-item-buttons"><button class="soft-button icon-btn delete-workout-btn"><i class='bx bxs-trash'></i></button></div></li>`).join(''); };
+        const renderWorkoutStats = () => { const now = new Date(); const start = new Date(now); start.setDate(now.getDate() - 6); const recent = workouts.filter(w => new Date(w.date) >= new Date(start.toISOString().split('T')[0])); const minutes = recent.reduce((a, w) => a + (w.minutes || 0), 0); const sessions = recent.length; const typeCount = {}; recent.forEach(w => { const t = w.type || 'Treino'; typeCount[t] = (typeCount[t]||0)+1; }); const topType = Object.entries(typeCount).sort((a,b)=>b[1]-a[1])[0]?.[0] || '-'; workoutWeekMinEl && (workoutWeekMinEl.textContent = String(minutes)); workoutWeekSessionsEl && (workoutWeekSessionsEl.textContent = String(sessions)); workoutTopTypeEl && (workoutTopTypeEl.textContent = topType); };
+        const renderWorkouts = () => { workoutList.innerHTML = workouts.map((w, i) => `<li class="workout-item" data-index="${i}"><span>${Utils.escapeHTML(w.type)} — ${w.minutes}m ${w.rpe?('• RPE '+w.rpe):''}${w.notes?(' • '+Utils.escapeHTML(w.notes)) : ''}</span><div class="task-item-buttons"><button class="soft-button icon-btn delete-workout-btn"><i class='bx bxs-trash'></i></button></div></li>`).join(''); renderWorkoutStats(); };
 
         // Respiração guiada (display)
         const protocolSelect = document.getElementById('breath-protocol');
@@ -759,12 +769,16 @@ document.addEventListener('DOMContentLoaded', () => {
         let breathTimer = null, currentStep = 0, remainingRounds = 0;
         const PROTOCOLS = { box: [4,4,4,4], '478': [4,7,8], coerente: [5,5] };
         const STEP_LABELS = { 3: ['Inspire','Segure','Expire','Segure'], 4: ['Inspire','Segure','Expire','Segure'] };
-        const stopBreath = () => { if (breathTimer) { clearTimeout(breathTimer); breathTimer = null; } breathDisplay && (breathDisplay.textContent = ''); };
+        const stopBreath = () => { if (breathTimer) { clearTimeout(breathTimer); breathTimer = null; } if (breathDisplay) { breathDisplay.textContent = ''; breathDisplay.classList.remove('active'); const bar = breathDisplay.querySelector('.breath-progress-bar'); if (bar) bar.remove(); } };
         const runBreath = (pattern) => {
             if (remainingRounds <= 0) { stopBreath(); return; }
             const stepSeconds = pattern[currentStep];
             const label = (pattern.length === 4 ? STEP_LABELS[4][currentStep] : (pattern.length===3 ? ['Inspire','Segure','Expire'][currentStep] : ['Inspire','Expire'][currentStep]));
             breathDisplay.textContent = `${label} • ${stepSeconds}s`;
+            let bar = breathDisplay.querySelector('.breath-progress-bar');
+            if (!bar) { bar = document.createElement('div'); bar.className = 'breath-progress-bar'; breathDisplay.appendChild(bar); }
+            bar.style.transition = 'none'; bar.style.width = '100%';
+            requestAnimationFrame(() => { requestAnimationFrame(() => { bar.style.transition = `width ${stepSeconds}s linear`; bar.style.width = '0%'; }); });
             currentStep = (currentStep + 1) % pattern.length;
             if (currentStep === 0) remainingRounds -= 1;
             breathTimer = setTimeout(() => runBreath(pattern), stepSeconds * 1000);
@@ -781,27 +795,45 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // Sol/Ar Livre
-        const outdoorMinutes = document.getElementById('outdoor-minutes');
-        const saveOutdoorBtn = document.getElementById('save-outdoor-btn');
-        const outdoorHistory = document.getElementById('outdoor-history');
-        let outdoor = Utils.loadFromLocalStorage('outdoor', []);
-        const renderOutdoor = () => { outdoorHistory.innerHTML = outdoor.slice().reverse().map((o, i) => `<li class="outdoor-item"><span>${o.date} — ${o.minutes} min</span></li>`).join(''); };
+        // (removido)
 
         const init = () => {
             // Workouts
-            workoutForm && workoutForm.addEventListener('submit', (e) => { e.preventDefault(); const type = workoutType.value.trim() || 'Treino'; const minutes = parseInt(workoutMinutes.value) || 20; const rpe = parseInt(workoutRpe.value) || null; workouts.push({ date: Utils.getTodayString(), type, minutes, rpe }); Utils.saveToLocalStorage('workouts', workouts); workoutType.value=''; workoutMinutes.value=''; workoutRpe.value=''; renderWorkouts(); });
-            workoutList && workoutList.addEventListener('click', (e) => { const i = Number(e.target.closest('.workout-item')?.dataset.index); if(Number.isInteger(i)) { workouts.splice(i,1); Utils.saveToLocalStorage('workouts', workouts); renderWorkouts(); }});
+            workoutForm && workoutForm.addEventListener('submit', (e) => { e.preventDefault(); const type = (workoutType.value.trim() || workoutPreset.value || 'Treino'); const minutes = parseInt(workoutMinutes.value) || 20; const rpe = parseInt(workoutRpe.value) || null; const notes = workoutNotes.value.trim() || null; workouts.push({ date: Utils.getTodayString(), type, minutes, rpe, notes }); Utils.saveToLocalStorage('workouts', workouts); workoutType.value=''; workoutMinutes.value=''; workoutRpe.value=''; workoutNotes.value=''; renderWorkouts(); });
+            workoutList && workoutList.addEventListener('click', (e) => { const deleteBtn = e.target.closest('.delete-workout-btn'); if (!deleteBtn) return; const i = Number(e.target.closest('.workout-item')?.dataset.index); if(Number.isInteger(i)) { workouts.splice(i,1); Utils.saveToLocalStorage('workouts', workouts); renderWorkouts(); }});
             renderWorkouts();
 
             // Respiração
-            startBreathBtn && startBreathBtn.addEventListener('click', () => { stopBreath(); const proto = protocolSelect.value; const rounds = parseInt(breathRounds.value) || 4; currentStep = 0; remainingRounds = rounds; runBreath(PROTOCOLS[proto] || PROTOCOLS.box); });
+            startBreathBtn && startBreathBtn.addEventListener('click', () => { stopBreath(); const proto = protocolSelect.value; const rounds = parseInt(breathRounds.value) || 4; currentStep = 0; remainingRounds = rounds; if (breathDisplay) breathDisplay.classList.add('active'); runBreath(PROTOCOLS[proto] || PROTOCOLS.box); });
 
             // Alongamento
             startStretchBtn && startStretchBtn.addEventListener('click', () => { const preset = stretchPreset.value; const steps = STRETCH_PRESETS[preset] || []; stretchStepsList.innerHTML = steps.map(s => `<li class="stretch-step"><span>${s}</span></li>`).join(''); });
 
-            // Sol
-            saveOutdoorBtn && saveOutdoorBtn.addEventListener('click', () => { const minutes = parseInt(outdoorMinutes.value) || 10; outdoor.push({ date: Utils.getTodayString(), minutes }); Utils.saveToLocalStorage('outdoor', outdoor); outdoorMinutes.value=''; renderOutdoor(); });
-            renderOutdoor();
+            // Sons de foco (white noise)
+            const soundPreset = document.getElementById('sound-preset');
+            const soundVolume = document.getElementById('sound-volume');
+            const soundPlay = document.getElementById('sound-play');
+            const soundStop = document.getElementById('sound-stop');
+            const SOUND_SOURCES = { rain: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_1b1dce7f54.mp3?filename=rain-ambient-110874.mp3', cafe: 'https://cdn.pixabay.com/download/audio/2022/03/22/audio_2db279b109.mp3?filename=coffee-shop-ambient-112191.mp3', wind: 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_3c4f225bc1.mp3?filename=wind-ambient-5883.mp3', waves: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_1a7b3b42a4.mp3?filename=sea-waves-110744.mp3' };
+            let audioEl = null;
+            const stopSound = () => { if (audioEl) { audioEl.pause(); audioEl.src = ''; audioEl = null; } };
+            soundPlay && soundPlay.addEventListener('click', () => { stopSound(); const src = SOUND_SOURCES[soundPreset.value] || SOUND_SOURCES.rain; audioEl = new Audio(src); audioEl.loop = true; audioEl.volume = parseFloat(soundVolume.value || '0.5'); audioEl.play().catch(()=>{}); });
+            soundStop && soundStop.addEventListener('click', stopSound);
+            soundVolume && soundVolume.addEventListener('input', () => { if (audioEl) audioEl.volume = parseFloat(soundVolume.value || '0.5'); });
+
+            // Nutrição leve
+            const nutritionForm = document.getElementById('nutrition-form');
+            const mealType = document.getElementById('meal-type');
+            const mealQuality = document.getElementById('meal-quality');
+            const mealSatiety = document.getElementById('meal-satiety');
+            const mealNotes = document.getElementById('meal-notes');
+            const mealList = document.getElementById('meal-list');
+            let meals = Utils.loadFromLocalStorage('meals', []);
+            const renderMeals = () => { mealList.innerHTML = meals.slice().reverse().map((m,i)=>`<li class="workout-item"><span>${m.date} • ${Utils.escapeHTML(m.type)} — Q${m.quality}/5 • S${m.satiety}/5${m.notes?(' • '+Utils.escapeHTML(m.notes)) : ''}</span></li>`).join(''); };
+            nutritionForm && nutritionForm.addEventListener('submit', (e) => { e.preventDefault(); const type = mealType.value; const q = Math.max(1, Math.min(5, parseInt(mealQuality.value||'3'))); const s = Math.max(1, Math.min(5, parseInt(mealSatiety.value||'3'))); const notes = mealNotes.value.trim() || null; meals.push({ date: Utils.getTodayString(), type, quality: q, satiety: s, notes }); Utils.saveToLocalStorage('meals', meals); mealQuality.value=''; mealSatiety.value=''; mealNotes.value=''; renderMeals(); });
+            renderMeals();
+
+            // (removido)
         };
 
         return { init };

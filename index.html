@@ -294,13 +294,25 @@
                     <h2>Treinos</h2>
                 </header>
                 <div class="todo-body">
-                    <form id="workout-form" class="add-task-container">
-                        <input type="text" id="workout-type" class="soft-input" placeholder="Tipo (ex.: Corrida, Força)">
+                    <form id="workout-form" class="add-task-container" style="flex-wrap:wrap;">
+                        <select id="workout-preset" class="soft-input" style="max-width: 18rem;">
+                            <option value="Corrida">Corrida</option>
+                            <option value="Força">Força</option>
+                            <option value="Bike">Bike</option>
+                            <option value="HIIT">HIIT</option>
+                        </select>
+                        <input type="text" id="workout-type" class="soft-input" placeholder="Tipo (opcional)">
                         <input type="number" id="workout-minutes" class="soft-input" placeholder="Min" style="max-width: 9rem;">
                         <input type="number" id="workout-rpe" class="soft-input" placeholder="RPE" style="max-width: 9rem;">
+                        <input type="text" id="workout-notes" class="soft-input" placeholder="Notas (opcional)">
                         <button type="submit" class="soft-button"><i class='bx bx-plus'></i></button>
                     </form>
                     <ul id="workout-list"></ul>
+                    <div class="stats-grid" style="margin-top:1rem;">
+                        <div class="stat-item"><span>Semana (min)</span><strong id="workout-week-min">0</strong></div>
+                        <div class="stat-item"><span>Sessões</span><strong id="workout-week-sessions">0</strong></div>
+                        <div class="stat-item"><span>Favorito</span><strong id="workout-top-type">-</strong></div>
+                    </div>
                 </div>
             </div>
             <div class="fitness-card">
@@ -308,7 +320,7 @@
                     <h2>Alongamento</h2>
                 </header>
                 <div class="todo-body">
-                    <div class="add-task-container">
+                    <div class="add-task-container" style="flex-wrap:wrap;">
                         <select id="stretch-preset" class="soft-input" style="max-width: 18rem;">
                             <option value="pescoço">Pescoço</option>
                             <option value="ombros">Ombros</option>
@@ -324,7 +336,7 @@
                     <h2>Respiração</h2>
                 </header>
                 <div class="todo-body">
-                    <div class="add-task-container">
+                    <div class="add-task-container" style="flex-wrap:wrap;">
                         <select id="breath-protocol" class="soft-input" style="max-width: 18rem;">
                             <option value="box">Box 4-4-4-4</option>
                             <option value="478">4-7-8</option>
@@ -338,14 +350,40 @@
             </div>
             <div class="fitness-card">
                 <header class="todo-header">
-                    <h2>Sol / Ar Livre</h2>
+                    <h2>Sons de Foco</h2>
                 </header>
                 <div class="todo-body">
-                    <div class="add-task-container">
-                        <input type="number" id="outdoor-minutes" class="soft-input" placeholder="Minutos" style="max-width: 9rem;">
-                        <button id="save-outdoor-btn" class="soft-button">Salvar</button>
+                    <div class="add-task-container" style="flex-wrap:wrap;">
+                        <select id="sound-preset" class="soft-input" style="max-width: 18rem;">
+                            <option value="rain">Chuva</option>
+                            <option value="cafe">Café</option>
+                            <option value="wind">Vento</option>
+                            <option value="waves">Ondas</option>
+                        </select>
+                        <input type="range" id="sound-volume" min="0" max="1" step="0.01" value="0.5" style="flex:1;">
+                        <button id="sound-play" class="soft-button"><i class='bx bx-play'></i></button>
+                        <button id="sound-stop" class="soft-button gray"><i class='bx bx-stop'></i></button>
                     </div>
-                    <ul id="outdoor-history"></ul>
+                </div>
+            </div>
+            <div class="fitness-card">
+                <header class="todo-header">
+                    <h2>Nutrição (Leve)</h2>
+                </header>
+                <div class="todo-body">
+                    <form id="nutrition-form" class="add-task-container" style="flex-wrap:wrap;">
+                        <select id="meal-type" class="soft-input" style="max-width: 14rem;">
+                            <option value="Café">Café</option>
+                            <option value="Almoço">Almoço</option>
+                            <option value="Jantar">Jantar</option>
+                            <option value="Lanche">Lanche</option>
+                        </select>
+                        <input type="number" id="meal-quality" class="soft-input" placeholder="Qualidade 1-5" style="max-width: 12rem;">
+                        <input type="number" id="meal-satiety" class="soft-input" placeholder="Saciedade 1-5" style="max-width: 12rem;">
+                        <input type="text" id="meal-notes" class="soft-input" placeholder="Notas (opcional)">
+                        <button type="submit" class="soft-button"><i class='bx bx-plus'></i></button>
+                    </form>
+                    <ul id="meal-list"></ul>
                 </div>
             </div>
         </section>
@@ -428,14 +466,28 @@
         </div>
     </div>
 
+    <div id="sleep-quality-modal" class="modal-backdrop hidden">
+        <div class="modal-content small">
+            <h3 class="modal-title-center">Qualidade do Sono</h3>
+            <div style="display:flex; flex-direction:column; gap:1rem; margin-top:1rem;">
+                <label for="sleep-quality-input">De 1 (ruim) a 5 (excelente)</label>
+                <input type="number" id="sleep-quality-input" class="soft-input" min="1" max="5" value="4">
+                <div class="modal-actions">
+                    <button type="button" id="sleep-quality-cancel" class="soft-button gray">Cancelar</button>
+                    <button type="button" id="sleep-quality-confirm" class="soft-button">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer class="bottom-nav">
         <nav>
             <button class="nav-button" data-target="inicio"><i class='bx bx-home-alt'></i><span>Início</span></button>
             <button class="nav-button" data-target="foco"><i class='bx bx-crosshair'></i><span>Foco</span></button>
             <button class="nav-button" data-target="financas"><i class='bx bx-wallet'></i><span>Finanças</span></button>
             <button class="nav-button" data-target="bem-estar"><i class='bx bx-heart'></i><span>Bem-estar</span></button>
-            <button class="nav-button" data-target="ajustes"><i class='bx bx-cog'></i><span>Ajustes</span></button>
             <button class="nav-button" data-target="fitness"><i class='bx bx-dumbbell'></i><span>Fitness</span></button>
+            <button class="nav-button" data-target="ajustes"><i class='bx bx-cog'></i><span>Ajustes</span></button>
         </nav>
     </footer>
 
