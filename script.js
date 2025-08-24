@@ -832,22 +832,88 @@ document.addEventListener('DOMContentLoaded', () => {
         const purgeBtn = document.getElementById('purge-old-data-btn');
         const resetBtn = document.getElementById('reset-all-data-btn');
         const TUTORIAL_HTML = `
-<h4>Como usar o Life OS (Tutorial rápido)</h4>
-<p>O que é: seu hub diário de foco e bem‑estar. Tudo salvo no seu dispositivo.</p>
-<h5>Navegação</h5>
-<p>Use a barra inferior. O app lembra a última aba.</p>
-<h5>MITs do Dia</h5>
-<p>Até 3 tarefas. Adicione com “+”, toque no texto para editar, lixeira para excluir.</p>
+<h3>Como usar o Life OS</h3>
+<p>O Life OS é seu painel diário para foco e bem‑estar. Tudo fica salvo localmente no seu dispositivo.</p>
+
+<h4>Navegação</h4>
+<ul>
+  <li>Use a barra inferior para trocar de aba.</li>
+  <li>O app lembra a última aba aberta automaticamente.</li>
+</ul>
+
+<h4>Foco</h4>
+<h5>MITs do Dia (até 3)</h5>
+<ul>
+  <li>Adicionar: digite "Revisar proposta" e toque em +.</li>
+  <li>Editar: toque no texto (ex.: "Revisar proposta") e altere para "Revisar proposta final".</li>
+  <li>Levar para amanhã: toque em "Levar para amanhã" para copiar a lista.</li>
+  <li>Limite: ao tentar cadastrar o 4º, o app avisa para priorizar.</li>
+</ul>
 <h5>Timeboxing</h5>
-<p>Blocos com rótulo, início e duração. Edite tocando no rótulo.</p>
+<ul>
+  <li>Exemplo: rótulo "Inglês", início 08:00, duração 30.</li>
+  <li>Editar rótulo: toque no texto e confirme com Enter.</li>
+</ul>
 <h5>Pomodoro</h5>
-<p>Inicie/pausa; as sessões contam nas estatísticas de foco.</p>
-<h5>Bem‑estar</h5>
-<p>Hidratação (copos e ml), sono (com qualidade), humor e reflexão do dia.</p>
-<h5>Resumo da Semana</h5>
-<p>Água, sono, foco e humor médios; compartilhe pelo botão.</p>
-<h5>Ajustes</h5>
-<p>Tema, tempos do Pomodoro, Hidratação (meta e ml), Dados e este Tutorial.</p>`;
+<ul>
+  <li>Defina tempos em Ajustes &gt; Pomodoro.</li>
+  <li>As sessões contam em Estatísticas de Foco.</li>
+</ul>
+
+<h4>Bem‑estar</h4>
+<h5>Hidratação</h5>
+<ul>
+  <li>Ajuste sua meta de copos e o tamanho do copo (ml) em Ajustes.</li>
+  <li>Exemplo: meta 8 copos de 250 ml (2 L/dia).</li>
+  <li>Use +/– para registrar a ingestão.</li>
+</ul>
+<h5>Sono</h5>
+<ul>
+  <li>Registre dormi/accordei e escolha a qualidade (1–5).</li>
+  <li>Exemplo: 22:30 a 06:30 = 8h; qualidade 4/5.</li>
+</ul>
+<h5>Humor</h5>
+<ul>
+  <li>Toque no emoji que representa seu humor de hoje (1–5).</li>
+</ul>
+<h5>Reflexão do Dia</h5>
+<ul>
+  <li>Responda a pergunta diária. Ex.: "Ponto alto do dia?" → "Treino concluído".</li>
+</ul>
+
+<h4>Resumo da Semana</h4>
+<ul>
+  <li>Mostra água total (e ml), sono médio, foco (min/sessões) e humor médio.</li>
+  <li>Compartilhe com o botão (ex.: WhatsApp).</li>
+</ul>
+
+<h4>Metas</h4>
+<ul>
+  <li>Crie metas com categorias e subtarefas.</li>
+  <li>Envie subtarefas ao Foco &gt; Tarefas (priorize na hora).</li>
+</ul>
+
+<h4>Hábitos</h4>
+<ul>
+  <li>Crie com ícone/cor e marque os dias da semana.</li>
+  <li>O contador mostra sua sequência (streak).</li>
+</ul>
+
+<h4>Ajustes</h4>
+<ul>
+  <li>Aparência: tema claro/escuro e cor de destaque.</li>
+  <li>Pomodoro: tempos de foco e pausas.</li>
+  <li>Hidratação: meta de copos e tamanho do copo (ml).</li>
+  <li>Dados: limpar históricos antigos e resetar tudo (cuidado).</li>
+  <li>Tutorial: você está aqui.</li>
+</ul>
+
+<h4>Dicas</h4>
+<ul>
+  <li>Use MITs para garantir o essencial do dia.</li>
+  <li>Mantenha rótulos curtos (melhor visual em telas estreitas).</li>
+  <li>Revise seu resumo no domingo e ajuste metas/hábitos.</li>
+</ul>`;
         if (tutorialContent && !tutorialContent.innerHTML) tutorialContent.innerHTML = TUTORIAL_HTML;
         if (tutorialBtn && tutorialModal) tutorialBtn.addEventListener('click', (e) => { e.preventDefault(); tutorialModal.classList.remove('hidden'); });
         if (closeTutorialBtn) closeTutorialBtn.addEventListener('click', (e)=>{ e.preventDefault(); tutorialModal.classList.add('hidden'); });
