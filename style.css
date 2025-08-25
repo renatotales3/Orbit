@@ -4,6 +4,7 @@
 html {
     font-size: 53.4375%; /* Alvo: 8.55px. */
     scroll-behavior: smooth;
+    color-scheme: light dark; /* Suporte nativo ao tema do sistema */
 }
 
 /* --- Variáveis de Tema --- */

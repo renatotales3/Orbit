@@ -196,26 +196,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const LIGHT_THEME_COLORS = ['#007AFF', '#34C759', '#FF9500', '#AF52DE', '#FF3B30', '#17A2B8', '#FF69B4'];
         const DARK_THEME_COLORS = ['#6C7EFF', '#FD7E14', '#48E5C2', '#FF69B4', '#FF6B6B', '#F0D55D', '#8B95FF'];
         
-        const updateStatusBarTheme = (theme) => {
-            const themeColorMeta = document.getElementById('theme-color-meta');
-            const appleStatusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-            
-            if (theme === 'dark') {
-                // Tema escuro: status bar preta
-                themeColorMeta.content = '#191919';
-                appleStatusBarMeta.content = 'black-translucent';
-            } else {
-                // Tema claro: status bar branca/clara  
-                themeColorMeta.content = '#F0F2F5';
-                appleStatusBarMeta.content = 'default';
-            }
-        };
-        
         const applyTheme = (theme) => { 
             htmlElement.setAttribute('data-theme', theme); 
             Utils.saveToLocalStorage('theme', theme); 
             applyAccentColor(); 
-            updateStatusBarTheme(theme);
         };
         const applyAccentColor = () => { const currentTheme = htmlElement.getAttribute('data-theme'); const colors = currentTheme === 'light' ? LIGHT_THEME_COLORS : DARK_THEME_COLORS; const savedColor = Utils.loadFromLocalStorage(`${currentTheme}AccentColor`, colors[0]); htmlElement.style.setProperty('--primary-color', savedColor); const palette = document.getElementById(`${currentTheme}-theme-palette`); palette.querySelector('.color-swatch.active')?.classList.remove('active'); palette.querySelector(`.color-swatch[data-color="${savedColor}"]`)?.classList.add('active'); };
         const renderColorPickers = () => { lightPalette.innerHTML = LIGHT_THEME_COLORS.map(color => `<div class="color-swatch" data-color="${color}" style="background-color:${color}"></div>`).join(''); darkPalette.innerHTML = DARK_THEME_COLORS.map(color => `<div class="color-swatch" data-color="${color}" style="background-color:${color}"></div>`).join(''); };
