@@ -1499,6 +1499,42 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     border-bottom: 1px solid var(--divider-color);
     margin-bottom: 1.5rem;
     z-index: 1;
+    background: transparent !important;
+}
+
+/* Remove qualquer background que possa estar criando retângulo no modal de filtro */
+#transactions-filter-modal .modal-header {
+    background: transparent !important;
+}
+
+#transactions-filter-modal .modal-content {
+    background-color: var(--component-bg) !important;
+}
+
+#transactions-filter-modal .filter-tab-content {
+    background: transparent !important;
+}
+
+#transactions-filter-modal .filter-tab-panel {
+    background: transparent !important;
+}
+
+/* Garantir que nenhum elemento filho tenha background que cause retângulo */
+#transactions-filter-modal .finance-period-section,
+#transactions-filter-modal .finance-custom-period,
+#transactions-filter-modal .finance-period-chips,
+#transactions-filter-modal .finance-date-row,
+#transactions-filter-modal .finance-date-field,
+#transactions-filter-modal h4 {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Remove qualquer pseudo-elemento que possa estar criando overlay */
+#transactions-filter-modal *::before,
+#transactions-filter-modal *::after {
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 .filter-tab-btn {
