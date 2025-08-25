@@ -1308,13 +1308,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const deleteTransactionBtn = document.getElementById('delete-transaction-btn');
         
         // Modais de filtro
-        const periodModal = document.getElementById('finance-period-modal');
         const categoryModal = document.getElementById('finance-category-modal');
         const periodFilterBtn = document.getElementById('finance-period-filter-btn');
         const categorySummaryFilterBtn = document.getElementById('finance-category-summary-filter-btn');
         const transactionsFilterBtn = document.getElementById('finance-transactions-filter-btn');
-        const closePeriodModalBtn = document.getElementById('close-period-modal-btn');
-        const closePeriodModalFooterBtn = document.getElementById('close-period-modal-footer-btn');
         const closeCategoryModalBtn = document.getElementById('close-category-modal-btn');
         const closeCategoryModalFooterBtn = document.getElementById('close-category-modal-footer-btn');
         const clearCategoryFilterBtn = document.getElementById('clear-category-filter-btn');
@@ -1346,7 +1343,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const summaryTitle = document.getElementById('finance-summary-title');
         
         // Filter elements
-        const periodChips = document.getElementById('finance-period-chips');
         const transactionsList = document.getElementById('finance-transactions-list');
         
         // Data
@@ -1507,16 +1503,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const isInCurrentPeriod = (dateString) => {
             try {
-                const transactionDate = new Date(dateString);
-                // Garantir que a comparação seja feita apenas com a data (sem hora)
-                const dateOnly = new Date(transactionDate.getFullYear(), transactionDate.getMonth(), transactionDate.getDate());
+                if (!dateString) return false;
                 
+                // Normalizar a data da transação para formato YYYY-MM-DD
+                let transactionDateStr;
+                if (dateString.includes('T')) {
+                    transactionDateStr = dateString.split('T')[0];
+                } else {
+                    transactionDateStr = dateString;
+                }
+                
+                // Para período personalizado, usar comparação de strings
+                if (currentPeriod === 'custom' && customStartDate && customEndDate) {
+                    return transactionDateStr >= customStartDate && transactionDateStr <= customEndDate;
+                }
+                
+                // Para outros períodos, usar comparação de datas
                 const { start, end } = getPeriodRange();
-                const startOnly = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-                const endOnly = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+                const startStr = start.toISOString().split('T')[0];
+                const endStr = end.toISOString().split('T')[0];
                 
-                return dateOnly >= startOnly && dateOnly <= endOnly;
+                // Usar comparação de strings que é mais confiável para datas
+                const result = transactionDateStr >= startStr && transactionDateStr <= endStr;
+                
+                return result;
             } catch (e) {
+                console.error('Error in isInCurrentPeriod:', e, dateString);
                 return false;
             }
         };
@@ -1682,16 +1694,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderTransactions();
         };
 
-        // Modal functions
-        const openPeriodModal = () => {
-            if (!periodModal) return;
-            periodModal.classList.remove('hidden');
-        };
-
-        const closePeriodModal = () => {
-            if (!periodModal) return;
-            periodModal.classList.add('hidden');
-        };
+        // Modal functions (openPeriodModal e closePeriodModal removidas - usando modal unificado)
 
         const openCategoryModal = () => {
             if (!categoryModal) return;
@@ -1913,24 +1916,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Modal events - Period Filter
+            // Modal events - Period Filter (usando o novo modal unificado)
             if (periodFilterBtn) {
-                periodFilterBtn.addEventListener('click', openPeriodModal);
+                periodFilterBtn.addEventListener('click', openTransactionsFilterModal);
             }
 
-            if (closePeriodModalBtn) {
-                closePeriodModalBtn.addEventListener('click', closePeriodModal);
-            }
 
-            if (closePeriodModalFooterBtn) {
-                closePeriodModalFooterBtn.addEventListener('click', closePeriodModal);
-            }
-
-            if (periodModal) {
-                periodModal.addEventListener('click', (e) => {
-                    if (e.target === periodModal) closePeriodModal();
-                });
-            }
 
             // Modal events - Category Filter
             if (categorySummaryFilterBtn) {
@@ -2021,7 +2012,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         periodBtn.classList.add('active');
                         
                         render();
-                        closeTransactionsFilterModal();
+                        // Não fecha o modal automaticamente - usuário pode continuar configurando filtros
                     }
                 });
             }
@@ -2035,7 +2026,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         Utils.saveToLocalStorage('finance_category', currentCategory);
                         renderTransactionsCategoryFilterGrid();
                         render();
-                        closeTransactionsFilterModal();
+                        // Não fecha o modal automaticamente - usuário pode continuar configurando filtros
                     }
                 });
             }
@@ -2135,22 +2126,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             
-            // Period filters
-            if (periodChips) {
-                periodChips.addEventListener('click', (e) => {
-                    const periodBtn = e.target.closest('[data-period]');
-                    if (periodBtn) {
-                        currentPeriod = periodBtn.dataset.period;
-                        Utils.saveToLocalStorage('finance_period', currentPeriod);
-                        
-                        periodChips.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-                        periodBtn.classList.add('active');
-                        
-                        render();
-                        closePeriodModal();
-                    }
-                });
-            }
+            // Period filters (removido - agora usa o modal unificado)
             
             // Category filter modal
             if (categoryFilterGrid) {
@@ -2180,70 +2156,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
             
-            // Custom period functionality
-            const periodStartDate = document.getElementById('period-start-date');
-            const periodEndDate = document.getElementById('period-end-date');
-            const applyCustomPeriodBtn = document.getElementById('apply-custom-period-btn');
-            const clearPeriodFilterBtn = document.getElementById('clear-period-filter-btn');
-            
-            if (applyCustomPeriodBtn) {
-                applyCustomPeriodBtn.addEventListener('click', () => {
-                    const startDate = periodStartDate?.value;
-                    const endDate = periodEndDate?.value;
-                    
-                    if (startDate && endDate) {
-                        const start = new Date(startDate);
-                        const end = new Date(endDate);
-                        
-                        if (start <= end) {
-                            customStartDate = startDate;
-                            customEndDate = endDate;
-                            currentPeriod = 'custom';
-                            Utils.saveToLocalStorage('finance_period', currentPeriod);
-                            Utils.saveToLocalStorage('finance_custom_start', customStartDate);
-                            Utils.saveToLocalStorage('finance_custom_end', customEndDate);
-                            
-                            // Update active button display
-                            periodChips?.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-                            
-                            render();
-                            closePeriodModal();
-                        } else {
-                            Utils.showNotice('A data inicial deve ser anterior ou igual à data final.');
-                        }
-                    } else {
-                        Utils.showNotice('Por favor, selecione ambas as datas.');
-                    }
-                });
-            }
-            
-            if (clearPeriodFilterBtn) {
-                clearPeriodFilterBtn.addEventListener('click', () => {
-                    currentPeriod = 'all';
-                    customStartDate = null;
-                    customEndDate = null;
-                    Utils.saveToLocalStorage('finance_period', currentPeriod);
-                    Utils.saveToLocalStorage('finance_custom_start', null);
-                    Utils.saveToLocalStorage('finance_custom_end', null);
-                    
-                    if (periodStartDate) periodStartDate.value = '';
-                    if (periodEndDate) periodEndDate.value = '';
-                    
-                    // Update active button
-                    periodChips?.querySelectorAll('.category-btn').forEach(btn => {
-                        btn.classList.toggle('active', btn.dataset.period === 'all');
-                    });
-                    
-                    render();
-                    closePeriodModal();
-                });
-            }
+            // Custom period functionality (removido - agora usa o modal unificado)
             
             // Load saved custom dates
             customStartDate = Utils.loadFromLocalStorage('finance_custom_start', null);
             customEndDate = Utils.loadFromLocalStorage('finance_custom_end', null);
-            if (customStartDate && periodStartDate) periodStartDate.value = customStartDate;
-            if (customEndDate && periodEndDate) periodEndDate.value = customEndDate;
             
             render();
         };
