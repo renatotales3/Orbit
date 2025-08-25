@@ -1081,7 +1081,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     box-shadow: var(--shadow) !important;
     width: 90vw !important;
     max-width: 45rem !important;
-    max-height: calc(100vh - 2rem) !important;
+    max-height: calc(100vh - 4rem) !important; /* Considerando padding do backdrop (1rem x2) + margem extra */
     overflow-y: auto !important;
     overflow-x: hidden !important;
     padding: 1.8rem !important;
@@ -1101,6 +1101,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    padding-bottom: 1rem; /* Espaço extra para scroll dos botões finais */
 }
 
 /* Form sections */
@@ -1163,7 +1164,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     #transaction-modal .modal-content {
         width: 95vw !important;
         padding: 1.5rem !important;
-        max-height: calc(100vh - 1rem) !important; /* Altura máxima otimizada para mobile */
+        max-height: calc(100vh - 2rem) !important; /* Altura máxima considerando padding mobile (0.5rem x2) + margem */
     }
     
     #transaction-modal .finance-quick-amounts {
@@ -1292,6 +1293,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 #transaction-modal .modal-actions {
     margin-top: 1rem;
     padding-top: 0.8rem;
-    padding-bottom: 0.4rem;
+    padding-bottom: 1.2rem; /* Mais espaço para scroll adequado */
     border-top: 1px solid var(--divider-color);
 }
