@@ -729,7 +729,31 @@
         </nav>
     </footer>
 
+    <!-- Life OS - Nova Arquitetura Modular -->
+    
+    <!-- Utilitários -->
+    <script src="utils/storage.js"></script>
+    <script src="utils/date.js"></script>
+    <script src="utils/validation.js"></script>
+    
+    <!-- Core do Sistema -->
+    <script src="core/store.js"></script>
+    <script src="core/router.js"></script>
+    <script src="core/app.js"></script>
+    
+    <!-- Módulos da Aplicação -->
+    <script src="modules/tasks.js"></script>
+    
+    <!-- Script original (temporário para compatibilidade) -->
     <script src="script.js"></script>
+    
+    <!-- Inicialização da Nova Arquitetura -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar nova arquitetura
+            App.init();
+        });
+    </script>
     
     <!-- PWA Service Worker Registration -->
     <script>
