@@ -1745,6 +1745,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (customEndDate && transactionsEndDate) transactionsEndDate.value = customEndDate;
             
             renderTransactionsCategoryFilterGrid();
+            document.body.classList.add('modal-open');
             transactionsFilterModal.classList.remove('hidden');
         };
 

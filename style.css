@@ -546,6 +546,11 @@ input[type="date"], input[type="time"], input[type="datetime-local"] {
     transition: opacity 0.3s ease; 
 }
 .modal-backdrop.hidden { opacity: 0; pointer-events: none; }
+
+/* Ocultar navbar quando qualquer modal estiver aberto */
+body.modal-open .bottom-nav {
+    display: none;
+}
 .modal-content { 
     background-color: var(--component-bg); 
     border: 1px solid var(--border-color); 
@@ -1493,7 +1498,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     display: flex;
     border-bottom: 1px solid var(--divider-color);
     margin-bottom: 1.5rem;
-    background-color: var(--component-bg);
     z-index: 1;
 }
 
