@@ -1240,9 +1240,25 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .modal-content .setting-row > .soft-input { min-width: 10rem; }
 /* Modal de aviso deve ficar por cima de outros modais */
 #app-notice-modal.modal-backdrop {
+    z-index: 1100 !important;
 }
 
-/* Modal de aviso deve ficar por cima de outros modais */
-#app-notice-modal.modal-backdrop {
-    z-index: 1100 !important;
+/* Espaçamento melhorado para modal de transação */
+#transaction-modal .finance-form-field {
+    margin-bottom: 1.6rem;
+}
+
+#transaction-modal .finance-form-row {
+    margin-bottom: 1.6rem;
+}
+
+#transaction-modal .modal-actions {
+    margin-top: 2.4rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Espaçamento entre data e descrição */
+#transaction-modal .finance-form-field:last-of-type {
+    margin-bottom: 2rem;
 }

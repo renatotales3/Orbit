@@ -1342,20 +1342,37 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Data
         let transactions = Utils.loadFromLocalStorage('finance_transactions', []);
-        let categories = Utils.loadFromLocalStorage('finance_categories', [
+        // Categorias para despesas
+        let expenseCategories = Utils.loadFromLocalStorage('finance_expense_categories', [
             { id: 'alimentacao', name: 'Alimentação', icon: 'bx-restaurant', color: '#F59E0B' },
             { id: 'transporte', name: 'Transporte', icon: 'bx-car', color: '#3B82F6' },
             { id: 'moradia', name: 'Moradia', icon: 'bx-home', color: '#8B5CF6' },
             { id: 'lazer', name: 'Lazer', icon: 'bx-game', color: '#EC4899' },
             { id: 'saude', name: 'Saúde', icon: 'bx-plus-medical', color: '#10B981' },
             { id: 'educacao', name: 'Educação', icon: 'bx-book', color: '#6366F1' },
-            { id: 'trabalho', name: 'Trabalho', icon: 'bx-briefcase', color: '#374151' },
+            { id: 'compras', name: 'Compras', icon: 'bx-shopping-bag', color: '#EF4444' },
+            { id: 'servicos', name: 'Serviços', icon: 'bx-wrench', color: '#F97316' },
+            { id: 'outros', name: 'Outros', icon: 'bx-dots-horizontal', color: '#6B7280' }
+        ]);
+        
+        // Categorias para receitas
+        let incomeCategories = Utils.loadFromLocalStorage('finance_income_categories', [
+            { id: 'salario', name: 'Salário', icon: 'bx-money', color: '#10B981' },
+            { id: 'freelance', name: 'Freelance', icon: 'bx-briefcase', color: '#3B82F6' },
+            { id: 'investimentos', name: 'Investimentos', icon: 'bx-trending-up', color: '#8B5CF6' },
+            { id: 'vendas', name: 'Vendas', icon: 'bx-store', color: '#F59E0B' },
+            { id: 'bonus', name: 'Bônus', icon: 'bx-gift', color: '#EC4899' },
+            { id: 'aluguel', name: 'Aluguel', icon: 'bx-home-heart', color: '#6366F1' },
             { id: 'outros', name: 'Outros', icon: 'bx-dots-horizontal', color: '#6B7280' }
         ]);
         
         let currentPeriod = Utils.loadFromLocalStorage('finance_period', 'month');
         let currentCategory = Utils.loadFromLocalStorage('finance_category', 'all');
         let editingTransaction = null;
+        
+        // Salvar categorias no localStorage
+        Utils.saveToLocalStorage('finance_expense_categories', expenseCategories);
+        Utils.saveToLocalStorage('finance_income_categories', incomeCategories);
 
         // Utility functions
         const formatCurrency = (value) => {
@@ -1363,6 +1380,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 style: 'currency',
                 currency: 'BRL'
             }).format(value || 0);
+        };
+        
+        const renderCategories = (type = 'expense') => {
+            if (!categoryGrid) return;
+            
+            const categories = type === 'income' ? incomeCategories : expenseCategories;
+            
+            categoryGrid.innerHTML = categories.map(category => `
+                <button class="finance-category-btn category-btn" data-category="${category.id}">
+                    <i class='bx ${category.icon}' style="color: ${category.color}"></i>
+                    <span>${category.name}</span>
+                </button>
+            `).join('');
         };
 
         const formatDate = (dateString) => {
@@ -1646,6 +1676,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     btn.classList.toggle('active', btn.dataset.type === transaction.type);
                 });
                 
+                // Renderizar categorias corretas para o tipo da transação
+                renderCategories(transaction.type);
+                
                 // Set category
                 setTimeout(() => {
                     const categoryBtn = categoryGrid.querySelector(`[data-category="${transaction.categoryId}"]`);
@@ -1663,6 +1696,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 transactionTypeButtons.forEach(btn => {
                     btn.classList.toggle('active', btn.dataset.type === 'expense');
                 });
+                
+                // Renderizar categorias para despesas por padrão
+                renderCategories('expense');
             }
             
             transactionModal.classList.remove('hidden');
@@ -1745,6 +1781,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             incomeBtn.classList.add('active');
                             const titleEl = document.getElementById('transaction-modal-title');
                             if (titleEl) titleEl.textContent = 'Nova Receita';
+                            // Renderizar categorias de receita
+                            renderCategories('income');
                         }
                     }, 100);
                 });
@@ -1761,6 +1799,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             expenseBtn.classList.add('active');
                             const titleEl = document.getElementById('transaction-modal-title');
                             if (titleEl) titleEl.textContent = 'Nova Despesa';
+                            // Renderizar categorias de despesa
+                            renderCategories('expense');
                         }
                     }, 100);
                 });
@@ -1843,6 +1883,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.addEventListener('click', () => {
                     transactionTypeButtons.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
+                    // Renderizar categorias corretas baseadas no tipo
+                    renderCategories(btn.dataset.type);
                 });
             });
             
@@ -1852,6 +1894,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     const amountBtn = e.target.closest('[data-amount]');
                     if (amountBtn && transactionAmount) {
                         transactionAmount.value = amountBtn.dataset.amount;
+                        
+                        // Efeito visual
+                        amountBtn.style.transform = 'scale(0.95)';
+                        amountBtn.style.backgroundColor = 'var(--primary-color)';
+                        amountBtn.style.color = 'white';
+                        
+                        setTimeout(() => {
+                            amountBtn.style.transform = '';
+                            amountBtn.style.backgroundColor = '';
+                            amountBtn.style.color = '';
+                        }, 200);
                     }
                 });
             }
