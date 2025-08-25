@@ -63,17 +63,34 @@ document.addEventListener('DOMContentLoaded', () => {
             return div.innerHTML;
         };
         // Modal simples de aviso
-        const showNotice = (message, title = 'Aviso') => {
+        const showNotice = (message, titleOrCallback = 'Aviso', callback = null) => {
             const modal = document.getElementById('app-notice-modal');
             const titleEl = document.getElementById('app-notice-title');
             const textEl = document.getElementById('app-notice-text');
             const okBtn = document.getElementById('app-notice-ok');
             if (!modal || !titleEl || !textEl || !okBtn) return;
-            titleEl.textContent = title; textEl.textContent = message;
+            
+            // Se o segundo parâmetro é uma função, é o callback
+            let title = 'Aviso';
+            let onConfirm = null;
+            if (typeof titleOrCallback === 'function') {
+                onConfirm = titleOrCallback;
+            } else {
+                title = titleOrCallback;
+                onConfirm = callback;
+            }
+            
+            titleEl.textContent = title; 
+            textEl.textContent = message;
             modal.classList.remove('hidden');
-            const close = ()=> modal.classList.add('hidden');
+            
+            const close = () => {
+                modal.classList.add('hidden');
+                if (onConfirm) onConfirm();
+            };
+            
             okBtn.onclick = close;
-            modal.onclick = (e)=>{ if (e.target === modal) close(); };
+            modal.onclick = (e) => { if (e.target === modal) close(); };
         };
         return { saveToLocalStorage, loadFromLocalStorage, getTodayString, formatDateToBR, escapeHTML, showNotice };
     })();
@@ -1683,7 +1700,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const deleteTransaction = () => {
             if (!editingTransaction) return;
             
-            Utils.showNotice('Tem certeza que deseja excluir esta transação?', () => {
+            Utils.showNotice('Tem certeza que deseja excluir esta transação?', 'Confirmar Exclusão', () => {
                 transactions = transactions.filter(t => t.id !== editingTransaction.id);
                 Utils.saveToLocalStorage('finance_transactions', transactions);
                 closeTransactionModal();

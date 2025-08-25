@@ -1238,3 +1238,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .modal-content .setting-row { flex-wrap: nowrap !important; }
 .modal-content .setting-row > label { white-space: nowrap; }
 .modal-content .setting-row > .soft-input { min-width: 10rem; }
+/* Modal de aviso deve ficar por cima de outros modais */
+#app-notice-modal.modal-backdrop {
+}
+
+/* Modal de aviso deve ficar por cima de outros modais */
+#app-notice-modal.modal-backdrop {
+    z-index: 1100 !important;
+}
