@@ -1301,12 +1301,35 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     max-width: 45rem !important;
     margin: 0 auto 2rem auto !important;
     position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Garantir que o conteúdo das abas ocupe o espaço necessário */
+#transactions-filter-modal .filter-tab-content {
+    flex: 1;
+    overflow-y: auto;
 }
 
 @media (max-width: 768px) {
     #transactions-filter-modal .modal-content {
         width: 95vw !important;
-        max-height: 80vh !important;
+        max-height: 85vh !important; /* Mais altura em mobile */
+    }
+    
+    /* Ajustes específicos para mobile */
+    #transactions-filter-modal .filter-tab-content {
+        min-height: 300px; /* Menor altura mínima em mobile */
+        margin-bottom: 0; /* Usar flexbox em mobile também */
+    }
+    
+    #transactions-filter-modal .modal-actions {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+    }
+    
+    #transactions-filter-modal .finance-custom-period {
+        margin-bottom: 2rem;
     }
 }
 
@@ -1418,23 +1441,41 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     border-color: var(--primary-color);
 }
 
-/* Correção de espaçamento no modal de filtro de transações */
+/* Correção completa de espaçamento no modal de filtro de transações */
 #transactions-filter-modal .finance-custom-period {
-    margin-bottom: 2rem; /* Espaço antes dos botões de ação */
+    margin-bottom: 3rem; /* Mais espaço antes dos botões de ação */
 }
 
 #transactions-filter-modal .modal-actions {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
     border-top: 1px solid var(--divider-color);
     position: relative;
     z-index: 10;
+    clear: both; /* Limpar floats */
 }
 
-/* Garantir que não haja sobreposição */
+/* Garantir que não haja sobreposição - altura mínima para cada aba */
 #transactions-filter-modal .filter-tab-content {
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
+    min-height: 350px; /* Altura mínima para empurrar botões para baixo */
+    margin-bottom: 0; /* Removido para usar flexbox */
+    padding-bottom: 2rem;
+    overflow-y: auto; /* Permitir scroll se necessário */
+}
+
+#transactions-filter-modal .filter-tab-panel {
+    min-height: 300px; /* Altura mínima para cada painel de aba */
+    padding-bottom: 2rem;
+}
+
+/* Espaçamento específico para a aba de categoria */
+#transactions-category-panel {
+    padding-bottom: 3rem; /* Mais espaço na aba de categoria */
+}
+
+/* Espaçamento específico para a aba de período */
+#transactions-period-panel {
+    padding-bottom: 3rem; /* Mais espaço na aba de período */
 }
 
 @media (max-width: 480px) {
@@ -1453,6 +1494,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     display: flex;
     border-bottom: 1px solid var(--divider-color);
     margin-bottom: 1.5rem;
+    position: sticky;
+    top: 0;
+    background-color: var(--component-bg);
+    z-index: 5;
 }
 
 .filter-tab-btn {
@@ -1495,6 +1540,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 0.8rem;
     padding: 1rem 0;
+    margin-bottom: 2rem; /* Espaço extra no final do grid */
+    min-height: 200px; /* Altura mínima para empurrar botões para baixo */
 }
 
 .finance-category-btn {
