@@ -1055,6 +1055,60 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     opacity: 0.9;
 }
 
+/* Fix transaction modal layout */
+#transaction-modal .modal-content {
+    max-width: min(90vw, 45rem);
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+#transaction-modal .modal-backdrop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+#transaction-modal form {
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+/* Fix horizontal scroll in modal elements */
+#transaction-modal .finance-quick-amounts {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+#transaction-modal .finance-category-grid {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+}
+
+/* Mobile adjustments for transaction modal */
+@media (max-width: 768px) {
+    #transaction-modal .modal-content {
+        max-width: 95vw;
+        margin: 1rem;
+    }
+    
+    #transaction-modal .finance-quick-amounts {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    #transaction-modal .finance-category-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 /* Finance summary actions */
 .finance-summary-actions {
     display: flex;
