@@ -1029,9 +1029,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     })();
 
-    // --- INICIALIZAÇÃO GERAL ---
-    App.init();
-
     // --- MÓDULO FINANÇAS (removido) ---
     /* const Finance = (() => {
         const periodChips = document.getElementById('fin-period-chips');
@@ -1852,6 +1849,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return { init, render };
     })();
 
-    // Inicializar o App
+    // --- INICIALIZAÇÃO GERAL ---
     App.init();
 });
