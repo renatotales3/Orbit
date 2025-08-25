@@ -1062,6 +1062,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     margin: 0 auto;
     box-sizing: border-box;
     overflow-x: hidden;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 #transaction-modal .modal-backdrop {
@@ -1075,6 +1079,35 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     width: 100%;
     box-sizing: border-box;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Center all form sections */
+#transaction-modal .finance-amount-section,
+#transaction-modal .finance-category-section,
+#transaction-modal .finance-form-row,
+#transaction-modal .finance-form-field,
+#transaction-modal .modal-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+#transaction-modal .finance-amount-input-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+#transaction-modal label {
+    text-align: left;
+    margin-bottom: 0.8rem;
+    display: block;
+    width: 100%;
 }
 
 /* Fix horizontal scroll in modal elements */
@@ -1083,6 +1116,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     max-width: 100%;
     box-sizing: border-box;
     overflow-x: hidden;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+    justify-items: stretch;
 }
 
 #transaction-modal .finance-category-grid {
@@ -1090,7 +1127,35 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     max-width: 100%;
     box-sizing: border-box;
     overflow-x: hidden;
+    display: grid;
     grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: 1rem;
+    justify-items: stretch;
+}
+
+/* Ensure buttons fill their grid cells */
+#transaction-modal .finance-category-btn,
+#transaction-modal .category-btn {
+    width: 100%;
+    text-align: center;
+    justify-self: stretch;
+}
+
+/* Modal actions alignment */
+#transaction-modal .modal-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--divider-color);
+}
+
+#transaction-modal .finance-action-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
 }
 
 /* Mobile adjustments for transaction modal */
@@ -1098,6 +1163,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     #transaction-modal .modal-content {
         max-width: 95vw;
         margin: 1rem;
+        padding: 1.5rem;
     }
     
     #transaction-modal .finance-quick-amounts {
@@ -1106,6 +1172,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     
     #transaction-modal .finance-category-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+    
+    #transaction-modal .modal-actions {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    #transaction-modal .finance-action-buttons {
+        justify-content: center;
+        width: 100%;
     }
 }
 
