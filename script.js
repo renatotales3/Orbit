@@ -1369,10 +1369,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentPeriod = Utils.loadFromLocalStorage('finance_period', 'month');
         let currentCategory = Utils.loadFromLocalStorage('finance_category', 'all');
         let editingTransaction = null;
-        
-        // Salvar categorias no localStorage
-        Utils.saveToLocalStorage('finance_expense_categories', expenseCategories);
-        Utils.saveToLocalStorage('finance_income_categories', incomeCategories);
 
         // Utility functions
         const formatCurrency = (value) => {
@@ -1474,7 +1470,9 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const getCategoryById = (id) => {
-            return categories.find(cat => cat.id === id) || { name: 'Outros', icon: 'bx-dots-horizontal', color: '#6B7280' };
+            // Procurar em ambas as listas de categorias
+            const allCategories = [...expenseCategories, ...incomeCategories];
+            return allCategories.find(cat => cat.id === id) || { name: 'Outros', icon: 'bx-dots-horizontal', color: '#6B7280' };
         };
 
         // Render functions
@@ -1524,16 +1522,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        const renderCategories = () => {
-            if (!categoryGrid) return;
-            
-            categoryGrid.innerHTML = categories.map(category => `
-                <button type="button" class="finance-category-btn" data-category="${category.id}">
-                    <i class='bx ${category.icon} finance-category-icon'></i>
-                    <span>${category.name}</span>
-                </button>
-            `).join('');
-        };
+
 
         const renderCategoryFilterGrid = () => {
             if (!categoryFilterGrid) return;
@@ -1543,7 +1532,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <i class='bx bx-category finance-category-icon'></i>
                     <span>Todas</span>
                 </button>
-                ${categories.map(category => `
+                ${[...expenseCategories, ...incomeCategories].map(category => `
                     <button type="button" class="finance-category-btn ${currentCategory === category.id ? 'active' : ''}" data-category="${category.id}">
                         <i class='bx ${category.icon} finance-category-icon'></i>
                         <span>${category.name}</span>
