@@ -880,10 +880,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Gráfico de Produtividade Semanal
         const renderProductivityChart = () => {
             const chartContainer = document.getElementById('productivity-chart');
-            if (!chartContainer) return;
+            const labelsContainer = document.getElementById('productivity-chart-labels');
+            if (!chartContainer || !labelsContainer) return;
 
             const today = new Date();
             const chartData = [];
+            const dayLabels = [];
 
             // Gerar dados para os últimos 7 dias
             for (let i = 6; i >= 0; i--) {
@@ -895,10 +897,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const brasiliaTime = new Date(utc + (brasiliaOffset * 3600000));
                 const dateStr = brasiliaTime.toISOString().split('T')[0];
                 
-                // Debug: verificar datas
-                if (i === 0) { // Só para hoje
-                    console.log('Debug gráfico - Hoje:', dateStr, 'getTodayString:', Utils.getTodayString());
-                }
+                // Gerar label do dia da semana
+                const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                const dayLabel = dayNames[brasiliaTime.getDay()];
+                dayLabels.push(dayLabel);
                 
                 // Contar tarefas concluídas no dia
                 const tasks = Utils.loadFromLocalStorage('tasks', []);
@@ -942,6 +944,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }).join('');
 
             chartContainer.innerHTML = barsHTML;
+            
+            // Gerar labels dinâmicos dos dias da semana
+            const labelsHTML = dayLabels.map(label => `<span>${label}</span>`).join('');
+            labelsContainer.innerHTML = labelsHTML;
         };
 
         // Review do Dia
