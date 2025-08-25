@@ -181,7 +181,7 @@ input[type="date"], input[type="time"], input[type="datetime-local"] {
 }
 
 /* --- Navegação --- */
-.bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1000; }
 .bottom-nav nav { 
     display: flex; 
     justify-content: space-around; 
@@ -897,7 +897,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     transition: all 0.2s ease;
     margin-bottom: 1rem;
     position: relative;
-    z-index: 1;
 }
 
 .finance-transaction-item:hover {
@@ -1494,10 +1493,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     display: flex;
     border-bottom: 1px solid var(--divider-color);
     margin-bottom: 1.5rem;
-    position: sticky;
-    top: 0;
     background-color: var(--component-bg);
-    z-index: 5;
+    z-index: 1;
 }
 
 .filter-tab-btn {
