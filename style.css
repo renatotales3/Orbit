@@ -1018,8 +1018,41 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 /* Finance add section */
 .finance-add-section {
     display: flex;
-    justify-content: center;
+    gap: 1.2rem;
     margin-bottom: 2rem;
+    width: 100%;
+}
+
+.finance-add-section .soft-button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 1.2rem;
+    font-weight: 500;
+    min-height: 5rem;
+}
+
+.finance-income-btn {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+.finance-income-btn:hover {
+    background-color: #218838;
+    border-color: #218838;
+}
+
+.finance-expense-btn {
+    background-color: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: var(--danger-border);
+}
+
+.finance-expense-btn:hover {
+    opacity: 0.9;
 }
 
 /* Finance summary actions */

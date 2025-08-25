@@ -1265,6 +1265,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Elementos DOM
         const financeSection = document.getElementById('financas');
         const addTransactionBtn = document.getElementById('add-transaction-btn');
+        const addIncomeBtn = document.getElementById('add-income-btn');
+        const addExpenseBtn = document.getElementById('add-expense-btn');
         const transactionModal = document.getElementById('transaction-modal');
         const transactionForm = document.getElementById('transaction-form');
         const closeTransactionBtn = document.getElementById('close-transaction-btn');
@@ -1695,6 +1697,31 @@ document.addEventListener('DOMContentLoaded', () => {
             // Modal events - Transaction
             if (addTransactionBtn) {
                 addTransactionBtn.addEventListener('click', () => openTransactionModal());
+            }
+            
+            if (addIncomeBtn) {
+                addIncomeBtn.addEventListener('click', () => {
+                    openTransactionModal();
+                    // Após abrir, define como receita
+                    setTimeout(() => {
+                        const incomeBtn = document.querySelector('.finance-type-btn[data-type="income"]');
+                        if (incomeBtn) {
+                            document.querySelectorAll('.finance-type-btn').forEach(btn => btn.classList.remove('active'));
+                            incomeBtn.classList.add('active');
+                            document.getElementById('transaction-modal-title').textContent = 'Nova Receita';
+                        }
+                    }, 50);
+                });
+            }
+            
+            if (addExpenseBtn) {
+                addExpenseBtn.addEventListener('click', () => {
+                    openTransactionModal();
+                    // Após abrir, define como despesa (já é padrão)
+                    setTimeout(() => {
+                        document.getElementById('transaction-modal-title').textContent = 'Nova Despesa';
+                    }, 50);
+                });
             }
             
             if (closeTransactionBtn) {
