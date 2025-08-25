@@ -1,7 +1,7 @@
-// Life OS Service Worker - v1.0.0
-const CACHE_NAME = 'life-os-v1.0.0';
-const STATIC_CACHE = 'life-os-static-v1.0.0';
-const DYNAMIC_CACHE = 'life-os-dynamic-v1.0.0';
+// Life OS Service Worker - v1.1.0
+const CACHE_NAME = 'life-os-v1.1.0';
+const STATIC_CACHE = 'life-os-static-v1.1.0';
+const DYNAMIC_CACHE = 'life-os-dynamic-v1.1.0';
 
 // Arquivos essenciais para cache
 const STATIC_FILES = [
@@ -250,4 +250,4 @@ self.addEventListener('sync', event => {
   }
 });
 
-console.log('[SW] Service Worker carregado - Life OS v1.0.0');
+console.log('[SW] Service Worker carregado - Life OS v1.1.0 - Teste de Atualização');
