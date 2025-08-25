@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             titleEl.textContent = title; 
             textEl.textContent = message;
-            modal.classList.remove('hidden');
+            document.body.classList.add('modal-open'); modal.classList.remove('hidden');
             
             // Se há callback, mostra como confirmação (2 botões)
             if (onConfirm && cancelBtn) {
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             const close = () => {
-                modal.classList.add('hidden');
+                document.body.classList.remove('modal-open'); modal.classList.add('hidden');
             };
             
             const confirm = () => {
@@ -433,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const subtaskId = Number(e.target.closest('.subtask-item').dataset.id);
                     subtaskToAdd = { goalId, subtaskId };
                     document.body.classList.add('modal-open');
-                    priorityModal.classList.remove('hidden');
+                    document.body.classList.add('modal-open'); priorityModal.classList.remove('hidden');
                 }
 
                 if (shouldReRender) { const wasExpanded = goalItem.classList.contains('expanded'); Utils.saveToLocalStorage('goals', goals); render(); if (wasExpanded) document.querySelector(`.goal-item[data-id="${goalId}"]`)?.classList.add('expanded'); }
@@ -481,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const render = () => { habitsList.innerHTML = ""; habits.forEach(habit => { const li = document.createElement('li'); li.className = 'habit-item'; li.dataset.id = habit.id; const today = new Date(); const startOfWeek = new Date(new Date().setDate(today.getDate() - today.getDay())); let weekTrackerHTML = ""; const weekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']; for (let i = 0; i < 7; i++) { const day = new Date(startOfWeek); day.setDate(startOfWeek.getDate() + i); const dateString = day.toISOString().split('T')[0]; const isCompleted = habit.completedDates.includes(dateString); const isCurrent = day.toDateString() === new Date().toDateString(); const isFuture = day > new Date(); weekTrackerHTML += `<div class="day-circle ${isCurrent ? 'current' : ''} ${isCompleted ? 'completed' : ''} ${isFuture ? 'disabled' : ''}" data-date="${dateString}" style="${isCompleted ? '--habit-color:' + habit.color : ''}">${weekDays[i]}</div>`; } li.innerHTML = `<div class="habit-info"><div class="habit-icon-name"><i class='bx ${habit.icon}' style="color: ${habit.color}"></i><span class="habit-name">${habit.name}</span></div><div class="habit-info-right"><div class="habit-streak"><span>🔥</span><span>${calculateStreak(habit.completedDates)}</span></div><div class="habit-actions"><button class="soft-button icon-btn edit-habit-btn" title="Editar Hábito"><i class="bx bxs-pencil"></i></button></div></div></div><div class="habit-week-tracker">${weekTrackerHTML}</div>`; habitsList.appendChild(li); }); };
         const openHabitModal = (mode = 'add', habitId = null) => { habitForm.reset(); habitForm.dataset.mode = mode; habitForm.dataset.habitId = habitId; iconPicker.innerHTML = AVAILABLE_ICONS.map(i => `<div class="picker-option"><button type="button" class="picker-button" data-icon="${i.name}"><i class='bx ${i.name}'></i></button><span class="picker-label">${i.label}</span></div>`).join(''); colorPicker.innerHTML = AVAILABLE_COLORS.map(c => `<button type="button" class="picker-button" data-color="${c}"><div class="color-swatch" style="background-color:${c}"></div></button>`).join(''); const modalTitle = document.getElementById('habit-modal-title'); if (mode === 'edit' && habitId !== null) { modalTitle.textContent = "Editar Hábito"; deleteHabitBtn.classList.remove('hidden'); const habit = habits.find(h => h.id === habitId); document.getElementById('habit-name-input').value = habit.name; iconPicker.querySelector(`.picker-button[data-icon="${habit.icon}"]`)?.classList.add('active'); colorPicker.querySelector(`.picker-button[data-color="${habit.color}"]`)?.classList.add('active'); } else { modalTitle.textContent = "Novo Hábito"; deleteHabitBtn.classList.add('hidden'); } document.body.classList.add('modal-open'); habitModal.classList.remove('hidden'); };
         const closeHabitModal = () => { document.body.classList.remove('modal-open'); habitForm.reset(); habitModal.classList.add('hidden'); };
-        const init = () => { addHabitModalBtn.addEventListener('click', () => openHabitModal('add')); cancelHabitBtn.addEventListener('click', closeHabitModal); habitModal.addEventListener('click', e => { if (e.target === habitModal) closeHabitModal(); }); iconPicker.addEventListener('click', e => { const button = e.target.closest('.picker-button'); if (button) { iconPicker.querySelector('.active')?.classList.remove('active'); button.classList.add('active'); }}); colorPicker.addEventListener('click', e => { const button = e.target.closest('.picker-button'); if (button) { colorPicker.querySelector('.active')?.classList.remove('active'); button.classList.add('active'); }}); habitForm.addEventListener('submit', e => { e.preventDefault(); const name = document.getElementById('habit-name-input').value, icon = iconPicker.querySelector('.active')?.dataset.icon, color = colorPicker.querySelector('.active')?.dataset.color; if (!name || !icon || !color) return alert("Por favor, preencha todos os campos."); const mode = habitForm.dataset.mode, habitId = Number(habitForm.dataset.habitId); if (mode === 'add') { habits.push({ id: Date.now(), name, icon, color, completedDates: [] }); } else if (mode === 'edit') { const habitIndex = habits.findIndex(h => h.id === habitId); if(habitIndex > -1) habits[habitIndex] = { ...habits[habitIndex], name, icon, color }; } Utils.saveToLocalStorage('habits', habits); render(); closeHabitModal(); }); habitsList.addEventListener('click', e => { const habitItem = e.target.closest('.habit-item'); if (!habitItem) return; const habitId = Number(habitItem.dataset.id); const habit = habits.find(h => h.id === habitId); if (!habit) return; if (e.target.closest('.day-circle:not(.disabled)')) { const date = e.target.closest('.day-circle').dataset.date; const dateIndex = habit.completedDates.indexOf(date); if (dateIndex > -1) habit.completedDates.splice(dateIndex, 1); else habit.completedDates.push(date); Utils.saveToLocalStorage('habits', habits); render(); } if (e.target.closest('.edit-habit-btn')) openHabitModal('edit', habitId); }); deleteHabitBtn.addEventListener('click', () => { habitToDeleteId = Number(habitForm.dataset.habitId); confirmationModal.classList.remove('hidden'); }); cancelDeleteBtn.addEventListener('click', () => { confirmationModal.classList.add('hidden'); habitToDeleteId = null; }); confirmDeleteBtn.addEventListener('click', () => { if (habitToDeleteId !== null) { habits = habits.filter(h => h.id !== habitToDeleteId); Utils.saveToLocalStorage('habits', habits); render(); habitToDeleteId = null; } confirmationModal.classList.add('hidden'); closeHabitModal(); }); render(); };
+        const init = () => { addHabitModalBtn.addEventListener('click', () => openHabitModal('add')); cancelHabitBtn.addEventListener('click', closeHabitModal); habitModal.addEventListener('click', e => { if (e.target === habitModal) closeHabitModal(); }); iconPicker.addEventListener('click', e => { const button = e.target.closest('.picker-button'); if (button) { iconPicker.querySelector('.active')?.classList.remove('active'); button.classList.add('active'); }}); colorPicker.addEventListener('click', e => { const button = e.target.closest('.picker-button'); if (button) { colorPicker.querySelector('.active')?.classList.remove('active'); button.classList.add('active'); }}); habitForm.addEventListener('submit', e => { e.preventDefault(); const name = document.getElementById('habit-name-input').value, icon = iconPicker.querySelector('.active')?.dataset.icon, color = colorPicker.querySelector('.active')?.dataset.color; if (!name || !icon || !color) return alert("Por favor, preencha todos os campos."); const mode = habitForm.dataset.mode, habitId = Number(habitForm.dataset.habitId); if (mode === 'add') { habits.push({ id: Date.now(), name, icon, color, completedDates: [] }); } else if (mode === 'edit') { const habitIndex = habits.findIndex(h => h.id === habitId); if(habitIndex > -1) habits[habitIndex] = { ...habits[habitIndex], name, icon, color }; } Utils.saveToLocalStorage('habits', habits); render(); closeHabitModal(); }); habitsList.addEventListener('click', e => { const habitItem = e.target.closest('.habit-item'); if (!habitItem) return; const habitId = Number(habitItem.dataset.id); const habit = habits.find(h => h.id === habitId); if (!habit) return; if (e.target.closest('.day-circle:not(.disabled)')) { const date = e.target.closest('.day-circle').dataset.date; const dateIndex = habit.completedDates.indexOf(date); if (dateIndex > -1) habit.completedDates.splice(dateIndex, 1); else habit.completedDates.push(date); Utils.saveToLocalStorage('habits', habits); render(); } if (e.target.closest('.edit-habit-btn')) openHabitModal('edit', habitId); }); deleteHabitBtn.addEventListener('click', () => { habitToDeleteId = Number(habitForm.dataset.habitId); document.body.classList.add('modal-open'); confirmationModal.classList.remove('hidden'); }); cancelDeleteBtn.addEventListener('click', () => { document.body.classList.remove('modal-open'); confirmationModal.classList.add('hidden'); habitToDeleteId = null; }); confirmDeleteBtn.addEventListener('click', () => { if (habitToDeleteId !== null) { habits = habits.filter(h => h.id !== habitToDeleteId); Utils.saveToLocalStorage('habits', habits); render(); habitToDeleteId = null; } document.body.classList.remove('modal-open'); confirmationModal.classList.add('hidden'); closeHabitModal(); }); render(); };
         return { init, render };
     })();
 
@@ -559,10 +559,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const sortedEntries = entriesWithJournal.sort((a, b) => new Date(b.date) - new Date(a.date));
                 historyList.innerHTML = sortedEntries.map(createHistoryItemHTML).join('');
             }
-            historyModal.classList.remove('hidden');
+            document.body.classList.add('modal-open'); historyModal.classList.remove('hidden');
         };
 
-        const closeHistoryModal = () => historyModal.classList.add('hidden');
+        const closeHistoryModal = () => { document.body.classList.remove('modal-open'); historyModal.classList.add('hidden'); };
 
         const render = () => {
             const { question } = getDailyQuestion();
@@ -754,10 +754,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     </li>
                 `).join('');
             }
-            historyModal.classList.remove('hidden');
+            document.body.classList.add('modal-open'); historyModal.classList.remove('hidden');
         };
 
-        const closeHistoryModal = () => historyModal.classList.add('hidden');
+        const closeHistoryModal = () => { document.body.classList.remove('modal-open'); historyModal.classList.add('hidden'); };
 
         const init = () => {
             waterGoalInput.value = waterGoal;
@@ -799,11 +799,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         totalMinutes: calculateSleep(bedTimeInput.value, wakeTimeInput.value)
                     };
                     sleepQualityInput.value = '4';
-                    sleepQualityModal.classList.remove('hidden');
+                    document.body.classList.add('modal-open'); sleepQualityModal.classList.remove('hidden');
                 }
             });
-            sleepQualityCancel && sleepQualityCancel.addEventListener('click', () => { pendingSleepData = null; sleepQualityModal.classList.add('hidden'); });
-            sleepQualityConfirm && sleepQualityConfirm.addEventListener('click', () => { if (!pendingSleepData) return; const quality = Math.max(1, Math.min(5, parseInt(sleepQualityInput.value || '4'))); const todayData = DailyData.getTodayData(); todayData.sleep = { ...pendingSleepData, quality }; DailyData.saveData(); pendingSleepData = null; sleepQualityModal.classList.add('hidden'); render(); });
+            sleepQualityCancel && sleepQualityCancel.addEventListener('click', () => { pendingSleepData = null; document.body.classList.remove('modal-open'); sleepQualityModal.classList.add('hidden'); });
+            sleepQualityConfirm && sleepQualityConfirm.addEventListener('click', () => { if (!pendingSleepData) return; const quality = Math.max(1, Math.min(5, parseInt(sleepQualityInput.value || '4'))); const todayData = DailyData.getTodayData(); todayData.sleep = { ...pendingSleepData, quality }; DailyData.saveData(); pendingSleepData = null; document.body.classList.remove('modal-open'); sleepQualityModal.classList.add('hidden'); render(); });
 
             editSleepBtn.addEventListener('click', () => {
                 const todayData = DailyData.getTodayData();
@@ -1034,10 +1034,10 @@ document.addEventListener('DOMContentLoaded', () => {
   <li>Revise seu resumo no domingo.</li>
   </ul>`;
         if (tutorialContent && !tutorialContent.innerHTML) tutorialContent.innerHTML = TUTORIAL_HTML;
-        if (tutorialBtn && tutorialModal) tutorialBtn.addEventListener('click', (e) => { e.preventDefault(); tutorialModal.classList.remove('hidden'); });
-        if (closeTutorialBtn) closeTutorialBtn.addEventListener('click', (e)=>{ e.preventDefault(); tutorialModal.classList.add('hidden'); });
-        if (closeTutorialBtnX) closeTutorialBtnX.addEventListener('click', (e)=>{ e.preventDefault(); tutorialModal.classList.add('hidden'); });
-        if (tutorialModal) tutorialModal.addEventListener('click', (e)=>{ if (e.target === tutorialModal) tutorialModal.classList.add('hidden'); });
+        if (tutorialBtn && tutorialModal) tutorialBtn.addEventListener('click', (e) => { e.preventDefault(); document.body.classList.add('modal-open'); tutorialModal.classList.remove('hidden'); });
+        if (closeTutorialBtn) closeTutorialBtn.addEventListener('click', (e)=>{ e.preventDefault(); document.body.classList.remove('modal-open'); tutorialModal.classList.add('hidden'); });
+        if (closeTutorialBtnX) closeTutorialBtnX.addEventListener('click', (e)=>{ e.preventDefault(); document.body.classList.remove('modal-open'); tutorialModal.classList.add('hidden'); });
+        if (tutorialModal) tutorialModal.addEventListener('click', (e)=>{ if (e.target === tutorialModal) document.body.classList.remove('modal-open'); tutorialModal.classList.add('hidden'); });
 
         if (purgeBtn) purgeBtn.addEventListener('click', () => {
             const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 180);
@@ -1059,9 +1059,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const okBtn = document.getElementById('app-notice-ok');
             if (!modal || !titleEl || !textEl || !okBtn) { proceed(); return; }
             titleEl.textContent = 'Confirmar'; textEl.textContent = 'Isso apagará todos os dados locais. Continuar?';
-            modal.classList.remove('hidden');
+            document.body.classList.add('modal-open'); modal.classList.remove('hidden');
             okBtn.onclick = proceed;
-            modal.onclick = (e)=>{ if (e.target === modal) modal.classList.add('hidden'); };
+            modal.onclick = (e)=>{ if (e.target === modal) document.body.classList.remove('modal-open'); modal.classList.add('hidden'); };
         });
     })();
 
@@ -1706,12 +1706,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const openCategoryModal = () => {
             if (!categoryModal) return;
             renderCategoryFilterGrid();
-            categoryModal.classList.remove('hidden');
+            document.body.classList.add('modal-open'); categoryModal.classList.remove('hidden');
         };
 
         const closeCategoryModal = () => {
             if (!categoryModal) return;
-            categoryModal.classList.add('hidden');
+            document.body.classList.remove('modal-open'); categoryModal.classList.add('hidden');
         };
 
         const clearCategoryFilter = () => {
