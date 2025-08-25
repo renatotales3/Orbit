@@ -1310,7 +1310,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Modais de filtro
         const categoryModal = document.getElementById('finance-category-modal');
         const periodFilterBtn = document.getElementById('finance-period-filter-btn');
-        const categorySummaryFilterBtn = document.getElementById('finance-category-summary-filter-btn');
         const transactionsFilterBtn = document.getElementById('finance-transactions-filter-btn');
         const closeCategoryModalBtn = document.getElementById('close-category-modal-btn');
         const closeCategoryModalFooterBtn = document.getElementById('close-category-modal-footer-btn');
@@ -1389,7 +1388,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const categories = type === 'income' ? incomeCategories : expenseCategories;
             
             transactionCategoryPicker.innerHTML = categories.map(category => `
-                <button class="category-option" data-category="${category.id}" data-icon="${category.icon}" data-color="${category.color}">
+                <button type="button" class="category-option" data-category="${category.id}" data-icon="${category.icon}" data-color="${category.color}">
                     <i class='bx ${category.icon}' style="color: ${category.color}"></i>
                     <span>${category.name}</span>
                 </button>
@@ -1516,6 +1515,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Para período personalizado, usar comparação de strings
                 if (currentPeriod === 'custom' && customStartDate && customEndDate) {
                     return transactionDateStr >= customStartDate && transactionDateStr <= customEndDate;
+                }
+                
+                // Para filtro "hoje", comparar diretamente com data de hoje
+                if (currentPeriod === 'today') {
+                    const todayStr = Utils.getTodayString();
+                    return transactionDateStr === todayStr;
                 }
                 
                 // Para outros períodos, usar comparação de datas
@@ -1923,10 +1928,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-            // Modal events - Category Filter
-            if (categorySummaryFilterBtn) {
-                categorySummaryFilterBtn.addEventListener('click', openCategoryModal);
-            }
+            // Modal events - Category Filter (removido - agora usa modal unificado)
 
             if (transactionsFilterBtn) {
                 transactionsFilterBtn.addEventListener('click', openTransactionsFilterModal);

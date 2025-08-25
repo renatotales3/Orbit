@@ -1412,10 +1412,29 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     font-size: 1.4rem;
 }
 
-#apply-custom-period-btn {
+#apply-custom-period-btn, #apply-transactions-period-btn {
     background-color: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
+}
+
+/* Correção de espaçamento no modal de filtro de transações */
+#transactions-filter-modal .finance-custom-period {
+    margin-bottom: 2rem; /* Espaço antes dos botões de ação */
+}
+
+#transactions-filter-modal .modal-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--divider-color);
+    position: relative;
+    z-index: 10;
+}
+
+/* Garantir que não haja sobreposição */
+#transactions-filter-modal .filter-tab-content {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
 }
 
 @media (max-width: 480px) {
