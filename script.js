@@ -1632,7 +1632,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             transactionModal.classList.remove('hidden');
-            if (transactionAmount) transactionAmount.focus();
+            // Removido foco automático que causava deslocamento do modal
+            // if (transactionAmount) transactionAmount.focus();
         };
 
         const closeTransactionModal = () => {
