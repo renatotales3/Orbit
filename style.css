@@ -1525,12 +1525,34 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 #transactions-filter-modal .filter-tab-content {
     background: transparent !important;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0 !important;
 }
 
 #transactions-filter-modal .modal-actions {
     background: transparent !important;
-    margin-top: 1rem;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Garantir que não há NENHUM espaço entre elementos do modal de filtro */
+#transactions-filter-modal .filter-tab-content + .modal-actions {
+    margin-top: 0 !important;
+    border-top: none !important;
+}
+
+/* Remover qualquer espaço que possa aparecer como retângulo */
+#transactions-filter-modal > .modal-content > * {
+    margin-bottom: 0 !important;
+}
+
+#transactions-filter-modal > .modal-content > .modal-header {
+    margin-bottom: 1.5rem !important;
+}
+
+#transactions-filter-modal > .modal-content > .finance-filter-tabs {
+    margin-bottom: 1.5rem !important;
 }
 
 #transactions-filter-modal .filter-tab-content {
