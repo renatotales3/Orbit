@@ -162,36 +162,30 @@ input[type="date"], input[type="time"], input[type="datetime-local"] {
 .soft-input:focus, .soft-textarea:focus { outline: none; }
 .soft-button.icon-btn { 
     padding: 0; 
-    width: 4.4rem; 
-    height: 4.4rem; 
-    font-size: 2.2rem; 
+    width: 3.8rem; 
+    height: 3.8rem; 
+    font-size: 2rem; 
     border-radius: 50%; 
     color: var(--icon-color);
-    min-width: 44px; /* Padrão de acessibilidade touch */
-    min-height: 44px;
 }
 .soft-button.icon-btn i { margin: 0; }
 
-/* Botões de ação padronizados - Touch Friendly */
+/* Botões de ação padronizados */
 .soft-button.add-btn {
-    width: 5.6rem;
-    height: 5.6rem;
-    padding: 0;
-    font-size: 2.6rem;
-    border-radius: 1.2rem;
-    min-width: 56px;
-    min-height: 56px;
-}
-
-.soft-button.metric-control-btn {
-    width: 5rem;
-    height: 5rem;
+    width: 5.2rem;
+    height: 5.2rem;
     padding: 0;
     font-size: 2.4rem;
     border-radius: 1.2rem;
+}
+
+.soft-button.metric-control-btn {
+    width: 4.6rem;
+    height: 4.6rem;
+    padding: 0;
+    font-size: 2.2rem;
+    border-radius: 1.2rem;
     flex-shrink: 0;
-    min-width: 50px;
-    min-height: 50px;
 }
 
 /* --- Navegação --- */
@@ -312,12 +306,29 @@ input[type="date"], input[type="time"], input[type="datetime-local"] {
     display: flex; 
     align-items: center; 
     justify-content: space-between; 
-    padding: 1.6rem 2rem; /* Mais padding para área de toque */
-    min-height: 60px; /* Altura mínima para toque confortável */
+    padding: 1.4rem 1.8rem;
 }
 .task-item.completed .complete-btn, .complete-subtask-btn.completed { color: #28a745; }
+.task-item.completed .task-text { 
+    text-decoration: line-through; 
+    opacity: 0.6; 
+}
+.task-item.completed { 
+    opacity: 0.8; 
+}
 .task-item-buttons button, .subtask-actions button { color: var(--icon-color); }
-.complete-subtask-btn { background: none; border: none; font-size: 2.2rem; cursor: pointer; padding: 0; margin-right: 1rem; display: flex; align-items: center; justify-content: center; }
+.complete-subtask-btn { 
+    background: none; 
+    border: none; 
+    font-size: 2.2rem; 
+    cursor: pointer; 
+    padding: 0; 
+    margin-right: 1rem; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    color: var(--icon-color); /* Garantir visibilidade em ambos os modos */
+}
 
 /* --- Aba Bem-estar --- */
 .water-tracker-card, .sleep-tracker-card { background-color: var(--component-bg); border: 1px solid var(--border-color); border-radius: 1.6rem; box-shadow: var(--shadow); margin-bottom: 2.5rem; }

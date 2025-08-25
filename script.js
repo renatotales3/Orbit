@@ -222,11 +222,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const createTaskHTML = task => {
             const priorityInfo = PRIORITIES[task.priority];
             const dataAttrs = (task.goalId && task.subtaskId) ? `data-goal-id="${task.goalId}" data-subtask-id="${task.subtaskId}"` : '';
-            return `<li class="task-item ${task.completed ? 'completed' : ''}" data-id="${task.id}" ${dataAttrs}
+            return `<li class="task-item ${task.completed ? 'completed' : ''}" data-id="${task.id}" ${dataAttrs}>
                         <div class="task-item-content">
-                            <button class="complete-btn"><i class='bx bx-check-circle'></i></button>
+                            <button class="complete-btn"><i class='bx ${task.completed ? 'bxs-check-circle' : 'bx-circle'}'></i></button>
                             <span class="priority-tag ${priorityInfo.colorClass}">${priorityInfo.name}</span>
-                            <span>${task.text}</span>
+                            <span class="task-text">${task.text}</span>
                         </div>
                         <div class="task-item-buttons">
                             <button class="soft-button icon-btn delete-btn"><i class='bx bxs-trash'></i></button>
@@ -370,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let subtaskToAdd = null;
         const ALL_CATEGORIES = { 'Pessoal': '#007BFF', 'Profissional': '#6F42C1', 'Acadêmica': '#28A745', 'Saúde': '#FD7E14', 'Finanças': '#FFC107' };
 
-        const createSubtaskHTML = st => `<li class="subtask-item" data-id="${st.id}"><div class="subtask-item-content"><button class="complete-subtask-btn ${st.completed ? 'completed' : ''}"><i class='bx bx-check-circle'></i></button><span class="subtask-text ${st.completed ? 'completed' : ''}">${st.text}</span></div><div class="subtask-actions"><button class="soft-button icon-btn add-to-focus-btn" title="Adicionar ao Foco do Dia"><i class='bx bx-list-plus'></i></button><button class="soft-button icon-btn delete-subtask-btn" title="Excluir Subtarefa"><i class='bx bxs-trash'></i></button></div></li>`;
+        const createSubtaskHTML = st => `<li class="subtask-item" data-id="${st.id}"><div class="subtask-item-content"><button class="complete-subtask-btn ${st.completed ? 'completed' : ''}"><i class='bx ${st.completed ? 'bxs-check-circle' : 'bx-circle'}'></i></button><span class="subtask-text ${st.completed ? 'completed' : ''}">${st.text}</span></div><div class="subtask-actions"><button class="soft-button icon-btn add-to-focus-btn" title="Adicionar ao Foco do Dia"><i class='bx bx-list-plus'></i></button><button class="soft-button icon-btn delete-subtask-btn" title="Excluir Subtarefa"><i class='bx bxs-trash'></i></button></div></li>`;
         const createGoalHTML = goal => { const progress = goal.subtasks.length > 0 ? (goal.subtasks.filter(st => st.completed).length / goal.subtasks.length) * 100 : 0; return `<li class="goal-item" data-id="${goal.id}"><div class="goal-header"><span class="goal-title">${goal.title}</span><div class="goal-actions"><button class="soft-button icon-btn edit-goal-btn" title="Editar Meta"><i class='bx bxs-pencil'></i></button><button class="soft-button icon-btn delete-goal-btn" title="Excluir Meta"><i class='bx bxs-trash'></i></button></div></div><div class="goal-progress"><div class="progress-bar-container"><div class="progress-bar" style="width: ${progress.toFixed(0)}%"></div></div></div><div class="goal-details"><div class="goal-details-content"><div class="goal-categories">${goal.categories.map(cat => `<span class="goal-category" style="background-color:${ALL_CATEGORIES[cat] || '#6c757d'}">${cat}</span>`).join('')}</div><p><strong>Motivação:</strong> ${goal.motivation || 'N/A'}</p><p><strong>Data Alvo:</strong> ${goal.targetDate ? Utils.formatDateToBR(goal.targetDate) : 'N/A'}</p><ul class="subtask-list">${goal.subtasks.map(createSubtaskHTML).join('')}</ul><form class="add-subtask-form"><input type="text" class="soft-input subtask-input" placeholder="Novo passo..."><button type="submit" class="soft-button add-subtask-btn"><i class='bx bx-plus'></i></button></form></div></div></li>`; };
 
         const render = () => { 
