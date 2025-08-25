@@ -1526,20 +1526,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 #transactions-filter-modal .filter-tab-content {
     background: transparent !important;
     margin-bottom: 0 !important;
-    padding-bottom: 1rem !important;
+    padding-bottom: 0.5rem !important;
 }
 
 #transactions-filter-modal .modal-actions {
     background: transparent !important;
-    margin-top: 1.5rem !important;
-    padding: 1rem 0 0 0 !important;
+    margin-top: 1rem !important;
+    padding: 0.8rem 0 0 0 !important;
     border-top: 1px solid var(--divider-color) !important;
     box-shadow: none !important;
 }
 
 /* Garantir espaçamento adequado entre conteúdo e botões finais */
 #transactions-filter-modal .filter-tab-content + .modal-actions {
-    margin-top: 1.5rem !important;
+    margin-top: 1rem !important;
     border-top: 1px solid var(--divider-color) !important;
 }
 
@@ -1590,7 +1590,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 }
 
 #transactions-filter-modal .finance-period-chips .category-btn.active {
-    box-shadow: var(--soft-shadow-inset-sharp) !important;
+    box-shadow: var(--shadow) !important;
 }
 
 /* Remove qualquer pseudo-elemento que possa estar criando overlay */
