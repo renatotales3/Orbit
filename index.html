@@ -4,6 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Life OS</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Seu sistema pessoal de produtividade, foco e bem-estar. Pomodoro, tarefas, metas, hábitos e muito mais.">
+    <meta name="theme-color" content="#007AFF">
+    <meta name="background-color" content="#F0F2F5">
+    
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Life OS">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    
+    <!-- Microsoft PWA Meta Tags -->
+    <meta name="msapplication-TileColor" content="#007AFF">
+    <meta name="msapplication-TileImage" content="assets/icon-144.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/icon-16.png">
+    <link rel="shortcut icon" href="assets/icon-32.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -625,5 +648,94 @@
     </footer>
 
     <script src="script.js"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('✅ Service Worker registrado:', registration.scope);
+                    
+                    // Detectar atualizações
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // Nova versão disponível
+                                showUpdateAvailable(registration);
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.log('❌ Falha ao registrar Service Worker:', error);
+                }
+            });
+        }
+        
+        // Mostrar notificação de atualização disponível
+        function showUpdateAvailable(registration) {
+            // Usando o sistema de notificação existente do Life OS
+            if (window.Utils && window.Utils.showNotice) {
+                const updateApp = () => {
+                    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    window.location.reload();
+                };
+                
+                // Criar botão de atualização customizado
+                const modal = document.getElementById('app-notice-modal');
+                const textEl = document.getElementById('app-notice-text');
+                const okBtn = document.getElementById('app-notice-ok');
+                
+                if (modal && textEl && okBtn) {
+                    document.getElementById('app-notice-title').textContent = '🚀 Atualização Disponível';
+                    textEl.innerHTML = 'Uma nova versão do Life OS está disponível!<br><br>Clique em "Atualizar" para obter as melhorias mais recentes.';
+                    okBtn.textContent = 'Atualizar Agora';
+                    okBtn.onclick = updateApp;
+                    modal.classList.remove('hidden');
+                }
+            }
+        }
+        
+        // Detectar instalação PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallButton();
+        });
+        
+        // Mostrar botão de instalação (será implementado depois)
+        function showInstallButton() {
+            console.log('💡 PWA pode ser instalado');
+            // TODO: Adicionar botão de instalação na UI
+        }
+        
+        // Detectar quando PWA foi instalado
+        window.addEventListener('appinstalled', () => {
+            console.log('🎉 Life OS foi instalado como PWA!');
+            deferredPrompt = null;
+        });
+        
+        // Performance: Preload de recursos críticos
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => {
+                // Preload de ícones importantes quando o browser estiver idle
+                const criticalIcons = [
+                    'assets/icon-192.png',
+                    'assets/icon-512.png'
+                ];
+                
+                criticalIcons.forEach(src => {
+                    const link = document.createElement('link');
+                    link.rel = 'preload';
+                    link.as = 'image';
+                    link.href = src;
+                    document.head.appendChild(link);
+                });
+            });
+        }
+    </script>
 </body>
 </html>

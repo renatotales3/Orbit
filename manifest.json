@@ -1,0 +1,122 @@
+{
+  "name": "Life OS - Sistema de Produtividade Pessoal",
+  "short_name": "Life OS",
+  "description": "Seu sistema pessoal de produtividade, foco e bem-estar. Pomodoro, tarefas, metas, hábitos e muito mais.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F0F2F5",
+  "theme_color": "#007AFF",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["productivity", "lifestyle", "health"],
+  "screenshots": [
+    {
+      "src": "assets/screenshot-mobile-1.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tela de Foco com Pomodoro e Tarefas"
+    },
+    {
+      "src": "assets/screenshot-mobile-2.png", 
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Bem-estar com Métricas e Hábitos"
+    }
+  ],
+  "icons": [
+    {
+      "src": "assets/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icon-96.png",
+      "sizes": "96x96", 
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png", 
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pomodoro",
+      "short_name": "Timer",
+      "description": "Iniciar sessão de foco",
+      "url": "/?tab=foco",
+      "icons": [
+        {
+          "src": "assets/shortcut-pomodoro.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Tarefas",
+      "short_name": "Tasks", 
+      "description": "Ver lista de tarefas",
+      "url": "/?tab=foco&section=tasks",
+      "icons": [
+        {
+          "src": "assets/shortcut-tasks.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Bem-estar",
+      "short_name": "Wellness",
+      "description": "Registrar métricas de saúde",
+      "url": "/?tab=bem-estar",
+      "icons": [
+        {
+          "src": "assets/shortcut-wellness.png", 
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+}
