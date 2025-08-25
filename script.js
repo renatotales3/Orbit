@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 goalsList.innerHTML = goals.map(createGoalHTML).join('');
             }
         };
-        const openGoalModal = (mode = 'add', goalId = null) => { goalForm.reset(); goalForm.dataset.mode = mode; goalForm.dataset.goalId = goalId; categoryContainer.innerHTML = Object.keys(ALL_CATEGORIES).map(cat => `<button type="button" class="category-btn">${cat}</button>`).join(''); if (mode === 'edit' && goalId !== null) { modalTitle.textContent = "Editar Meta"; const goal = goals.find(g => g.id === goalId); document.getElementById('goal-title-input').value = goal.title; document.getElementById('goal-motivation-input').value = goal.motivation; document.getElementById('goal-date-input').value = goal.targetDate; categoryContainer.querySelectorAll('.category-btn').forEach(btn => { if (goal.categories.includes(btn.textContent)) btn.classList.add('active'); }); } else { modalTitle.textContent = "Criar Nova Meta"; } goalModal.classList.remove('hidden'); };
+        const openGoalModal = (mode = 'add', goalId = null) => { goalForm.reset(); goalForm.dataset.mode = mode; goalForm.dataset.goalId = goalId; categoryContainer.innerHTML = Object.keys(ALL_CATEGORIES).map(cat => `<button type="button" class="category-btn">${cat}</button>`).join(''); if (mode === 'edit' && goalId !== null) { modalTitle.textContent = "Editar Meta"; const goal = goals.find(g => g.id === goalId); document.getElementById('goal-title-input').value = goal.title; document.getElementById('goal-motivation-input').value = goal.motivation; document.getElementById('goal-date-input').value = goal.targetDate; categoryContainer.querySelectorAll('.category-btn').forEach(btn => { if (goal.categories.includes(btn.textContent)) btn.classList.add('active'); }); } else { modalTitle.textContent = "Criar Nova Meta"; } document.body.classList.add('modal-open'); goalModal.classList.remove('hidden'); };
         const closeGoalModal = () => goalModal.classList.add('hidden');
 
         const setSubtaskCompletedState = (goalId, subtaskId, isCompleted) => {
@@ -1751,6 +1751,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const closeTransactionsFilterModal = () => {
             if (!transactionsFilterModal) return;
+            document.body.classList.remove('modal-open');
             transactionsFilterModal.classList.add('hidden');
         };
 
@@ -1816,6 +1817,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetCategorySelector();
             }
             
+            document.body.classList.add('modal-open');
             transactionModal.classList.remove('hidden');
             // Removido foco automático que causava deslocamento do modal
             // if (transactionAmount) transactionAmount.focus();
@@ -1823,6 +1825,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const closeTransactionModal = () => {
             if (!transactionModal) return;
+            document.body.classList.remove('modal-open');
             transactionModal.classList.add('hidden');
             transactionCategoryPicker?.classList.add('hidden');
             transactionCategoryBtn?.classList.remove('open');
