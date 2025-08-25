@@ -1079,7 +1079,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     max-height: 90vh !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    padding: 2.4rem !important;
+    padding: 1.8rem !important; /* Padding mais compacto */
     position: relative !important;
 }
 
@@ -1240,24 +1240,41 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     z-index: 1100 !important;
 }
 
-/* Espaçamento melhorado para modal de transação */
+/* Espaçamento compacto para modal de transação */
 #transaction-modal .finance-form-field {
-    margin-bottom: 1.2rem;
+    margin-bottom: 0.8rem;
 }
 
 #transaction-modal .finance-form-row {
-    margin-bottom: 1.2rem;
+    margin-bottom: 0.8rem;
 }
 
-/* Reduzir espaçamento excessivo entre data e descrição */
+/* Espaçamento mínimo entre seções */
+#transaction-modal .finance-type-selector,
+#transaction-modal .finance-amount-section,
+#transaction-modal .finance-category-section {
+    margin-bottom: 0.8rem;
+}
+
+/* Espaçamento compacto para quick amounts */
+#transaction-modal .finance-quick-amounts {
+    margin: 0.6rem 0;
+}
+
+/* Espaçamento compacto para grid de categorias */
+#transaction-modal .finance-category-grid {
+    margin-top: 0.6rem;
+}
+
+/* Reduzir espaçamento entre data e descrição */
 #transaction-modal .finance-form-row + .finance-form-field {
-    margin-top: 0.8rem;
+    margin-top: 0.4rem;
 }
 
-/* Modal actions seguindo padrão do app */
+/* Modal actions mais compacto */
 #transaction-modal .modal-actions {
-    margin-top: 1.6rem;
-    padding-top: 1.2rem;
-    padding-bottom: 0.8rem; /* Adicionar respiro na parte inferior */
+    margin-top: 1rem;
+    padding-top: 0.8rem;
+    padding-bottom: 0.4rem;
     border-top: 1px solid var(--divider-color);
 }
