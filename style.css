@@ -223,7 +223,36 @@ input[type="date"], input[type="time"], input[type="datetime-local"] {
 .pomodoro-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--divider-color); }
 .pomodoro-header h2 { font-weight: 600; font-size: 1.8rem; }
 .pomodoro-timer { display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 1.5rem; }
-.timer-display-container { width: 20rem; height: 20rem; border-radius: 50%; background-color: var(--bg-color); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; box-shadow: var(--soft-shadow-inset-sharp); }
+.timer-display-container { 
+    width: 20rem; 
+    height: 20rem; 
+    border-radius: 50%; 
+    background-color: var(--bg-color); 
+    border: 1px solid var(--border-color); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    box-shadow: var(--soft-shadow-inset-sharp);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Progress Ring para o Pomodoro Timer */
+.timer-display-container::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--primary-color) var(--progress, 0deg),
+        transparent var(--progress, 0deg)
+    );
+    z-index: -1;
+    transition: --progress 1s ease;
+}
 .pomodoro-controls { 
     display: flex; 
     gap: 2rem; 
