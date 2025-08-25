@@ -1260,7 +1260,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 }
 
 /* Espaçamento mínimo entre seções */
-#transaction-modal .finance-type-selector,
 #transaction-modal .finance-amount-section,
 #transaction-modal .finance-category-section {
     margin-bottom: 0.8rem;

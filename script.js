@@ -1321,12 +1321,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const categoryFilterGrid = document.getElementById('finance-category-filter-grid');
         
         // Form elements
-        const transactionTypeButtons = document.querySelectorAll('.finance-type-btn');
         const transactionAmount = document.getElementById('transaction-amount');
         const transactionDate = document.getElementById('transaction-date');
         const transactionDescription = document.getElementById('transaction-description');
         const quickAmounts = document.getElementById('finance-quick-amounts');
         const categoryGrid = document.getElementById('finance-category-grid');
+        
+        // Variable to track current transaction type
+        let currentTransactionType = 'expense';
         
         // Summary elements
         const totalIncomeEl = document.getElementById('finance-total-income');
@@ -1652,18 +1654,15 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (transaction) {
                 // Edit mode
-                document.getElementById('transaction-modal-title').textContent = 'Editar Transação';
+                currentTransactionType = transaction.type;
+                const titleText = transaction.type === 'income' ? 'Editar Receita' : 'Editar Despesa';
+                document.getElementById('transaction-modal-title').textContent = titleText;
                 deleteTransactionBtn.classList.remove('hidden');
                 
                 // Fill form with transaction data
                 if (transactionAmount) transactionAmount.value = transaction.amount;
                 if (transactionDate) transactionDate.value = transaction.date;
                 if (transactionDescription) transactionDescription.value = transaction.description || '';
-                
-                // Set transaction type
-                transactionTypeButtons.forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.type === transaction.type);
-                });
                 
                 // Renderizar categorias corretas para o tipo da transação
                 renderCategories(transaction.type);
@@ -1677,17 +1676,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }, 100);
             } else {
-                // Create mode
-                document.getElementById('transaction-modal-title').textContent = 'Nova Transação';
+                // Create mode - título será definido pelos botões específicos
                 deleteTransactionBtn.classList.add('hidden');
                 
-                // Set default type to expense
-                transactionTypeButtons.forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.type === 'expense');
-                });
-                
-                // Renderizar categorias para despesas por padrão
-                renderCategories('expense');
+                // Renderizar categorias baseadas no tipo atual
+                renderCategories(currentTransactionType);
             }
             
             transactionModal.classList.remove('hidden');
@@ -1702,13 +1695,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const saveTransaction = () => {
-            const type = document.querySelector('.finance-type-btn.active')?.dataset.type;
+            const type = currentTransactionType;
             const amount = parseFloat(transactionAmount.value);
             const date = transactionDate.value;
             const description = transactionDescription.value.trim();
             const categoryId = document.querySelector('.finance-category-btn.active')?.dataset.category;
             
-            if (!type || !amount || amount <= 0 || !date || !categoryId) {
+            if (!amount || amount <= 0 || !date || !categoryId) {
                 Utils.showNotice('Por favor, preencha todos os campos obrigatórios.');
                 return;
             }
@@ -1761,37 +1754,17 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (addIncomeBtn) {
                 addIncomeBtn.addEventListener('click', () => {
+                    currentTransactionType = 'income';
+                    document.getElementById('transaction-modal-title').textContent = 'Nova Receita';
                     openTransactionModal();
-                    // Após abrir, define como receita
-                    setTimeout(() => {
-                        const incomeBtn = document.querySelector('.finance-type-btn[data-type="income"]');
-                        if (incomeBtn) {
-                            document.querySelectorAll('.finance-type-btn').forEach(btn => btn.classList.remove('active'));
-                            incomeBtn.classList.add('active');
-                            const titleEl = document.getElementById('transaction-modal-title');
-                            if (titleEl) titleEl.textContent = 'Nova Receita';
-                            // Renderizar categorias de receita
-                            renderCategories('income');
-                        }
-                    }, 100);
                 });
             }
             
             if (addExpenseBtn) {
                 addExpenseBtn.addEventListener('click', () => {
+                    currentTransactionType = 'expense';
+                    document.getElementById('transaction-modal-title').textContent = 'Nova Despesa';
                     openTransactionModal();
-                    // Após abrir, define como despesa
-                    setTimeout(() => {
-                        const expenseBtn = document.querySelector('.finance-type-btn[data-type="expense"]');
-                        if (expenseBtn) {
-                            document.querySelectorAll('.finance-type-btn').forEach(btn => btn.classList.remove('active'));
-                            expenseBtn.classList.add('active');
-                            const titleEl = document.getElementById('transaction-modal-title');
-                            if (titleEl) titleEl.textContent = 'Nova Despesa';
-                            // Renderizar categorias de despesa
-                            renderCategories('expense');
-                        }
-                    }, 100);
                 });
             }
             
@@ -1866,16 +1839,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     saveTransaction();
                 });
             }
-            
-            // Type selector
-            transactionTypeButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    transactionTypeButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    // Renderizar categorias corretas baseadas no tipo
-                    renderCategories(btn.dataset.type);
-                });
-            });
             
             // Quick amounts
             if (quickAmounts) {
