@@ -880,19 +880,24 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.2rem;
+    padding: 0;
+    margin: 0;
 }
 
 .finance-transaction-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.2rem;
+    padding: 1.4rem;
     background-color: var(--bg-color);
     border: 1px solid var(--border-color);
     border-radius: 1.2rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
 }
 
 .finance-transaction-item:hover {
@@ -1323,6 +1328,160 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     .finance-category-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+}
+
+/* Estilos para o modal de período melhorado */
+.finance-period-content {
+    padding: 1rem 0;
+}
+
+.finance-period-section {
+    margin-bottom: 1.5rem;
+}
+
+.finance-period-section h4 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+    opacity: 0.9;
+}
+
+.finance-period-chips {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+    margin-bottom: 0;
+}
+
+.finance-period-divider {
+    height: 1px;
+    background-color: var(--divider-color);
+    margin: 1.5rem 0;
+}
+
+.finance-custom-period {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.finance-date-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.finance-date-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.finance-date-field label {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--text-color);
+    opacity: 0.8;
+}
+
+.finance-date-field input {
+    font-size: 1.4rem;
+}
+
+#apply-custom-period-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+@media (max-width: 480px) {
+    .finance-period-chips {
+        grid-template-columns: 1fr;
+    }
+    
+    .finance-date-row {
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+    }
+}
+
+/* Estilos para o modal de filtro de transações com abas */
+.finance-filter-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--divider-color);
+    margin-bottom: 1.5rem;
+}
+
+.filter-tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 1rem;
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--icon-color);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.filter-tab-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.filter-tab-btn:hover {
+    color: var(--primary-color);
+    opacity: 0.8;
+}
+
+.filter-tab-content {
+    min-height: 200px;
+}
+
+.filter-tab-panel {
+    display: none;
+}
+
+.filter-tab-panel.active {
+    display: block;
+}
+
+#transactions-category-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.8rem;
+    padding: 1rem 0;
+}
+
+.finance-category-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.2rem;
+}
+
+.finance-category-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.finance-category-btn:hover {
+    background-color: var(--component-bg);
+    box-shadow: var(--shadow);
+}
+
+.finance-category-btn.active:hover {
+    opacity: 0.9;
 }
 
 /* Modal chips layout (removido com finanças) */

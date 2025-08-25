@@ -1454,6 +1454,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
 
+        // Variáveis para período personalizado
+        let customStartDate = null;
+        let customEndDate = null;
+
         const getPeriodRange = () => {
             const now = new Date();
             let start, end;
@@ -1461,17 +1465,40 @@ document.addEventListener('DOMContentLoaded', () => {
             switch (currentPeriod) {
                 case 'today':
                     start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                    end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+                    end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    end.setHours(23, 59, 59, 999); // Incluir todo o dia
                     break;
                 case 'week':
                     const dayOfWeek = now.getDay();
                     start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOfWeek);
-                    end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (7 - dayOfWeek));
+                    end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (6 - dayOfWeek));
+                    end.setHours(23, 59, 59, 999); // Incluir todo o último dia da semana
                     break;
                 case 'month':
+                    start = new Date(now.getFullYear(), now.getMonth(), 1);
+                    end = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Último dia do mês
+                    end.setHours(23, 59, 59, 999);
+                    break;
+                case 'all':
+                    start = new Date(2000, 0, 1); // Data muito antiga
+                    end = new Date(2100, 0, 1);   // Data muito futura
+                    break;
+                case 'custom':
+                    if (customStartDate && customEndDate) {
+                        start = new Date(customStartDate);
+                        end = new Date(customEndDate);
+                        end.setHours(23, 59, 59, 999); // Incluir todo o dia final
+                    } else {
+                        // Fallback para mês atual se não houver datas customizadas
+                        start = new Date(now.getFullYear(), now.getMonth(), 1);
+                        end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                        end.setHours(23, 59, 59, 999);
+                    }
+                    break;
                 default:
                     start = new Date(now.getFullYear(), now.getMonth(), 1);
-                    end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+                    end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                    end.setHours(23, 59, 59, 999);
                     break;
             }
             
@@ -1480,9 +1507,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const isInCurrentPeriod = (dateString) => {
             try {
-                const date = new Date(dateString);
+                const transactionDate = new Date(dateString);
+                // Garantir que a comparação seja feita apenas com a data (sem hora)
+                const dateOnly = new Date(transactionDate.getFullYear(), transactionDate.getMonth(), transactionDate.getDate());
+                
                 const { start, end } = getPeriodRange();
-                return date >= start && date < end;
+                const startOnly = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+                const endOnly = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+                
+                return dateOnly >= startOnly && dateOnly <= endOnly;
             } catch (e) {
                 return false;
             }
@@ -1545,7 +1578,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (progressFill && progressText) {
                 const percentage = totalIncome > 0 ? Math.min(100, (totalExpense / totalIncome) * 100) : 0;
                 progressFill.style.width = `${percentage}%`;
-                progressText.textContent = `${Math.round(percentage)}% dos gastos em relação às receitas`;
+                
+                let progressMessage;
+                if (totalIncome === 0) {
+                    progressMessage = "Adicione receitas para ver sua análise";
+                } else if (percentage <= 50) {
+                    progressMessage = `Você está gastando ${Math.round(percentage)}% das suas receitas`;
+                } else if (percentage <= 80) {
+                    progressMessage = `Cuidado! Você está gastando ${Math.round(percentage)}% das suas receitas`;
+                } else if (percentage < 100) {
+                    progressMessage = `Atenção! Você está gastando ${Math.round(percentage)}% das suas receitas`;
+                } else {
+                    progressMessage = `Alerta! Seus gastos estão ${Math.round(percentage - 100)}% acima das receitas`;
+                }
+                
+                progressText.textContent = progressMessage;
             }
         };
 
@@ -1662,6 +1709,58 @@ document.addEventListener('DOMContentLoaded', () => {
             Utils.saveToLocalStorage('finance_category', currentCategory);
             renderCategoryFilterGrid();
             render();
+        };
+
+        // Transactions filter modal functions
+        const transactionsFilterModal = document.getElementById('transactions-filter-modal');
+        const closeTransactionsFilterBtn = document.getElementById('close-transactions-filter-btn');
+        const closeTransactionsFilterFooterBtn = document.getElementById('close-transactions-filter-footer-btn');
+        const clearTransactionsFilterBtn = document.getElementById('clear-transactions-filter-btn');
+        const transactionsPeriodChips = document.getElementById('transactions-period-chips');
+        const transactionsCategoryFilterGrid = document.getElementById('transactions-category-filter-grid');
+        const transactionsStartDate = document.getElementById('transactions-start-date');
+        const transactionsEndDate = document.getElementById('transactions-end-date');
+        const applyTransactionsPeriodBtn = document.getElementById('apply-transactions-period-btn');
+
+        const openTransactionsFilterModal = () => {
+            if (!transactionsFilterModal) return;
+            
+            // Sync current filters with modal
+            if (transactionsPeriodChips) {
+                transactionsPeriodChips.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.period === currentPeriod);
+                });
+            }
+            
+            // Load custom dates if they exist
+            if (customStartDate && transactionsStartDate) transactionsStartDate.value = customStartDate;
+            if (customEndDate && transactionsEndDate) transactionsEndDate.value = customEndDate;
+            
+            renderTransactionsCategoryFilterGrid();
+            transactionsFilterModal.classList.remove('hidden');
+        };
+
+        const closeTransactionsFilterModal = () => {
+            if (!transactionsFilterModal) return;
+            transactionsFilterModal.classList.add('hidden');
+        };
+
+        const renderTransactionsCategoryFilterGrid = () => {
+            if (!transactionsCategoryFilterGrid) return;
+            
+            const allCategories = [...expenseCategories, ...incomeCategories];
+            
+            transactionsCategoryFilterGrid.innerHTML = allCategories.map(category => `
+                <button class="finance-category-btn ${currentCategory === category.id ? 'active' : ''}" data-category="${category.id}">
+                    <i class='bx ${category.icon}' style="color: ${category.color}"></i>
+                    <span>${category.name}</span>
+                </button>
+            `).join('') + `
+                <button class="finance-category-btn ${currentCategory === 'all' ? 'active' : ''}" data-category="all">
+                    <i class='bx bx-list-ul' style="color: #6B7280"></i>
+                    <span>Todas</span>
+                </button>
+            `;
         };
 
         const openTransactionModal = (transaction = null) => {
@@ -1839,7 +1938,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (transactionsFilterBtn) {
-                transactionsFilterBtn.addEventListener('click', openCategoryModal);
+                transactionsFilterBtn.addEventListener('click', openTransactionsFilterModal);
             }
 
             if (closeCategoryModalBtn) {
@@ -1857,6 +1956,118 @@ document.addEventListener('DOMContentLoaded', () => {
             if (categoryModal) {
                 categoryModal.addEventListener('click', (e) => {
                     if (e.target === categoryModal) closeCategoryModal();
+                });
+            }
+
+            // Transactions filter modal events
+            if (closeTransactionsFilterBtn) {
+                closeTransactionsFilterBtn.addEventListener('click', closeTransactionsFilterModal);
+            }
+
+            if (closeTransactionsFilterFooterBtn) {
+                closeTransactionsFilterFooterBtn.addEventListener('click', closeTransactionsFilterModal);
+            }
+
+            if (clearTransactionsFilterBtn) {
+                clearTransactionsFilterBtn.addEventListener('click', () => {
+                    currentPeriod = 'all';
+                    currentCategory = 'all';
+                    customStartDate = null;
+                    customEndDate = null;
+                    Utils.saveToLocalStorage('finance_period', currentPeriod);
+                    Utils.saveToLocalStorage('finance_category', currentCategory);
+                    Utils.saveToLocalStorage('finance_custom_start', null);
+                    Utils.saveToLocalStorage('finance_custom_end', null);
+                    
+                    if (transactionsStartDate) transactionsStartDate.value = '';
+                    if (transactionsEndDate) transactionsEndDate.value = '';
+                    
+                    render();
+                    closeTransactionsFilterModal();
+                });
+            }
+
+            if (transactionsFilterModal) {
+                transactionsFilterModal.addEventListener('click', (e) => {
+                    if (e.target === transactionsFilterModal) closeTransactionsFilterModal();
+                });
+            }
+
+            // Tab switching in transactions filter modal
+            const filterTabs = document.querySelectorAll('.filter-tab-btn');
+            const filterPanels = document.querySelectorAll('.filter-tab-panel');
+            
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetTab = tab.dataset.tab;
+                    
+                    filterTabs.forEach(t => t.classList.remove('active'));
+                    filterPanels.forEach(p => p.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    document.getElementById(`transactions-${targetTab}-panel`).classList.add('active');
+                });
+            });
+
+            // Transactions period chips
+            if (transactionsPeriodChips) {
+                transactionsPeriodChips.addEventListener('click', (e) => {
+                    const periodBtn = e.target.closest('[data-period]');
+                    if (periodBtn) {
+                        currentPeriod = periodBtn.dataset.period;
+                        Utils.saveToLocalStorage('finance_period', currentPeriod);
+                        
+                        transactionsPeriodChips.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+                        periodBtn.classList.add('active');
+                        
+                        render();
+                        closeTransactionsFilterModal();
+                    }
+                });
+            }
+
+            // Transactions category filter
+            if (transactionsCategoryFilterGrid) {
+                transactionsCategoryFilterGrid.addEventListener('click', (e) => {
+                    const categoryBtn = e.target.closest('.finance-category-btn');
+                    if (categoryBtn) {
+                        currentCategory = categoryBtn.dataset.category;
+                        Utils.saveToLocalStorage('finance_category', currentCategory);
+                        renderTransactionsCategoryFilterGrid();
+                        render();
+                        closeTransactionsFilterModal();
+                    }
+                });
+            }
+
+            // Transactions custom period
+            if (applyTransactionsPeriodBtn) {
+                applyTransactionsPeriodBtn.addEventListener('click', () => {
+                    const startDate = transactionsStartDate?.value;
+                    const endDate = transactionsEndDate?.value;
+                    
+                    if (startDate && endDate) {
+                        const start = new Date(startDate);
+                        const end = new Date(endDate);
+                        
+                        if (start <= end) {
+                            customStartDate = startDate;
+                            customEndDate = endDate;
+                            currentPeriod = 'custom';
+                            Utils.saveToLocalStorage('finance_period', currentPeriod);
+                            Utils.saveToLocalStorage('finance_custom_start', customStartDate);
+                            Utils.saveToLocalStorage('finance_custom_end', customEndDate);
+                            
+                            transactionsPeriodChips?.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+                            
+                            render();
+                            closeTransactionsFilterModal();
+                        } else {
+                            Utils.showNotice('A data inicial deve ser anterior ou igual à data final.');
+                        }
+                    } else {
+                        Utils.showNotice('Por favor, selecione ambas as datas.');
+                    }
                 });
             }
             
@@ -1968,6 +2179,71 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
+            
+            // Custom period functionality
+            const periodStartDate = document.getElementById('period-start-date');
+            const periodEndDate = document.getElementById('period-end-date');
+            const applyCustomPeriodBtn = document.getElementById('apply-custom-period-btn');
+            const clearPeriodFilterBtn = document.getElementById('clear-period-filter-btn');
+            
+            if (applyCustomPeriodBtn) {
+                applyCustomPeriodBtn.addEventListener('click', () => {
+                    const startDate = periodStartDate?.value;
+                    const endDate = periodEndDate?.value;
+                    
+                    if (startDate && endDate) {
+                        const start = new Date(startDate);
+                        const end = new Date(endDate);
+                        
+                        if (start <= end) {
+                            customStartDate = startDate;
+                            customEndDate = endDate;
+                            currentPeriod = 'custom';
+                            Utils.saveToLocalStorage('finance_period', currentPeriod);
+                            Utils.saveToLocalStorage('finance_custom_start', customStartDate);
+                            Utils.saveToLocalStorage('finance_custom_end', customEndDate);
+                            
+                            // Update active button display
+                            periodChips?.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+                            
+                            render();
+                            closePeriodModal();
+                        } else {
+                            Utils.showNotice('A data inicial deve ser anterior ou igual à data final.');
+                        }
+                    } else {
+                        Utils.showNotice('Por favor, selecione ambas as datas.');
+                    }
+                });
+            }
+            
+            if (clearPeriodFilterBtn) {
+                clearPeriodFilterBtn.addEventListener('click', () => {
+                    currentPeriod = 'all';
+                    customStartDate = null;
+                    customEndDate = null;
+                    Utils.saveToLocalStorage('finance_period', currentPeriod);
+                    Utils.saveToLocalStorage('finance_custom_start', null);
+                    Utils.saveToLocalStorage('finance_custom_end', null);
+                    
+                    if (periodStartDate) periodStartDate.value = '';
+                    if (periodEndDate) periodEndDate.value = '';
+                    
+                    // Update active button
+                    periodChips?.querySelectorAll('.category-btn').forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.period === 'all');
+                    });
+                    
+                    render();
+                    closePeriodModal();
+                });
+            }
+            
+            // Load saved custom dates
+            customStartDate = Utils.loadFromLocalStorage('finance_custom_start', null);
+            customEndDate = Utils.loadFromLocalStorage('finance_custom_end', null);
+            if (customStartDate && periodStartDate) periodStartDate.value = customStartDate;
+            if (customEndDate && periodEndDate) periodEndDate.value = customEndDate;
             
             render();
         };

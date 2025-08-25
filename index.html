@@ -548,6 +548,11 @@
                 <button id="close-transaction-btn" class="soft-button icon-btn md close-btn"><i class='bx bx-x'></i></button>
             </header>
             <form id="transaction-form">
+                <div class="finance-form-field">
+                    <label for="transaction-description">Descrição (opcional):</label>
+                    <input type="text" id="transaction-description" class="soft-input" placeholder="Ex: Almoço executivo">
+                </div>
+
                 <div class="finance-amount-section">
                     <label for="transaction-amount">Valor:</label>
                     <div class="finance-amount-input-container">
@@ -584,11 +589,6 @@
                     </div>
                 </div>
 
-                <div class="finance-form-field">
-                    <label for="transaction-description">Descrição (opcional):</label>
-                    <input type="text" id="transaction-description" class="soft-input" placeholder="Ex: Almoço executivo">
-                </div>
-
                 <div class="modal-actions">
                     <button type="button" id="delete-transaction-btn" class="soft-button danger hidden">Excluir</button>
                     <div class="finance-action-buttons">
@@ -606,13 +606,41 @@
                 <h3>Filtrar por Período</h3>
                 <button id="close-period-modal-btn" class="soft-button icon-btn md close-btn"><i class='bx bx-x'></i></button>
             </header>
-            <div class="finance-period-chips" id="finance-period-chips">
-                <button class="category-btn active" data-period="month">Mês</button>
-                <button class="category-btn" data-period="week">Semana</button>
-                <button class="category-btn" data-period="today">Hoje</button>
+            
+            <div class="finance-period-content">
+                <div class="finance-period-section">
+                    <h4>Períodos Rápidos</h4>
+                    <div class="finance-period-chips" id="finance-period-chips">
+                        <button class="category-btn active" data-period="month">Este Mês</button>
+                        <button class="category-btn" data-period="week">Esta Semana</button>
+                        <button class="category-btn" data-period="today">Hoje</button>
+                        <button class="category-btn" data-period="all">Todos</button>
+                    </div>
+                </div>
+                
+                <div class="finance-period-divider"></div>
+                
+                <div class="finance-period-section">
+                    <h4>Período Personalizado</h4>
+                    <div class="finance-custom-period">
+                        <div class="finance-date-row">
+                            <div class="finance-date-field">
+                                <label for="period-start-date">Data Inicial:</label>
+                                <input type="date" id="period-start-date" class="soft-input">
+                            </div>
+                            <div class="finance-date-field">
+                                <label for="period-end-date">Data Final:</label>
+                                <input type="date" id="period-end-date" class="soft-input">
+                            </div>
+                        </div>
+                        <button type="button" id="apply-custom-period-btn" class="soft-button">Aplicar Período</button>
+                    </div>
+                </div>
             </div>
+            
             <div class="modal-actions">
-                <button type="button" id="close-period-modal-footer-btn" class="soft-button gray">Fechar</button>
+                <button type="button" id="clear-period-filter-btn" class="soft-button gray">Limpar Filtro</button>
+                <button type="button" id="close-period-modal-footer-btn" class="soft-button">Fechar</button>
             </div>
         </div>
     </div>
@@ -629,6 +657,64 @@
             <div class="modal-actions">
                 <button type="button" id="clear-category-filter-btn" class="soft-button gray">Limpar Filtro</button>
                 <button type="button" id="close-category-modal-footer-btn" class="soft-button">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="transactions-filter-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3>Filtrar Transações</h3>
+                <button id="close-transactions-filter-btn" class="soft-button icon-btn md close-btn"><i class='bx bx-x'></i></button>
+            </header>
+            
+            <div class="finance-filter-tabs">
+                <button class="filter-tab-btn active" data-tab="period">Por Período</button>
+                <button class="filter-tab-btn" data-tab="category">Por Categoria</button>
+            </div>
+            
+            <div class="filter-tab-content">
+                <div class="filter-tab-panel active" id="transactions-period-panel">
+                    <div class="finance-period-section">
+                        <h4>Períodos Rápidos</h4>
+                        <div class="finance-period-chips" id="transactions-period-chips">
+                            <button class="category-btn active" data-period="month">Este Mês</button>
+                            <button class="category-btn" data-period="week">Esta Semana</button>
+                            <button class="category-btn" data-period="today">Hoje</button>
+                            <button class="category-btn" data-period="all">Todos</button>
+                        </div>
+                    </div>
+                    
+                    <div class="finance-period-divider"></div>
+                    
+                    <div class="finance-period-section">
+                        <h4>Período Personalizado</h4>
+                        <div class="finance-custom-period">
+                            <div class="finance-date-row">
+                                <div class="finance-date-field">
+                                    <label for="transactions-start-date">Data Inicial:</label>
+                                    <input type="date" id="transactions-start-date" class="soft-input">
+                                </div>
+                                <div class="finance-date-field">
+                                    <label for="transactions-end-date">Data Final:</label>
+                                    <input type="date" id="transactions-end-date" class="soft-input">
+                                </div>
+                            </div>
+                            <button type="button" id="apply-transactions-period-btn" class="soft-button">Aplicar Período</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-tab-panel" id="transactions-category-panel">
+                    <div class="finance-category-filter-grid" id="transactions-category-filter-grid">
+                        <!-- Categorias de filtro serão inseridas aqui -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" id="clear-transactions-filter-btn" class="soft-button gray">Limpar Filtros</button>
+                <button type="button" id="close-transactions-filter-footer-btn" class="soft-button">Fechar</button>
             </div>
         </div>
     </div>
