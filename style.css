@@ -645,8 +645,8 @@ body.modal-open .bottom-nav {
 .priority-picker-modal { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
 
 /* --- Focus Extras --- */
-.focus-mits-card, .focus-stats-card, .timeboxing-card, .review-card, .fitness-card { background-color: var(--component-bg); border: 1px solid var(--border-color); border-radius: 1.6rem; box-shadow: var(--shadow); margin-top: 2.5rem; }
-.focus-mits-card .todo-body, .focus-stats-card .todo-body, .timeboxing-card .todo-body, .review-card .todo-body, .fitness-card .todo-body { padding: 1.5rem; }
+.focus-mits-card, .focus-stats-card,  .review-card, .fitness-card { background-color: var(--component-bg); border: 1px solid var(--border-color); border-radius: 1.6rem; box-shadow: var(--shadow); margin-top: 2.5rem; }
+.focus-mits-card .todo-body, .focus-stats-card .todo-body .todo-body, .review-card .todo-body, .fitness-card .todo-body { padding: 1.5rem; }
 .add-task-container > * { min-width: 0; }
 .fitness-card + .fitness-card { margin-top: 2rem; }
 .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
@@ -1509,6 +1509,28 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 #transactions-filter-modal .modal-content {
     background-color: var(--component-bg) !important;
+    gap: 0 !important; /* Remove o gap que estava criando o retângulo branco */
+}
+
+/* Adicionar espaçamentos manuais para manter funcionalidade */
+#transactions-filter-modal .modal-header {
+    background: transparent !important;
+    margin-bottom: 1.5rem;
+}
+
+#transactions-filter-modal .finance-filter-tabs {
+    background: transparent !important;
+    margin-bottom: 1.5rem;
+}
+
+#transactions-filter-modal .filter-tab-content {
+    background: transparent !important;
+    margin-bottom: 1.5rem;
+}
+
+#transactions-filter-modal .modal-actions {
+    background: transparent !important;
+    margin-top: 1rem;
 }
 
 #transactions-filter-modal .filter-tab-content {

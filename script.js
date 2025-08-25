@@ -862,16 +862,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statsWeekMinutesEl && (statsWeekMinutesEl.textContent = String(weekMinutes));
         };
 
-        // Timeboxing
-        const tbForm = document.getElementById('timeboxing-form');
-        const tbLabel = document.getElementById('tb-label');
-        const tbStart = document.getElementById('tb-start');
-        const tbDuration = document.getElementById('tb-duration');
-        const tbList = document.getElementById('timeboxing-list');
-        let timeboxes = Utils.loadFromLocalStorage('timeboxes', []);
-        const renderTimeboxes = () => { tbList.innerHTML = timeboxes.map((tb, i) => `<li class="timeboxing-item" data-index="${i}"><span class="tb-label">${Utils.escapeHTML(tb.label)}</span><span> — ${tb.start} • ${tb.duration}m</span><div class="task-item-buttons"><button class="soft-button icon-btn delete-tb-btn"><i class='bx bxs-trash'></i></button></div></li>`).join(''); updateNowHighlight(); };
-        const getMinutesFromHHMM = (s) => { const [h, m] = (s || '00:00').split(':').map(Number); return (h||0)*60 + (m||0); };
-        const updateNowHighlight = () => { if (!tbList) return; const now = new Date(); const nowMin = now.getHours()*60 + now.getMinutes(); tbList.querySelectorAll('.timeboxing-item').forEach(li => { const i = Number(li.dataset.index); const tb = timeboxes[i]; if (!tb) return; const start = getMinutesFromHHMM(tb.start); const dur = parseInt(tb.duration)||0; const active = nowMin >= start && nowMin < (start + dur); li.classList.toggle('now', !!active); }); };
+
 
         // Review do Dia
         const reviewForm = document.getElementById('review-form');
@@ -904,20 +895,6 @@ document.addEventListener('DOMContentLoaded', () => {
             carryoverMitsBtn && carryoverMitsBtn.addEventListener('click', carryoverMits);
             renderMits();
 
-            // Timeboxing
-            tbForm && tbForm.addEventListener('submit', (e) => { e.preventDefault(); const label = tbLabel.value.trim(); if (!label) return; const start = tbStart.value || '--:--'; const duration = parseInt(tbDuration.value) || 30; timeboxes.push({ label, start, duration }); Utils.saveToLocalStorage('timeboxes', timeboxes); tbLabel.value=''; tbStart.value=''; tbDuration.value=''; renderTimeboxes(); });
-            tbList && tbList.addEventListener('click', (e) => {
-                const item = e.target.closest('.timeboxing-item'); if(!item) return;
-                if (e.target.closest('.delete-tb-btn')) { const i = Number(item.dataset.index); if(Number.isInteger(i)) { timeboxes.splice(i,1); Utils.saveToLocalStorage('timeboxes', timeboxes); renderTimeboxes(); } return; }
-                const labelEl = item.querySelector('.tb-label'); if(!labelEl) return;
-                const i = Number(item.dataset.index); if(!Number.isInteger(i)) return;
-                const current = timeboxes[i].label;
-                const input = document.createElement('input'); input.type='text'; input.className='soft-input'; input.value=current; input.style.maxWidth='180px';
-                labelEl.replaceWith(input); input.focus();
-                const commit = () => { timeboxes[i].label = input.value.trim() || current; Utils.saveToLocalStorage('timeboxes', timeboxes); renderTimeboxes(); };
-                input.addEventListener('blur', commit); input.addEventListener('keypress', ev => { if (ev.key==='Enter') { commit(); }});
-            });
-            renderTimeboxes(); updateNowHighlight(); setInterval(updateNowHighlight, 60000);
 
             // Review
             const today = Utils.getTodayString();
@@ -969,12 +946,6 @@ document.addEventListener('DOMContentLoaded', () => {
   <li>Levar para amanhã: toque em "Levar para amanhã" para copiar a lista.</li>
   <li>Limite: ao tentar cadastrar o 4º, o app avisa para priorizar.</li>
   </ul>
-<h5>Timeboxing</h5>
-<ul>
-  <li>Exemplo: rótulo "Inglês", início 08:00, duração 30.</li>
-  <li>Editar rótulo: toque no texto e confirme com Enter.</li>
-  </ul>
-<h5>Pomodoro</h5>
 <ul>
   <li>Defina tempos em Ajustes &gt; Pomodoro.</li>
   <li>As sessões contam em Estatísticas de Foco.</li>
