@@ -1063,11 +1063,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     width: 100vw !important;
     height: 100vh !important;
     display: flex !important;
-    align-items: center !important;
+    align-items: flex-start !important; /* Começar do topo */
     justify-content: center !important;
     z-index: 1000 !important;
     background-color: rgba(0,0,0,0.6) !important;
-    padding: 2rem !important; /* Adicionar padding para garantir espaço */
+    padding: 2rem 1rem !important; /* Padding menor nas laterais */
+    box-sizing: border-box !important;
 }
 
 #transaction-modal.modal-backdrop .modal-content {
@@ -1076,11 +1077,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     box-shadow: var(--shadow) !important;
     width: 90vw !important;
     max-width: 45rem !important;
-    max-height: 90vh !important;
+    max-height: calc(100vh - 4rem) !important; /* Altura máxima considerando padding */
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    padding: 1.8rem !important; /* Padding mais compacto */
+    padding: 1.8rem !important;
     position: relative !important;
+    margin: auto 0 !important; /* Centralizar verticalmente */
+    align-self: center !important; /* Forçar centralização */
 }
 
 #transaction-modal form {
@@ -1143,9 +1146,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
+    #transaction-modal.modal-backdrop {
+        padding: 1rem 0.5rem !important; /* Menos padding em mobile */
+        align-items: center !important; /* Forçar centralização em mobile */
+    }
+    
     #transaction-modal .modal-content {
-        width: 95vw;
-        padding: 1.5rem;
+        width: 95vw !important;
+        padding: 1.5rem !important;
+        margin: auto !important; /* Centralizar completamente em mobile */
+        max-height: calc(100vh - 2rem) !important; /* Altura máxima menor em mobile */
     }
     
     #transaction-modal .finance-quick-amounts {
