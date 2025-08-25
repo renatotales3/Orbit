@@ -567,8 +567,13 @@
 
                 <div class="finance-category-section">
                     <label>Categoria:</label>
-                    <div id="finance-category-grid" class="finance-category-grid">
-                        <!-- Categorias serão inseridas aqui -->
+                    <div class="category-selector-wrapper">
+                        <button id="transaction-category-btn" class="soft-button category-selector-btn" type="button" aria-label="Selecionar Categoria">
+                            <i id="transaction-category-icon" class='bx bx-category'></i>
+                            <span id="transaction-category-text">Selecionar categoria</span>
+                            <i class='bx bx-chevron-down'></i>
+                        </button>
+                        <div id="transaction-category-picker" class="category-picker hidden"></div>
                     </div>
                 </div>
 

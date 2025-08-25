@@ -394,6 +394,91 @@ input[type="date"], input[type="time"], input[type="datetime-local"] {
     gap: 0.5rem; 
 }
 .priority-picker.hidden { display: none; }
+
+/* Seletor de categorias para finanças */
+.category-selector-wrapper { 
+    position: relative; 
+    width: 100%; 
+}
+
+.category-selector-btn { 
+    width: 100%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 1.2rem 1.6rem; 
+    text-align: left;
+    gap: 1rem;
+}
+
+.category-selector-btn > i:first-child {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.category-selector-btn > span {
+    flex: 1;
+    font-weight: 500;
+}
+
+.category-selector-btn > i:last-child {
+    font-size: 1.4rem;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.category-selector-btn.open > i:last-child {
+    transform: rotate(180deg);
+}
+
+.category-picker { 
+    position: absolute; 
+    top: 100%; 
+    left: 0; 
+    right: 0;
+    background-color: var(--component-bg); 
+    border: 1px solid var(--border-color); 
+    border-radius: 1.2rem; 
+    box-shadow: var(--shadow); 
+    padding: 0.8rem; 
+    z-index: 30; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.4rem; 
+    max-height: 25rem;
+    overflow-y: auto;
+    margin-top: 0.4rem;
+}
+
+.category-picker.hidden { 
+    display: none; 
+}
+
+.category-option { 
+    background: none; 
+    border: none; 
+    color: var(--text-color); 
+    padding: 1rem 1.2rem; 
+    border-radius: 0.8rem; 
+    cursor: pointer; 
+    transition: background-color 0.2s ease; 
+    display: flex; 
+    align-items: center; 
+    gap: 1rem; 
+    text-align: left;
+    font-size: 1.4rem;
+}
+
+.category-option:hover { 
+    background-color: rgba(var(--primary-color), 0.1); 
+}
+
+.category-option i {
+    font-size: 1.8rem;
+    width: 2.4rem;
+    text-align: center;
+    flex-shrink: 0;
+}
 .priority-option { 
     background: none; 
     border: none; 
@@ -1055,7 +1140,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     opacity: 0.9;
 }
 
-/* Override modal-backdrop styles for transaction modal - FORÇA CENTRALIZAÇÃO */
+/* Modal de transações - Corrigido para scroll adequado */
 #transaction-modal.modal-backdrop {
     position: fixed !important;
     top: 0 !important;
@@ -1065,14 +1150,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     width: 100vw !important;
     height: 100vh !important;
     display: flex !important;
-    align-items: center !important; /* CENTRALIZAÇÃO FORÇADA */
+    align-items: flex-start !important; /* Mudado de center para flex-start */
     justify-content: center !important;
     z-index: 1000 !important;
     background-color: rgba(0,0,0,0.6) !important;
-    padding: 1rem !important;
+    padding: 2rem 1rem !important; /* Padding superior para evitar colagem no topo */
     box-sizing: border-box !important;
-    margin: 0 !important;
-    transform: none !important;
+    overflow-y: auto !important; /* Permitir scroll no backdrop */
+    overflow-x: hidden !important;
 }
 
 #transaction-modal.modal-backdrop .modal-content {
@@ -1081,19 +1166,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     box-shadow: var(--shadow) !important;
     width: 90vw !important;
     max-width: 45rem !important;
-    max-height: calc(100vh - 2rem) !important; /* Altura otimizada */
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
+    min-height: fit-content !important; /* Altura mínima baseada no conteúdo */
+    max-height: none !important; /* Remover limitação de altura */
     padding: 1.8rem !important;
     position: relative !important;
-    margin: 0 !important; /* Reset margin */
-    top: auto !important; /* Reset top */
-    bottom: auto !important; /* Reset bottom */
-    left: auto !important; /* Reset left */
-    right: auto !important; /* Reset right */
-    transform: none !important; /* Reset transform */
-    align-self: auto !important; /* Reset align-self */
-    flex-shrink: 0 !important; /* Não encolher */
+    margin: 0 auto 2rem auto !important; /* Margem inferior para espaçamento */
+    flex-shrink: 0 !important;
 }
 
 #transaction-modal form {
@@ -1157,13 +1235,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 /* Mobile adjustments */
 @media (max-width: 768px) {
     #transaction-modal.modal-backdrop {
-        padding: 0.5rem !important; /* Padding mínimo em mobile */
+        padding: 1rem 0.5rem 2rem 0.5rem !important; /* Padding ajustado para mobile */
     }
     
     #transaction-modal .modal-content {
         width: 95vw !important;
         padding: 1.5rem !important;
-        max-height: calc(100vh - 1rem) !important; /* Altura máxima mobile */
+        margin-bottom: 2rem !important; /* Espaçamento inferior em mobile */
     }
     
     #transaction-modal .finance-quick-amounts {

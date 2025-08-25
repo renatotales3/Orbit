@@ -1327,8 +1327,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const quickAmounts = document.getElementById('finance-quick-amounts');
         const categoryGrid = document.getElementById('finance-category-grid');
         
+        // Novos elementos do seletor de categorias
+        const transactionCategoryBtn = document.getElementById('transaction-category-btn');
+        const transactionCategoryIcon = document.getElementById('transaction-category-icon');
+        const transactionCategoryText = document.getElementById('transaction-category-text');
+        const transactionCategoryPicker = document.getElementById('transaction-category-picker');
+        
         // Variable to track current transaction type
         let currentTransactionType = 'expense';
+        let selectedCategory = null;
         
         // Summary elements
         const totalIncomeEl = document.getElementById('finance-total-income');
@@ -1381,16 +1388,34 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         
         const renderCategories = (type = 'expense') => {
-            if (!categoryGrid) return;
+            if (!transactionCategoryPicker) return;
             
             const categories = type === 'income' ? incomeCategories : expenseCategories;
             
-            categoryGrid.innerHTML = categories.map(category => `
-                <button class="finance-category-btn category-btn" data-category="${category.id}">
+            transactionCategoryPicker.innerHTML = categories.map(category => `
+                <button class="category-option" data-category="${category.id}" data-icon="${category.icon}" data-color="${category.color}">
                     <i class='bx ${category.icon}' style="color: ${category.color}"></i>
                     <span>${category.name}</span>
                 </button>
             `).join('');
+        };
+
+        const updateCategorySelector = (category) => {
+            if (!category || !transactionCategoryIcon || !transactionCategoryText) return;
+            
+            selectedCategory = category;
+            transactionCategoryIcon.className = `bx ${category.icon}`;
+            transactionCategoryIcon.style.color = category.color;
+            transactionCategoryText.textContent = category.name;
+        };
+
+        const resetCategorySelector = () => {
+            if (!transactionCategoryIcon || !transactionCategoryText) return;
+            
+            selectedCategory = null;
+            transactionCategoryIcon.className = 'bx bx-category';
+            transactionCategoryIcon.style.color = '';
+            transactionCategoryText.textContent = 'Selecionar categoria';
         };
 
         const formatDate = (dateString) => {
@@ -1667,20 +1692,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Renderizar categorias corretas para o tipo da transação
                 renderCategories(transaction.type);
                 
-                // Set category
-                setTimeout(() => {
-                    const categoryBtn = categoryGrid.querySelector(`[data-category="${transaction.categoryId}"]`);
-                    if (categoryBtn) {
-                        categoryGrid.querySelectorAll('.finance-category-btn').forEach(btn => btn.classList.remove('active'));
-                        categoryBtn.classList.add('active');
-                    }
-                }, 100);
+                // Set category in selector
+                const category = getCategoryById(transaction.categoryId);
+                if (category) {
+                    updateCategorySelector(category);
+                }
             } else {
                 // Create mode - título será definido pelos botões específicos
                 deleteTransactionBtn.classList.add('hidden');
                 
                 // Renderizar categorias baseadas no tipo atual
                 renderCategories(currentTransactionType);
+                
+                // Reset category selector
+                resetCategorySelector();
             }
             
             transactionModal.classList.remove('hidden');
@@ -1691,6 +1716,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const closeTransactionModal = () => {
             if (!transactionModal) return;
             transactionModal.classList.add('hidden');
+            transactionCategoryPicker?.classList.add('hidden');
+            transactionCategoryBtn?.classList.remove('open');
+            resetCategorySelector();
             editingTransaction = null;
         };
 
@@ -1699,7 +1727,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const amount = parseFloat(transactionAmount.value);
             const date = transactionDate.value;
             const description = transactionDescription.value.trim();
-            const categoryId = document.querySelector('.finance-category-btn.active')?.dataset.category;
+            const categoryId = selectedCategory?.id;
             
             if (!amount || amount <= 0 || !date || !categoryId) {
                 Utils.showNotice('Por favor, preencha todos os campos obrigatórios.');
@@ -1861,16 +1889,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
             
-            // Category selection
-            if (categoryGrid) {
-                categoryGrid.addEventListener('click', (e) => {
-                    const categoryBtn = e.target.closest('.finance-category-btn');
-                    if (categoryBtn) {
-                        categoryGrid.querySelectorAll('.finance-category-btn').forEach(btn => btn.classList.remove('active'));
-                        categoryBtn.classList.add('active');
+            // Category selector events
+            if (transactionCategoryBtn) {
+                transactionCategoryBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    transactionCategoryPicker.classList.toggle('hidden');
+                    transactionCategoryBtn.classList.toggle('open');
+                });
+            }
+
+            if (transactionCategoryPicker) {
+                transactionCategoryPicker.addEventListener('click', (e) => {
+                    const categoryOption = e.target.closest('.category-option');
+                    if (categoryOption) {
+                        const categoryData = {
+                            id: categoryOption.dataset.category,
+                            name: categoryOption.querySelector('span').textContent,
+                            icon: categoryOption.dataset.icon,
+                            color: categoryOption.dataset.color
+                        };
+                        
+                        updateCategorySelector(categoryData);
+                        transactionCategoryPicker.classList.add('hidden');
+                        transactionCategoryBtn.classList.remove('open');
                     }
                 });
             }
+
+            // Close category picker when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!transactionCategoryBtn?.contains(e.target) && !transactionCategoryPicker?.contains(e.target)) {
+                    transactionCategoryPicker?.classList.add('hidden');
+                    transactionCategoryBtn?.classList.remove('open');
+                }
+            });
             
             // Period filters
             if (periodChips) {
