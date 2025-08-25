@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const titleEl = document.getElementById('app-notice-title');
             const textEl = document.getElementById('app-notice-text');
             const okBtn = document.getElementById('app-notice-ok');
+            const cancelBtn = document.getElementById('app-notice-cancel');
             if (!modal || !titleEl || !textEl || !okBtn) return;
             
             // Se o segundo parâmetro é uma função, é o callback
@@ -84,12 +85,28 @@ document.addEventListener('DOMContentLoaded', () => {
             textEl.textContent = message;
             modal.classList.remove('hidden');
             
+            // Se há callback, mostra como confirmação (2 botões)
+            if (onConfirm && cancelBtn) {
+                cancelBtn.classList.remove('hidden');
+                okBtn.textContent = 'Confirmar';
+                okBtn.className = 'soft-button danger';
+            } else {
+                if (cancelBtn) cancelBtn.classList.add('hidden');
+                okBtn.textContent = 'OK';
+                okBtn.className = 'soft-button';
+            }
+            
             const close = () => {
                 modal.classList.add('hidden');
+            };
+            
+            const confirm = () => {
+                close();
                 if (onConfirm) onConfirm();
             };
             
-            okBtn.onclick = close;
+            okBtn.onclick = onConfirm ? confirm : close;
+            if (cancelBtn) cancelBtn.onclick = close;
             modal.onclick = (e) => { if (e.target === modal) close(); };
         };
         return { saveToLocalStorage, loadFromLocalStorage, getTodayString, formatDateToBR, escapeHTML, showNotice };
