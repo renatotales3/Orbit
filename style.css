@@ -1307,12 +1307,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     position: relative !important;
     display: flex !important;
     flex-direction: column !important;
+    height: 85vh !important;
+    gap: 0 !important;
 }
 
-/* Garantir que o conteúdo das abas ocupe o espaço necessário */
+/* Área de conteúdo scrollável */
 #transactions-filter-modal .filter-tab-content {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1 !important;
+    overflow-y: auto !important;
+    margin-bottom: 0 !important;
 }
 
 @media (max-width: 768px) {
@@ -1323,13 +1326,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     
     /* Ajustes específicos para mobile */
     #transactions-filter-modal .filter-tab-content {
-        min-height: 300px; /* Menor altura mínima em mobile */
-        margin-bottom: 0; /* Usar flexbox em mobile também */
+        flex: 1 !important;
+        overflow-y: auto !important;
+        margin-bottom: 0 !important;
     }
     
     #transactions-filter-modal .modal-actions {
-        margin-top: 2rem;
-        padding-top: 1.5rem;
+        flex-shrink: 0 !important;
+        margin-top: auto !important;
+        padding-top: 1rem !important;
+        border-top: 1px solid var(--divider-color) !important;
     }
     
     #transactions-filter-modal .finance-custom-period {
@@ -1445,41 +1451,34 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     border-color: var(--primary-color);
 }
 
-/* Correção completa de espaçamento no modal de filtro de transações */
+/* Espaçamento normal para período customizado */
 #transactions-filter-modal .finance-custom-period {
-    margin-bottom: 3rem; /* Mais espaço antes dos botões de ação */
+    margin-bottom: 1rem;
 }
 
 #transactions-filter-modal .modal-actions {
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--divider-color);
-    position: relative;
-    z-index: 10;
-    clear: both; /* Limpar floats */
+    flex-shrink: 0 !important;
+    margin-top: auto !important;
+    padding-top: 1rem !important;
+    border-top: 1px solid var(--divider-color) !important;
 }
 
-/* Garantir que não haja sobreposição - altura mínima para cada aba */
+/* Área de conteúdo flexível */
 #transactions-filter-modal .filter-tab-content {
-    min-height: 350px; /* Altura mínima para empurrar botões para baixo */
-    margin-bottom: 0; /* Removido para usar flexbox */
-    padding-bottom: 2rem;
-    overflow-y: auto; /* Permitir scroll se necessário */
+    flex: 1 !important;
+    overflow-y: auto !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 1rem !important;
 }
 
 #transactions-filter-modal .filter-tab-panel {
-    min-height: 300px; /* Altura mínima para cada painel de aba */
-    padding-bottom: 2rem;
+    padding-bottom: 1rem;
 }
 
-/* Espaçamento específico para a aba de categoria */
-#transactions-category-panel {
-    padding-bottom: 3rem; /* Mais espaço na aba de categoria */
-}
-
-/* Espaçamento específico para a aba de período */
+/* Espaçamento padrão para as abas */
+#transactions-category-panel,
 #transactions-period-panel {
-    padding-bottom: 3rem; /* Mais espaço na aba de período */
+    padding-bottom: 1rem;
 }
 
 @media (max-width: 480px) {
@@ -1636,18 +1635,30 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 /* Header fixo */
 #transactions-filter-modal .modal-header {
+    flex-shrink: 0 !important;
+    margin-bottom: 1.5rem !important;
 }
 
 /* Abas fixas */
 #transactions-filter-modal .finance-filter-tabs {
+    flex-shrink: 0 !important;
+    margin-bottom: 1.5rem !important;
 }
 
 /* Área de conteúdo scrollável */
 #transactions-filter-modal .filter-tab-content {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 1rem !important;
 }
 
 /* Botões de ação fixos na parte inferior */
 #transactions-filter-modal .modal-actions {
+    flex-shrink: 0 !important;
+    margin-top: auto !important;
+    padding-top: 1rem !important;
+    border-top: 1px solid var(--divider-color) !important;
 }
 
 #transactions-filter-modal .modal-content {
