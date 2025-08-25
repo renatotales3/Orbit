@@ -316,6 +316,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (e.target.closest('.complete-btn')) {
                     const isCompleted = !tasks[taskIndex].completed;
                     tasks[taskIndex].completed = isCompleted;
+                    // Adicionar data de conclusão
+                    if (isCompleted) {
+                        tasks[taskIndex].completedDate = Utils.getTodayString();
+                    } else {
+                        delete tasks[taskIndex].completedDate;
+                    }
                     const { goalId, subtaskId } = tasks[taskIndex];
                     if (goalId && subtaskId) {
                         Goals.setSubtaskCompletedState(Number(goalId), Number(subtaskId), isCompleted);
@@ -857,7 +863,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const statsTodaySessionsEl = document.getElementById('focus-stats-today-sessions');
         const statsWeekMinutesEl = document.getElementById('focus-stats-week-minutes');
         let focusStats = Utils.loadFromLocalStorage('focusStats', { sessions: [] });
-        const addFocusSession = (minutes) => { focusStats.sessions.push({ date: Utils.getTodayString(), minutes }); Utils.saveToLocalStorage('focusStats', focusStats); renderStats(); };
+        const addFocusSession = (minutes) => { focusStats.sessions.push({ date: Utils.getTodayString(), minutes }); Utils.saveToLocalStorage('focusStats', focusStats); renderStats(); renderProductivityChart(); };
         const renderStats = () => {
             const today = Utils.getTodayString();
             const todaySessions = focusStats.sessions.filter(s => s.date === today);
@@ -871,7 +877,63 @@ document.addEventListener('DOMContentLoaded', () => {
             statsWeekMinutesEl && (statsWeekMinutesEl.textContent = String(weekMinutes));
         };
 
+        // Gráfico de Produtividade Semanal
+        const renderProductivityChart = () => {
+            const chartContainer = document.getElementById('productivity-chart');
+            if (!chartContainer) return;
 
+            const today = new Date();
+            const chartData = [];
+
+            // Gerar dados para os últimos 7 dias
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                // Contar tarefas concluídas no dia
+                const tasks = Utils.loadFromLocalStorage('tasks', []);
+                const completedTasks = tasks.filter(task => {
+                    if (!task.completed) return false;
+                    // Se tem data de conclusão, usar ela
+                    if (task.completedDate) return task.completedDate === dateStr;
+                    // Caso contrário, assumir que foi concluída hoje se está marcada como completa
+                    return dateStr === today.toISOString().split('T')[0];
+                }).length;
+
+                // Contar minutos de foco no dia
+                const focusMinutes = focusStats.sessions
+                    .filter(s => s.date === dateStr)
+                    .reduce((acc, s) => acc + (s.minutes || 0), 0);
+
+                chartData.push({
+                    day: i,
+                    tasks: completedTasks,
+                    focus: focusMinutes
+                });
+            }
+
+            // Encontrar valores máximos para escala
+            const maxTasks = Math.max(...chartData.map(d => d.tasks), 1);
+            const maxFocus = Math.max(...chartData.map(d => d.focus), 25);
+
+            // Gerar barras HTML
+            const barsHTML = chartData.map(data => {
+                const tasksHeight = (data.tasks / maxTasks) * 100;
+                const focusHeight = (data.focus / maxFocus) * 100;
+                const combinedHeight = Math.max(tasksHeight, focusHeight, 5);
+                
+                return `
+                    <div class="chart-bar" 
+                         style="height: ${combinedHeight}%" 
+                         data-value="${data.tasks}T / ${data.focus}min"
+                         title="${data.tasks} tarefas • ${data.focus} min foco">
+                    </div>
+                `;
+            }).join('');
+
+            chartContainer.innerHTML = barsHTML;
+        };
 
         // Review do Dia
         const reviewForm = document.getElementById('review-form');
@@ -920,6 +982,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Estatísticas iniciais
             renderStats();
+            renderProductivityChart();
         };
 
         // Expor para Pomodoro somar sessões de foco
