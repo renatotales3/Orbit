@@ -275,7 +275,71 @@ input[type="date"], input[type="time"], input[type="datetime-local"] {
 .add-task-container { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
 #task-input { flex: 1 1 180px; min-width: 0; }
 #add-task-btn { width: 5rem; height: 5rem; border-radius: 1.2rem; font-size: 2.4rem; padding: 0; flex: 0 0 auto; }
-.task-item, .goal-item { background-color: var(--component-bg); border: 1px solid var(--border-color); border-radius: 1.6rem; box-shadow: var(--shadow); }
+.task-item, .goal-item { 
+    background-color: var(--component-bg); 
+    border: 1px solid var(--border-color); 
+    border-radius: 1.6rem; 
+    box-shadow: var(--shadow);
+    position: relative;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    touch-action: pan-y;
+    overflow: hidden;
+}
+
+/* Swipe gestures para tarefas */
+.task-item.swiping-right {
+    transform: translateX(80px);
+    background-color: #28a745;
+    color: white;
+}
+
+.task-item.swiping-left {
+    transform: translateX(-80px);
+    background-color: #dc3545;
+    color: white;
+}
+
+.task-item.completing {
+    transform: scale(0.9);
+    opacity: 0.7;
+}
+
+.task-item.deleting {
+    transform: translateX(-100%);
+    opacity: 0;
+}
+
+/* Indicadores de swipe */
+.task-item::before,
+.task-item::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+}
+
+.task-item::before {
+    left: 20px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E") no-repeat center;
+}
+
+.task-item::after {
+    right: 20px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z'/%3E%3C/svg%3E") no-repeat center;
+}
+
+.task-item.swiping-right::before {
+    opacity: 1;
+}
+
+.task-item.swiping-left::after {
+    opacity: 1;
+}
 .goal-item { padding: 1.6rem; }
 .task-item { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.6rem; }
 .task-item.completed .complete-btn, .complete-subtask-btn.completed { color: #28a745; }
