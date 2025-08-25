@@ -160,25 +160,38 @@ input[type="date"], input[type="time"], input[type="datetime-local"] {
     padding-right: 3.2rem !important; 
 }
 .soft-input:focus, .soft-textarea:focus { outline: none; }
-.soft-button.icon-btn { padding: 0; width: 3.5rem; height: 3.5rem; font-size: 2rem; border-radius: 50%; color: var(--icon-color); }
+.soft-button.icon-btn { 
+    padding: 0; 
+    width: 4.4rem; 
+    height: 4.4rem; 
+    font-size: 2.2rem; 
+    border-radius: 50%; 
+    color: var(--icon-color);
+    min-width: 44px; /* Padrão de acessibilidade touch */
+    min-height: 44px;
+}
 .soft-button.icon-btn i { margin: 0; }
 
-/* Botões de ação padronizados */
+/* Botões de ação padronizados - Touch Friendly */
 .soft-button.add-btn {
+    width: 5.6rem;
+    height: 5.6rem;
+    padding: 0;
+    font-size: 2.6rem;
+    border-radius: 1.2rem;
+    min-width: 56px;
+    min-height: 56px;
+}
+
+.soft-button.metric-control-btn {
     width: 5rem;
     height: 5rem;
     padding: 0;
     font-size: 2.4rem;
     border-radius: 1.2rem;
-}
-
-.soft-button.metric-control-btn {
-    width: 4.5rem;
-    height: 4.5rem;
-    padding: 0;
-    font-size: 2.2rem;
-    border-radius: 1.2rem;
     flex-shrink: 0;
+    min-width: 50px;
+    min-height: 50px;
 }
 
 /* --- Navegação --- */
@@ -272,7 +285,14 @@ input[type="date"], input[type="time"], input[type="datetime-local"] {
 .todo-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--divider-color); }
 .todo-header h2 { font-weight: 600; font-size: 1.8rem; }
 .todo-body { padding: 1.5rem; }
-.add-task-container { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.add-task-container { 
+    display: flex; 
+    gap: 1.2rem; 
+    align-items: center; 
+    margin-bottom: 1.8rem; 
+    flex-wrap: wrap;
+    padding: 0.4rem; /* Área de toque mais confortável */
+}
 #task-input { flex: 1 1 180px; min-width: 0; }
 #add-task-btn { width: 5rem; height: 5rem; border-radius: 1.2rem; font-size: 2.4rem; padding: 0; flex: 0 0 auto; }
 .task-item, .goal-item { 
@@ -340,8 +360,41 @@ input[type="date"], input[type="time"], input[type="datetime-local"] {
 .task-item.swiping-left::after {
     opacity: 1;
 }
+
+/* Arrastar para reordenar */
+.task-item.dragging {
+    opacity: 0.8;
+    transform: scale(1.05);
+    z-index: 1000;
+    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.2);
+    cursor: grabbing;
+}
+
+.task-item.drag-over {
+    border-top: 3px solid var(--primary-color);
+    margin-top: 3px;
+}
+
+#task-list {
+    min-height: 60px;
+    transition: all 0.3s ease;
+}
+
+.task-item {
+    cursor: grab;
+}
+
+.task-item:active {
+    cursor: grabbing;
+}
 .goal-item { padding: 1.6rem; }
-.task-item { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.6rem; }
+.task-item { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 1.6rem 2rem; /* Mais padding para área de toque */
+    min-height: 60px; /* Altura mínima para toque confortável */
+}
 .task-item.completed .complete-btn, .complete-subtask-btn.completed { color: #28a745; }
 .task-item-buttons button, .subtask-actions button { color: var(--icon-color); }
 .complete-subtask-btn { background: none; border: none; font-size: 2.2rem; cursor: pointer; padding: 0; margin-right: 1rem; display: flex; align-items: center; justify-content: center; }
@@ -739,7 +792,7 @@ body.modal-open .bottom-nav {
 .priority-picker-modal { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
 
 /* --- Focus Extras --- */
-.focus-mits-card, .focus-stats-card,  .review-card, .fitness-card { background-color: var(--component-bg); border: 1px solid var(--border-color); border-radius: 1.6rem; box-shadow: var(--shadow); margin-top: 2.5rem; }
+.focus-mits-card, .focus-stats-card, .productivity-chart-card, .review-card, .fitness-card { background-color: var(--component-bg); border: 1px solid var(--border-color); border-radius: 1.6rem; box-shadow: var(--shadow); margin-top: 2.5rem; }
 .focus-mits-card .todo-body, .focus-stats-card .todo-body .todo-body, .review-card .todo-body, .fitness-card .todo-body { padding: 1.5rem; }
 .add-task-container > * { min-width: 0; }
 .fitness-card + .fitness-card { margin-top: 2rem; }
@@ -747,6 +800,95 @@ body.modal-open .bottom-nav {
 .stat-item { background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 1.2rem; padding: 1rem; box-shadow: var(--soft-shadow-inset-sharp); display: flex; flex-direction: column; gap: 0.3rem; align-items: center; }
 .stat-item span { font-size: 1.2rem; opacity: 0.8; }
 .stat-item strong { font-size: 1.8rem; }
+
+/* Gráfico de Produtividade */
+.chart-container {
+    position: relative;
+    height: 200px;
+    margin-bottom: 1.5rem;
+}
+
+.chart-bars {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.8rem;
+    height: 160px;
+    align-items: end;
+    padding: 1rem 0;
+}
+
+.chart-bar {
+    position: relative;
+    background: linear-gradient(to top, var(--primary-color) 0%, rgba(var(--primary-color-rgb, 0, 122, 255), 0.7) 100%);
+    border-radius: 0.4rem 0.4rem 0 0;
+    min-height: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.chart-bar:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+.chart-bar::after {
+    content: attr(data-value);
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.chart-bar:hover::after {
+    opacity: 1;
+}
+
+.chart-labels {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.8rem;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.chart-labels span {
+    font-size: 1.2rem;
+    opacity: 0.7;
+    font-weight: 500;
+}
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.2rem;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.tasks-color {
+    background: var(--primary-color);
+}
+
+.focus-color {
+    background: linear-gradient(45deg, var(--primary-color), #10B981);
+}
 #timeboxing-list, #mits-list, #workout-list, #outdoor-history, #stretch-steps { list-style: none; display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; }
 .timeboxing-item, .mit-item, .workout-item, .outdoor-item, .stretch-step { background-color: var(--component-bg); border: 1px solid var(--border-color); border-radius: 1.2rem; box-shadow: var(--shadow); padding: 1.2rem; display: flex; align-items: center; justify-content: space-between; }
 .breath-display { display: none; align-items: center; justify-content: center; min-height: 12rem; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 1.2rem; box-shadow: var(--soft-shadow-inset-sharp); font-size: 2rem; font-weight: 600; position: relative; overflow: hidden; }
