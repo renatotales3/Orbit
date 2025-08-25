@@ -1003,7 +1003,31 @@ document.addEventListener('DOMContentLoaded', () => {
   <li>Use MITs para garantir o essencial do dia.</li>
   <li>Mantenha rótulos curtos.</li>
   <li>Revise seu resumo no domingo.</li>
-  </ul>`;
+  </ul>
+
+<h4>Finanças</h4>
+<h5>Transações</h5>
+<ul>
+  <li>Adicionar receita: toque em "Nova Receita", preencha descrição, valor e categoria.</li>
+  <li>Adicionar despesa: toque em "Nova Despesa", preencha os dados necessários.</li>
+  <li>Editar transação: toque em qualquer transação da lista para editar.</li>
+  <li>Categorias personalizadas: crie suas próprias categorias de receitas e despesas.</li>
+</ul>
+
+<h5>Relatórios e Filtros</h5>
+<ul>
+  <li>Resumo mensal: veja total de receitas, despesas e saldo do período.</li>
+  <li>Filtrar por período: "Hoje", "Esta Semana", "Este Mês" ou período personalizado.</li>
+  <li>Filtrar por categoria: visualize transações de categorias específicas.</li>
+  <li>Histórico completo: acesse todas as transações com filtros avançados.</li>
+</ul>
+
+<h5>Insights Financeiros</h5>
+<ul>
+  <li>Percentual de gastos: veja quanto % das receitas você está gastando.</li>
+  <li>Controle mensal: monitore se está dentro do orçamento planejado.</li>
+  <li>Categorização automática: organize automaticamente suas transações.</li>
+</ul>`;
         if (tutorialContent && !tutorialContent.innerHTML) tutorialContent.innerHTML = TUTORIAL_HTML;
         if (tutorialBtn && tutorialModal) tutorialBtn.addEventListener('click', (e) => { e.preventDefault(); document.body.classList.add('modal-open'); tutorialModal.classList.remove('hidden'); });
         if (closeTutorialBtn) closeTutorialBtn.addEventListener('click', (e)=>{ e.preventDefault(); document.body.classList.remove('modal-open'); tutorialModal.classList.add('hidden'); });
