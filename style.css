@@ -1526,20 +1526,21 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 #transactions-filter-modal .filter-tab-content {
     background: transparent !important;
     margin-bottom: 0 !important;
+    padding-bottom: 1rem !important;
 }
 
 #transactions-filter-modal .modal-actions {
     background: transparent !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
+    margin-top: 1.5rem !important;
+    padding: 1rem 0 0 0 !important;
+    border-top: 1px solid var(--divider-color) !important;
     box-shadow: none !important;
 }
 
-/* Garantir que não há NENHUM espaço entre elementos do modal de filtro */
+/* Garantir espaçamento adequado entre conteúdo e botões finais */
 #transactions-filter-modal .filter-tab-content + .modal-actions {
-    margin-top: 0 !important;
-    border-top: none !important;
+    margin-top: 1.5rem !important;
+    border-top: 1px solid var(--divider-color) !important;
 }
 
 /* Remover qualquer espaço que possa aparecer como retângulo */
@@ -1571,7 +1572,25 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 #transactions-filter-modal .finance-date-field,
 #transactions-filter-modal h4 {
     background: transparent !important;
+}
+
+/* Não remover box-shadow dos botões, apenas dos containers */
+#transactions-filter-modal .finance-period-section,
+#transactions-filter-modal .finance-custom-period,
+#transactions-filter-modal .finance-period-chips,
+#transactions-filter-modal .finance-date-row,
+#transactions-filter-modal .finance-date-field,
+#transactions-filter-modal h4 {
     box-shadow: none !important;
+}
+
+/* Manter sombras naturais dos botões de período */
+#transactions-filter-modal .finance-period-chips .category-btn {
+    box-shadow: var(--shadow) !important;
+}
+
+#transactions-filter-modal .finance-period-chips .category-btn.active {
+    box-shadow: var(--soft-shadow-inset-sharp) !important;
 }
 
 /* Remove qualquer pseudo-elemento que possa estar criando overlay */
