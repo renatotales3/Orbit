@@ -89,6 +89,54 @@
                         <ul id="task-list"></ul>
                     </div>
                 </div>
+
+                <div class="productivity-chart-card">
+                    <header class="todo-header">
+                        <h2>Produtividade Semanal</h2>
+                    </header>
+                    <div class="todo-body">
+                        <div class="chart-container">
+                            <div class="chart-bars" id="productivity-chart">
+                                <!-- Gráfico será gerado dinamicamente -->
+                            </div>
+                            <div class="chart-labels" id="productivity-chart-labels">
+                                <!-- Labels gerados dinamicamente -->
+                            </div>
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <div class="legend-color tasks-color"></div>
+                                <span>Tarefas Concluídas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="productivity-stats-card">
+                    <header class="todo-header">
+                        <h2>Estatísticas</h2>
+                    </header>
+                    <div class="todo-body">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span>Streak</span>
+                                <strong id="productivity-streak">0</strong>
+                                <small>dias</small>
+                            </div>
+                            <div class="stat-item">
+                                <span>Meta Diária</span>
+                                <strong id="daily-goal-progress">0/3</strong>
+                                <small>tarefas</small>
+                            </div>
+                            <div class="stat-item">
+                                <span>Média Semanal</span>
+                                <strong id="weekly-average">0</strong>
+                                <small>por dia</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="goals-app">
                     <header class="goals-header">
                         <h2>Minhas Metas</h2>
@@ -122,28 +170,6 @@
                             <div class="stat-item"><span>Hoje (min)</span><strong id="focus-stats-today-minutes">0</strong></div>
                             <div class="stat-item"><span>Sessões</span><strong id="focus-stats-today-sessions">0</strong></div>
                             <div class="stat-item"><span>Semana (min)</span><strong id="focus-stats-week-minutes">0</strong></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="productivity-chart-card">
-                    <header class="todo-header">
-                        <h2>Produtividade Semanal</h2>
-                    </header>
-                    <div class="todo-body">
-                        <div class="chart-container">
-                            <div class="chart-bars" id="productivity-chart">
-                                <!-- Gráfico será gerado dinamicamente -->
-                            </div>
-                            <div class="chart-labels" id="productivity-chart-labels">
-                                <!-- Labels gerados dinamicamente -->
-                            </div>
-                        </div>
-                        <div class="chart-legend">
-                            <div class="legend-item">
-                                <div class="legend-color tasks-color"></div>
-                                <span>Tarefas Concluídas</span>
-                            </div>
                         </div>
                     </div>
                 </div>
