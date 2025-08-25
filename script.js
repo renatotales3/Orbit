@@ -1709,19 +1709,26 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (incomeBtn) {
                             document.querySelectorAll('.finance-type-btn').forEach(btn => btn.classList.remove('active'));
                             incomeBtn.classList.add('active');
-                            document.getElementById('transaction-modal-title').textContent = 'Nova Receita';
+                            const titleEl = document.getElementById('transaction-modal-title');
+                            if (titleEl) titleEl.textContent = 'Nova Receita';
                         }
-                    }, 50);
+                    }, 100);
                 });
             }
             
             if (addExpenseBtn) {
                 addExpenseBtn.addEventListener('click', () => {
                     openTransactionModal();
-                    // Após abrir, define como despesa (já é padrão)
+                    // Após abrir, define como despesa
                     setTimeout(() => {
-                        document.getElementById('transaction-modal-title').textContent = 'Nova Despesa';
-                    }, 50);
+                        const expenseBtn = document.querySelector('.finance-type-btn[data-type="expense"]');
+                        if (expenseBtn) {
+                            document.querySelectorAll('.finance-type-btn').forEach(btn => btn.classList.remove('active'));
+                            expenseBtn.classList.add('active');
+                            const titleEl = document.getElementById('transaction-modal-title');
+                            if (titleEl) titleEl.textContent = 'Nova Despesa';
+                        }
+                    }, 100);
                 });
             }
             
