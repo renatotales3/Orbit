@@ -889,7 +889,16 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 6; i >= 0; i--) {
                 const date = new Date(today);
                 date.setDate(today.getDate() - i);
-                const dateStr = date.toISOString().split('T')[0];
+                // Usar mesma lógica de fuso horário que getTodayString()
+                const brasiliaOffset = -3; // UTC-3
+                const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+                const brasiliaTime = new Date(utc + (brasiliaOffset * 3600000));
+                const dateStr = brasiliaTime.toISOString().split('T')[0];
+                
+                // Debug: verificar datas
+                if (i === 0) { // Só para hoje
+                    console.log('Debug gráfico - Hoje:', dateStr, 'getTodayString:', Utils.getTodayString());
+                }
                 
                 // Contar tarefas concluídas no dia
                 const tasks = Utils.loadFromLocalStorage('tasks', []);
@@ -898,7 +907,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Se tem data de conclusão, usar ela
                     if (task.completedDate) return task.completedDate === dateStr;
                     // Caso contrário, assumir que foi concluída hoje se está marcada como completa
-                    return dateStr === today.toISOString().split('T')[0];
+                    return dateStr === Utils.getTodayString();
                 }).length;
 
                 // Contar minutos de foco no dia
