@@ -1055,20 +1055,24 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     opacity: 0.9;
 }
 
-/* Override modal-backdrop styles for transaction modal */
+/* Override modal-backdrop styles for transaction modal - FORÇA CENTRALIZAÇÃO */
 #transaction-modal.modal-backdrop {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
     display: flex !important;
-    align-items: flex-start !important; /* Começar do topo */
+    align-items: center !important; /* CENTRALIZAÇÃO FORÇADA */
     justify-content: center !important;
     z-index: 1000 !important;
     background-color: rgba(0,0,0,0.6) !important;
-    padding: 2rem 1rem !important; /* Padding menor nas laterais */
+    padding: 1rem !important;
     box-sizing: border-box !important;
+    margin: 0 !important;
+    transform: none !important;
 }
 
 #transaction-modal.modal-backdrop .modal-content {
@@ -1077,13 +1081,19 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     box-shadow: var(--shadow) !important;
     width: 90vw !important;
     max-width: 45rem !important;
-    max-height: calc(100vh - 4rem) !important; /* Altura máxima considerando padding */
+    max-height: calc(100vh - 2rem) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     padding: 1.8rem !important;
     position: relative !important;
-    margin: auto 0 !important; /* Centralizar verticalmente */
-    align-self: center !important; /* Forçar centralização */
+    margin: 0 !important; /* Reset margin */
+    top: auto !important; /* Reset top */
+    bottom: auto !important; /* Reset bottom */
+    left: auto !important; /* Reset left */
+    right: auto !important; /* Reset right */
+    transform: none !important; /* Reset transform */
+    align-self: auto !important; /* Reset align-self */
+    flex-shrink: 0 !important; /* Não encolher */
 }
 
 #transaction-modal form {
@@ -1147,15 +1157,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 /* Mobile adjustments */
 @media (max-width: 768px) {
     #transaction-modal.modal-backdrop {
-        padding: 1rem 0.5rem !important; /* Menos padding em mobile */
-        align-items: center !important; /* Forçar centralização em mobile */
+        padding: 0.5rem !important; /* Padding mínimo em mobile */
     }
     
     #transaction-modal .modal-content {
         width: 95vw !important;
         padding: 1.5rem !important;
-        margin: auto !important; /* Centralizar completamente em mobile */
-        max-height: calc(100vh - 2rem) !important; /* Altura máxima menor em mobile */
+        max-height: calc(100vh - 1rem) !important; /* Altura máxima otimizada para mobile */
     }
     
     #transaction-modal .finance-quick-amounts {
@@ -1190,8 +1198,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
     gap: 1rem;
 }
 
-/* Finance modal scroll fix */
-.modal-content {
+/* Finance modal scroll fix - mais específico para evitar conflitos */
+#finance-category-modal .modal-content {
     max-height: 90vh;
     overflow-y: auto;
 }
