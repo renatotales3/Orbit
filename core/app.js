@@ -1,89 +1,90 @@
-// Life OS - Módulo Principal da Aplicação
-// Controla a inicialização e coordenação de todos os módulos
+// Life OS - Core Application
+// Coordenador principal da aplicação
 
 const App = (() => {
-    // Estado da aplicação
     let isInitialized = false;
-    let modules = new Map();
+    let modules = {};
+    let emergencyMode = false;
     
-    // Inicializar a aplicação
-    const init = async () => {
-        if (isInitialized) {
-            console.warn('App já foi inicializado');
-            return;
+    // Ordem de inicialização dos módulos
+    const moduleOrder = [
+        'Utils',
+        'Store', 
+        'Router',
+        'Theme',
+        'Navigation',
+        'Pomodoro',
+        'Tasks',
+        'Goals',
+        'Habits',
+        'Mood',
+        'Journal',
+        'Metrics',
+        'FocusExtras',
+        'Finance'
+    ];
+    
+    // Sistema de recuperação de emergência
+    const emergencyRecovery = () => {
+        console.warn('🚨 ATIVANDO MODO DE EMERGÊNCIA');
+        emergencyMode = true;
+        
+        // Verificar se script original ainda funciona
+        if (typeof window.Navigation !== 'undefined' && typeof window.Navigation.switchTab === 'function') {
+            console.log('✅ Script original disponível - usando como fallback');
+            return true;
         }
         
+        // Tentar restaurar funcionalidade básica
         try {
-            console.log('🚀 Inicializando Life OS...');
-            
-            // 1. Inicializar o Store primeiro
-            if (typeof Store !== 'undefined') {
-                Store.init();
-                console.log('✅ Store inicializado');
-            } else {
-                console.error('❌ Store não encontrado');
-                return;
+            if (confirm('A aplicação está com problemas. Deseja recarregar a página?')) {
+                window.location.reload();
+                return true;
             }
-            
-            // 2. Inicializar sistema de refresh
-            if (typeof Refresh !== 'undefined') {
-                Refresh.init();
-                console.log('✅ Sistema de Refresh inicializado');
-            } else {
-                console.warn('⚠️ Sistema de Refresh não encontrado');
-            }
-            
-            // 2. Inicializar módulos na ordem correta
-            await initializeModules();
-            
-            // 3. Configurar navegação inicial
-            setupInitialNavigation();
-            
-            // 4. Marcar como inicializado
-            isInitialized = true;
-            
-            // 5. Adicionar classe de carregamento
-            const content = document.querySelector('.content');
-            if (content) {
-                content.classList.add('js-loaded');
-            }
-            
-            console.log('🎉 Life OS inicializado com sucesso!');
-            
         } catch (error) {
-            console.error('❌ Erro ao inicializar Life OS:', error);
-            showErrorNotification('Erro ao inicializar o aplicativo');
+            console.error('❌ Falha na recuperação de emergência:', error);
         }
+        
+        return false;
     };
     
-    // Inicializar todos os módulos
+    // Verificar saúde dos módulos
+    const healthCheck = () => {
+        const issues = [];
+        
+        moduleOrder.forEach(moduleName => {
+            if (typeof window[moduleName] === 'undefined') {
+                issues.push(`Módulo ${moduleName} não encontrado`);
+            } else if (typeof window[moduleName].isInitialized !== 'function') {
+                issues.push(`Módulo ${moduleName} sem método isInitialized`);
+            } else if (!window[moduleName].isInitialized()) {
+                issues.push(`Módulo ${moduleName} não inicializado`);
+            }
+        });
+        
+        if (issues.length > 0) {
+            console.warn('🚨 Problemas de saúde detectados:', issues);
+            return false;
+        }
+        
+        return true;
+    };
+    
+    // Inicializar módulos com fallback
     const initializeModules = async () => {
-        const moduleOrder = [
-            'Theme',
-            'Router', // Inicializar Router primeiro
-            'Navigation', 
-            'Pomodoro',
-            'Tasks',
-            'Goals',
-            'Habits',
-            'Mood',
-            'Journal',
-            'Metrics',
-            'FocusExtras',
-            'Finance'
-        ];
+        console.log('🔄 Inicializando módulos...');
         
         for (const moduleName of moduleOrder) {
             try {
                 if (window[moduleName] && typeof window[moduleName].init === 'function') {
-                    await window[moduleName].init();
-                    modules.set(moduleName, window[moduleName]);
-                    console.log(`✅ Módulo ${moduleName} inicializado`);
+                    window[moduleName].init();
+                    modules[moduleName] = window[moduleName];
+                    console.log(`✅ ${moduleName} inicializado`);
                 } else {
-                    console.warn(`⚠️ Módulo ${moduleName} não encontrado ou sem método init`);
+                    console.warn(`⚠️ Módulo ${moduleName} não disponível`);
                 }
             } catch (error) {
-                console.error(`❌ Erro ao inicializar módulo ${moduleName}:`, error);
+                console.error(`❌ Erro ao inicializar ${moduleName}:`, error);
             }
         }
     };
@@ -91,180 +92,88 @@ const App = (() => {
     // Configurar navegação inicial
     const setupInitialNavigation = () => {
         try {
-            // Carregar aba salva com fallbacks
-            let savedTab = null;
+            const savedTab = localStorage.getItem('lifeOS_currentTab') || 
+                           localStorage.getItem('activeTab') || 'inicio';
             
-            // 1. Tentar do Store
-            if (typeof Store !== 'undefined') {
-                savedTab = Store.getState().currentTab;
+            if (typeof Router !== 'undefined' && Router.navigateToTab) {
+                Router.navigateToTab(savedTab);
+            } else if (typeof Navigation !== 'undefined' && Navigation.switchTab) {
+                Navigation.switchTab(savedTab);
             }
             
-            // 2. Fallback para localStorage novo formato
-            if (!savedTab || savedTab === 'inicio') {
-                savedTab = localStorage.getItem('lifeOS_currentTab');
-            }
-            
-            // 3. Fallback para localStorage formato antigo
-            if (!savedTab || savedTab === 'inicio') {
-                savedTab = localStorage.getItem('activeTab');
-            }
-            
-            // 4. Fallback final
-            if (!savedTab) {
-                savedTab = 'inicio';
-            }
-            
-            console.log(`🔄 Carregando aba inicial: ${savedTab}`);
-            
-            // Verificar se a aba existe
-            const targetPage = document.getElementById(savedTab);
-            if (!targetPage) {
-                console.warn(`Aba ${savedTab} não encontrada, usando 'inicio'`);
-                savedTab = 'inicio';
-            }
-            
-            // Ativar navegação
-            if (window.Navigation && typeof window.Navigation.switchTab === 'function') {
-                window.Navigation.switchTab(savedTab);
+        } catch (error) {
+            console.error('❌ Erro ao configurar navegação inicial:', error);
+        }
+    };
+    
+    // Fallback manual para troca de abas
+    const manualTabSwitch = (tabId) => {
+        try {
+            if (typeof Navigation !== 'undefined' && Navigation.switchTab) {
+                Navigation.switchTab(tabId);
+            } else if (typeof Router !== 'undefined' && Router.navigateToTab) {
+                Router.navigateToTab(tabId);
             } else {
-                console.warn('⚠️ Navigation module não disponível');
+                // Fallback direto
+                const pages = document.querySelectorAll('.page');
+                const navButtons = document.querySelectorAll('.nav-btn');
+                
+                pages.forEach(p => p.classList.remove('active'));
+                navButtons.forEach(b => b.classList.remove('active'));
+                
+                const targetPage = document.getElementById(tabId);
+                const targetButton = document.querySelector(`[data-target="${tabId}"]`);
+                
+                if (targetPage) targetPage.classList.add('active');
+                if (targetButton) targetButton.classList.add('active');
+                
+                localStorage.setItem('activeTab', tabId);
+                localStorage.setItem('lifeOS_currentTab', tabId);
             }
-            
         } catch (error) {
-            console.error('Erro ao configurar navegação inicial:', error);
+            console.error('❌ Erro no fallback de navegação:', error);
         }
     };
     
-    // Fallback para mudança de aba
-    const manualTabSwitch = (targetId) => {
-        try {
-            const pages = document.querySelectorAll('.page');
-            const navButtons = document.querySelectorAll('.nav-button');
-            const content = document.querySelector('.content');
-            
-            if (!content) return;
-            
-            // Salvar posição do scroll da aba atual
-            const currentActive = document.querySelector('.page.active');
-            if (currentActive) {
-                Store.saveScrollPosition(currentActive.id, content.scrollTop);
-            }
-            
-            // Ativar nova aba
-            pages.forEach(p => p.classList.remove('active'));
-            const targetPage = document.getElementById(targetId);
-            if (targetPage) {
-                targetPage.classList.add('active');
-            }
-            
-            // Atualizar botões de navegação
-            navButtons.forEach(b => b.classList.toggle('active', b.dataset.target === targetId));
-            
-            // Restaurar posição do scroll
-            const savedPosition = Store.getScrollPosition(targetId);
-            if (savedPosition) {
-                content.scrollTop = savedPosition;
-            } else {
-                content.scrollTop = 0;
-            }
-            
-            // Renderizar módulos relevantes
-            renderModulesForTab(targetId);
-            
-        } catch (error) {
-            console.error('Erro no fallback de navegação:', error);
-        }
-    };
-    
-    // Renderizar módulos específicos para cada aba
-    const renderModulesForTab = (tabId) => {
-        try {
-            switch (tabId) {
-                case 'bem-estar':
-                    if (modules.has('Metrics')) modules.get('Metrics').render();
-                    if (modules.has('Mood')) modules.get('Mood').render();
-                    if (modules.has('Journal')) modules.get('Journal').render();
-                    if (modules.has('Habits')) modules.get('Habits').render();
-                    break;
-                    
-                case 'foco':
-                    if (modules.has('Goals')) modules.get('Goals').render();
-                    if (modules.has('Tasks')) modules.get('Tasks').render();
-                    if (modules.has('FocusExtras')) modules.get('FocusExtras').renderStats();
-                    break;
-                    
-                case 'financas':
-                    if (modules.has('Finance')) modules.get('Finance').render();
-                    break;
-                    
-                case 'ajustes':
-                    // Renderizar configurações se necessário
-                    break;
-                    
-                default:
-                    // Página inicial - renderizar widgets principais
-                    break;
-            }
-        } catch (error) {
-            console.error('Erro ao renderizar módulos para aba:', error);
-        }
-    };
-    
-    // Verificar se todos os módulos estão funcionando
-    const healthCheck = () => {
-        const health = {
-            store: typeof Store !== 'undefined',
-            modules: {},
-            overall: true
-        };
+    // Inicializar aplicação
+    const init = async () => {
+        if (isInitialized) return;
         
-        modules.forEach((module, name) => {
-            const isHealthy = module && typeof module.render === 'function';
-            health.modules[name] = isHealthy;
-            if (!isHealthy) health.overall = false;
-        });
-        
-        return health;
-    };
-    
-    // Reinicializar módulo específico
-    const reinitModule = async (moduleName) => {
         try {
-            if (modules.has(moduleName)) {
-                const module = modules.get(moduleName);
-                if (typeof module.init === 'function') {
-                    await module.init();
-                    console.log(`✅ Módulo ${moduleName} reinicializado`);
-                    return true;
+            console.log('🚀 Inicializando Life OS...');
+            
+            if (document.readyState === 'loading') {
+                await new Promise(resolve => {
+                    document.addEventListener('DOMContentLoaded', resolve);
+                });
+            }
+            
+            await initializeModules();
+            setupInitialNavigation();
+            
+            // Event listeners de navegação
+            document.addEventListener('click', (e) => {
+                const navBtn = e.target.closest('.nav-btn');
+                if (navBtn && navBtn.dataset.target) {
+                    manualTabSwitch(navBtn.dataset.target);
                 }
-            }
-            return false;
+            });
+            
+            isInitialized = true;
+            console.log('✅ Life OS inicializado com sucesso');
+            
         } catch (error) {
-            console.error(`❌ Erro ao reinicializar módulo ${moduleName}:`, error);
-            return false;
+            console.error('❌ Erro crítico na inicialização:', error);
+            emergencyRecovery();
         }
     };
     
-    // Mostrar notificação de erro
-    const showErrorNotification = (message) => {
-        try {
-            if (window.Utils && typeof window.Utils.showNotice === 'function') {
-                window.Utils.showNotice(message, 'Erro');
-            } else {
-                // Fallback simples
-                alert(`Erro: ${message}`);
-            }
-        } catch (error) {
-            console.error('Erro ao mostrar notificação:', error);
-        }
-    };
-    
-    // API pública
     return {
         init,
         healthCheck,
-        reinitModule,
-        getModules: () => modules,
-        isInitialized: () => isInitialized
+        emergencyRecovery,
+        manualTabSwitch,
+        isInitialized: () => isInitialized,
+        isEmergencyMode: () => emergencyMode
     };
 })();

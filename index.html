@@ -759,11 +759,16 @@
     <!-- Script original (reativado temporariamente para manter funcionalidade) -->
     <script src="script.js"></script>
     
+    <!-- Sistema de Emergência -->
+    <script src="emergency-recovery.js"></script>
+    
     <!-- Inicialização da Nova Arquitetura -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Inicializar nova arquitetura
-            App.init();
+            if (typeof App !== 'undefined') {
+                App.init();
+            }
         });
     </script>
     
