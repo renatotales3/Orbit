@@ -1,5 +1,5 @@
-// Life OS - Sistema de Roteamento
-// Gerencia navegação entre abas e sincronização com o Store
+// Life OS - Sistema de Roteamento Unificado
+// Gerencia navegação entre abas, sincronização com Store e eventos centralizados
 
 const Router = (() => {
     // Estado interno
@@ -12,7 +12,7 @@ const Router = (() => {
     let navButtons;
     
     // Inicializar o roteador
-    const init = () => {
+    const init = (deps = {}) => {
         if (isInitialized) return;
         
         try {
@@ -34,6 +34,11 @@ const Router = (() => {
             
             isInitialized = true;
             console.log('✅ Router inicializado com sucesso');
+            
+            // Emitir evento de inicialização
+            if (deps.EventBus) {
+                deps.EventBus.emit(EVENTS.MODULE_INITIALIZED, { module: 'Router' });
+            }
             
             // Forçar renderização dos módulos da aba atual
             setTimeout(() => {
@@ -65,6 +70,15 @@ const Router = (() => {
                     updateUI(newTab);
                 }
             });
+        }
+        
+        // Listener para eventos do EventBus
+        if (typeof EventBus !== 'undefined') {
+            EventBus.on(EVENTS.TAB_SWITCHED, (data) => {
+                if (data.tab && data.tab !== currentTab) {
+                    navigateToTab(data.tab);
+                }
+            }, 'Router');
         }
         
         // Listener para mudanças de hash na URL (para deep linking futuro)
@@ -129,6 +143,7 @@ const Router = (() => {
         
         try {
             // Salvar posição do scroll da aba atual
+            const previousTab = currentTab;
             saveCurrentScrollPosition();
             
             // Atualizar estado
@@ -147,6 +162,18 @@ const Router = (() => {
             
             // Atualizar UI
             updateUI(tabId);
+            
+            // Emitir eventos de navegação
+            if (typeof EventBus !== 'undefined') {
+                EventBus.emit(EVENTS.NAVIGATION_CHANGED, { 
+                    from: previousTab, 
+                    to: tabId 
+                });
+                EventBus.emit(EVENTS.TAB_SWITCHED, { 
+                    tab: tabId,
+                    previousTab: previousTab
+                });
+            }
             
             // Renderizar módulos relevantes
             renderModulesForTab(tabId);
@@ -238,47 +265,53 @@ const Router = (() => {
         try {
             // Aguardar um frame para garantir que a UI foi atualizada
             requestAnimationFrame(() => {
-                switch (tabId) {
-                    case 'bem-estar':
-                        if (window.Metrics && typeof window.Metrics.render === 'function') {
-                            window.Metrics.render();
-                        }
-                        if (window.Mood && typeof window.Mood.render === 'function') {
-                            window.Mood.render();
-                        }
-                        if (window.Journal && typeof window.Journal.render === 'function') {
-                            window.Journal.render();
-                        }
-                        if (window.Habits && typeof window.Habits.render === 'function') {
-                            window.Habits.render();
-                        }
-                        break;
-                        
-                    case 'foco':
-                        if (window.Goals && typeof window.Goals.render === 'function') {
-                            window.Goals.render();
-                        }
-                        if (window.Tasks && typeof window.Tasks.render === 'function') {
-                            window.Tasks.render();
-                        }
-                        if (window.FocusExtras && typeof window.FocusExtras.renderStats === 'function') {
-                            window.FocusExtras.renderStats();
-                        }
-                        break;
-                        
-                    case 'financas':
-                        if (window.Finance && typeof window.Finance.render === 'function') {
-                            window.Finance.render();
-                        }
-                        break;
-                        
-                    case 'ajustes':
-                        // Renderizar configurações se necessário
-                        break;
-                        
-                    default:
-                        // Página inicial - renderizar widgets principais
-                        break;
+                // Usar ModuleManager se disponível, senão fallback para window
+                if (typeof ModuleManager !== 'undefined') {
+                    ModuleManager.renderModulesForTab(tabId);
+                } else {
+                    // Fallback para o sistema antigo
+                    switch (tabId) {
+                        case 'bem-estar':
+                            if (window.Metrics && typeof window.Metrics.render === 'function') {
+                                window.Metrics.render();
+                            }
+                            if (window.Mood && typeof window.Mood.render === 'function') {
+                                window.Mood.render();
+                            }
+                            if (window.Journal && typeof window.Journal.render === 'function') {
+                                window.Journal.render();
+                            }
+                            if (window.Habits && typeof window.Habits.render === 'function') {
+                                window.Habits.render();
+                            }
+                            break;
+                            
+                        case 'foco':
+                            if (window.Goals && typeof window.Goals.render === 'function') {
+                                window.Goals.render();
+                            }
+                            if (window.Tasks && typeof window.Tasks.render === 'function') {
+                                window.Tasks.render();
+                            }
+                            if (window.FocusExtras && typeof window.FocusExtras.renderStats === 'function') {
+                                window.FocusExtras.renderStats();
+                            }
+                            break;
+                            
+                        case 'financas':
+                            if (window.Finance && typeof window.Finance.render === 'function') {
+                                window.Finance.render();
+                            }
+                            break;
+                            
+                        case 'ajustes':
+                            // Renderizar configurações se necessário
+                            break;
+                            
+                        default:
+                            // Página inicial - renderizar widgets principais
+                            break;
+                    }
                 }
             });
             
