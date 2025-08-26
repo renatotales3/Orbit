@@ -36,18 +36,8 @@ const App = (() => {
             // 2. Inicializar módulos na ordem correta
             await initializeModules();
             
-            // 3. Configurar navegação inicial (apenas se Router não estiver disponível)
-            if (!window.Router || !window.Router.isInitialized()) {
-                setupInitialNavigation();
-            } else {
-                // Se Router está disponível, aguardar um pouco para garantir que tudo foi inicializado
-                setTimeout(() => {
-                    const currentTab = window.Router.getCurrentTab();
-                    if (currentTab) {
-                        console.log(`🔄 Router ativo, aba atual: ${currentTab}`);
-                    }
-                }, 200);
-            }
+            // 3. Configurar navegação inicial
+            setupInitialNavigation();
             
             // 4. Marcar como inicializado
             isInitialized = true;
@@ -101,23 +91,43 @@ const App = (() => {
     // Configurar navegação inicial
     const setupInitialNavigation = () => {
         try {
-            // Carregar aba salva ou usar padrão
-            const savedTab = Store.getState().currentTab || 'inicio';
+            // Carregar aba salva com fallbacks
+            let savedTab = null;
+            
+            // 1. Tentar do Store
+            if (typeof Store !== 'undefined') {
+                savedTab = Store.getState().currentTab;
+            }
+            
+            // 2. Fallback para localStorage novo formato
+            if (!savedTab || savedTab === 'inicio') {
+                savedTab = localStorage.getItem('lifeOS_currentTab');
+            }
+            
+            // 3. Fallback para localStorage formato antigo
+            if (!savedTab || savedTab === 'inicio') {
+                savedTab = localStorage.getItem('activeTab');
+            }
+            
+            // 4. Fallback final
+            if (!savedTab) {
+                savedTab = 'inicio';
+            }
+            
+            console.log(`🔄 Carregando aba inicial: ${savedTab}`);
             
             // Verificar se a aba existe
             const targetPage = document.getElementById(savedTab);
             if (!targetPage) {
                 console.warn(`Aba ${savedTab} não encontrada, usando 'inicio'`);
-                Store.switchTab('inicio');
-                return;
+                savedTab = 'inicio';
             }
             
             // Ativar navegação
             if (window.Navigation && typeof window.Navigation.switchTab === 'function') {
                 window.Navigation.switchTab(savedTab);
             } else {
-                // Fallback manual se o módulo de navegação não estiver disponível
-                manualTabSwitch(savedTab);
+                console.warn('⚠️ Navigation module não disponível');
             }
             
         } catch (error) {
