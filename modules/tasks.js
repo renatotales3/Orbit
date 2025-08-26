@@ -98,6 +98,11 @@ const Tasks = (() => {
             tasks.push(newTask);
             saveTasks();
             render();
+            
+            // Emitir evento de tarefa adicionada
+            if (typeof EventBus !== 'undefined') {
+                EventBus.emit(EVENTS.TASK_ADDED, { task: newTask });
+            }
         }
     };
     
@@ -129,7 +134,7 @@ const Tasks = (() => {
     };
     
     // Inicializar módulo
-    const init = () => {
+    const init = (deps = {}) => {
         if (isInitialized) return;
         
         try {
@@ -230,6 +235,11 @@ const Tasks = (() => {
                         if (typeof Utils !== 'undefined' && Utils.saveCompletedTask) {
                             Utils.saveCompletedTask(tasks[taskIndex].text, completedDate);
                         }
+                        
+                        // Emitir evento de tarefa completada
+                        if (typeof EventBus !== 'undefined') {
+                            EventBus.emit(EVENTS.TASK_COMPLETED, { task: tasks[taskIndex] });
+                        }
                     } else {
                         delete tasks[taskIndex].completedDate;
                     }
@@ -242,7 +252,13 @@ const Tasks = (() => {
                 }
 
                 if (e.target.closest('.delete-btn')) {
+                    const deletedTask = tasks[taskIndex];
                     tasks.splice(taskIndex, 1);
+                    
+                    // Emitir evento de tarefa deletada
+                    if (typeof EventBus !== 'undefined') {
+                        EventBus.emit(EVENTS.TASK_DELETED, { task: deletedTask });
+                    }
                 }
                 
                 saveTasks();

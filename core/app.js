@@ -1,18 +1,18 @@
 // Life OS - Core Application
-// Coordenador principal da aplicação
+// Coordenador principal da aplicação com nova arquitetura
 
 const App = (() => {
     let isInitialized = false;
-    let modules = {};
     let emergencyMode = false;
     
-    // Ordem de inicialização dos módulos
+    // Ordem de inicialização dos módulos (usando ModuleManager)
     const moduleOrder = [
         'Utils',
         'Store', 
+        'EventBus',
+        'ModuleManager',
         'Router',
         'Theme',
-        'Navigation',
         'Pomodoro',
         'Tasks',
         'Goals',
@@ -52,13 +52,19 @@ const App = (() => {
     const healthCheck = () => {
         const issues = [];
         
-        moduleOrder.forEach(moduleName => {
-            if (typeof window[moduleName] === 'undefined') {
-                issues.push(`Módulo ${moduleName} não encontrado`);
-            } else if (typeof window[moduleName].isInitialized !== 'function') {
-                issues.push(`Módulo ${moduleName} sem método isInitialized`);
-            } else if (!window[moduleName].isInitialized()) {
-                issues.push(`Módulo ${moduleName} não inicializado`);
+        // Verificar se ModuleManager está disponível
+        if (typeof ModuleManager === 'undefined') {
+            issues.push('ModuleManager não encontrado');
+            return false;
+        }
+        
+        // Verificar módulos críticos
+        const criticalModules = ['Utils', 'Store', 'EventBus', 'Router'];
+        criticalModules.forEach(moduleName => {
+            if (!ModuleManager.has(moduleName)) {
+                issues.push(`Módulo crítico ${moduleName} não registrado`);
+            } else if (!ModuleManager.isInitialized(moduleName)) {
+                issues.push(`Módulo crítico ${moduleName} não inicializado`);
             }
         });
         
@@ -70,23 +76,45 @@ const App = (() => {
         return true;
     };
     
-    // Inicializar módulos com fallback
+    // Inicializar módulos usando ModuleManager
     const initializeModules = async () => {
-        console.log('🔄 Inicializando módulos...');
+        console.log('🔄 Inicializando módulos com ModuleManager...');
         
-        for (const moduleName of moduleOrder) {
-            try {
-                if (window[moduleName] && typeof window[moduleName].init === 'function') {
-                    window[moduleName].init();
-                    modules[moduleName] = window[moduleName];
-                    console.log(`✅ ${moduleName} inicializado`);
-                } else {
-                    console.warn(`⚠️ Módulo ${moduleName} não disponível`);
+        try {
+            // Registrar módulos disponíveis no ModuleManager
+            moduleOrder.forEach(moduleName => {
+                if (window[moduleName]) {
+                    const dependencies = getModuleDependencies(moduleName);
+                    ModuleManager.register(moduleName, window[moduleName], dependencies);
                 }
-            } catch (error) {
-                console.error(`❌ Erro ao inicializar ${moduleName}:`, error);
-            }
+            });
+            
+            // Inicializar todos os módulos
+            const results = await ModuleManager.initializeAll();
+            
+            const successCount = results.filter(r => r.success).length;
+            console.log(`📊 Inicialização concluída: ${successCount}/${results.length} módulos`);
+            
+        } catch (error) {
+            console.error('❌ Erro na inicialização dos módulos:', error);
         }
+    };
+    
+    // Obter dependências de um módulo
+    const getModuleDependencies = (moduleName) => {
+        const dependencyMap = {
+            'Router': ['EventBus'],
+            'Tasks': ['Store', 'EventBus'],
+            'Goals': ['Store', 'EventBus'],
+            'Habits': ['Store', 'EventBus'],
+            'Mood': ['Store', 'EventBus'],
+            'Journal': ['Store', 'EventBus'],
+            'Finance': ['Store', 'EventBus'],
+            'Pomodoro': ['Store', 'EventBus'],
+            'Theme': ['EventBus']
+        };
+        
+        return dependencyMap[moduleName] || [];
     };
     
     // Configurar navegação inicial
