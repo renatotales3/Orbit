@@ -36,6 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`🔄 Carregando aba salva: ${savedTab}`);
             Navigation.switchTab(savedTab);
             content.classList.add('js-loaded');
+            
+            // Inicializar nova arquitetura em background
+            setTimeout(() => {
+                if (typeof App !== 'undefined') {
+                    App.init();
+                }
+            }, 100);
         };
         return { init };
     })();
