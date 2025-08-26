@@ -1,15 +1,132 @@
-// Life OS - Módulo de Tarefas
-// Sistema de gerenciamento de tarefas com integração ao Store
+// Life OS - Módulo de Tarefas Completo
+// Implementação completa baseada no script original
 
 const Tasks = (() => {
+    // Elementos DOM
+    let taskInput, taskPriorityBtn, priorityPicker, addTaskBtn, taskList, clearCompletedBtn;
+    
     // Estado interno
+    let tasks = [];
+    let currentTaskPriority = 3;
     let isInitialized = false;
-    let taskInput;
-    let addTaskBtn;
-    let taskList;
-    let clearCompletedBtn;
-    let priorityBtn;
-    let priorityPicker;
+    
+    // Definições de prioridades
+    const PRIORITIES = { 
+        1: { name: 'Urgente', colorClass: 'priority-1' }, 
+        2: { name: 'Alta', colorClass: 'priority-2' }, 
+        3: { name: 'Média', colorClass: 'priority-3' }, 
+        4: { name: 'Baixa', colorClass: 'priority-4' }
+    };
+    
+    // Carregar tarefas salvas
+    const loadTasks = () => {
+        if (typeof Utils !== 'undefined') {
+            tasks = Utils.loadFromLocalStorage('tasks', []);
+        } else {
+            tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+        }
+    };
+    
+    // Salvar tarefas
+    const saveTasks = () => {
+        if (typeof Utils !== 'undefined') {
+            Utils.saveToLocalStorage('tasks', tasks);
+        } else {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+    };
+    
+    // Criar HTML de uma tarefa
+    const createTaskHTML = (task) => {
+        const priorityInfo = PRIORITIES[task.priority];
+        const dataAttrs = (task.goalId && task.subtaskId) ? `data-goal-id="${task.goalId}" data-subtask-id="${task.subtaskId}"` : '';
+        return `<li class="task-item ${task.completed ? 'completed' : ''}" data-id="${task.id}" ${dataAttrs}>
+                    <div class="task-item-content">
+                        <button class="complete-btn"><i class='bx ${task.completed ? 'bxs-check-circle' : 'bx-circle'}'></i></button>
+                        <span class="priority-tag ${priorityInfo.colorClass}">${priorityInfo.name}</span>
+                        <span class="task-text">${task.text}</span>
+                    </div>
+                    <div class="task-item-buttons">
+                        <button class="soft-button icon-btn delete-btn"><i class='bx bxs-trash'></i></button>
+                    </div>
+                </li>`;
+    };
+    
+    // Renderizar lista de tarefas
+    const render = () => {
+        if (!taskList) return;
+        
+        const sortedTasks = [...tasks].sort((a, b) => a.priority - b.priority);
+        
+        if (sortedTasks.length === 0) {
+            taskList.innerHTML = `
+                <div class="empty-state">
+                    <h4>Nenhuma tarefa ainda</h4>
+                    <p>Adicione sua primeira tarefa do dia para começar a organizar seu foco.</p>
+                </div>
+            `;
+        } else {
+            taskList.innerHTML = sortedTasks.map(createTaskHTML).join('');
+        }
+
+        const hasCompleted = tasks.some(task => task.completed);
+        if (clearCompletedBtn) {
+            clearCompletedBtn.classList.toggle('hidden', !hasCompleted);
+        }
+    };
+    
+    // Adicionar nova tarefa
+    const add = (taskData) => {
+        const text = taskData.text?.trim();
+        if (text) {
+            // Loading state feedback
+            const addBtn = document.getElementById('add-task-btn');
+            if (addBtn) {
+                addBtn.classList.add('loading');
+                setTimeout(() => addBtn.classList.remove('loading'), 200);
+            }
+            
+            const newTask = { 
+                id: Date.now(),
+                text: text, 
+                completed: false, 
+                priority: parseInt(taskData.priority),
+                goalId: taskData.goalId || null,
+                subtaskId: taskData.subtaskId || null
+            };
+            
+            tasks.push(newTask);
+            saveTasks();
+            render();
+        }
+    };
+    
+    // Remover tarefa por subtarefa
+    const removeTaskBySubtask = (goalId, subtaskId) => {
+        tasks = tasks.filter(task => !(task.goalId === goalId && task.subtaskId === subtaskId));
+        saveTasks();
+        render();
+    };
+    
+    // Definir estado de conclusão por subtarefa
+    const setTaskCompletedStateBySubtask = (goalId, subtaskId, isCompleted) => {
+        const taskIndex = tasks.findIndex(t => t.goalId === goalId && t.subtaskId === subtaskId);
+        if (taskIndex > -1 && tasks[taskIndex].completed !== isCompleted) {
+            tasks[taskIndex].completed = isCompleted;
+            saveTasks();
+            render();
+        }
+    };
+    
+    // Atualizar botão de prioridade
+    const updatePriorityBtn = () => {
+        if (taskPriorityBtn) {
+            const indicator = taskPriorityBtn.querySelector('.priority-indicator-btn');
+            if (indicator) {
+                indicator.className = `bx bxs-circle priority-indicator-btn ${PRIORITIES[currentTaskPriority].colorClass}`;
+            }
+        }
+    };
     
     // Inicializar módulo
     const init = () => {
@@ -18,338 +135,142 @@ const Tasks = (() => {
         try {
             // Obter referências DOM
             taskInput = document.getElementById('task-input');
+            taskPriorityBtn = document.getElementById('task-priority-btn');
+            priorityPicker = document.getElementById('priority-picker');
             addTaskBtn = document.getElementById('add-task-btn');
             taskList = document.getElementById('task-list');
             clearCompletedBtn = document.getElementById('clear-completed-tasks-btn');
-            priorityBtn = document.getElementById('task-priority-btn');
-            priorityPicker = document.getElementById('priority-picker');
             
             if (!taskInput || !addTaskBtn || !taskList) {
                 console.error('❌ Elementos de tarefas não encontrados');
                 return;
             }
             
-            // Configurar event listeners
-            setupEventListeners();
+            // Carregar tarefas salvas
+            loadTasks();
             
-            // Configurar seletor de prioridade
-            setupPrioritySelector();
+            // Configurar picker de prioridade
+            if (priorityPicker) {
+                priorityPicker.innerHTML = Object.keys(PRIORITIES).map(key => 
+                    `<button class="priority-option" data-priority="${key}">
+                        <span class="priority-dot ${PRIORITIES[key].colorClass}"></span>
+                        ${PRIORITIES[key].name}
+                    </button>`
+                ).join('');
+            }
             
-            // Renderizar tarefas existentes
+            // Event listeners
+            if (taskPriorityBtn) {
+                taskPriorityBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (priorityPicker) {
+                        priorityPicker.classList.toggle('hidden');
+                    }
+                });
+            }
+            
+            if (priorityPicker) {
+                priorityPicker.addEventListener('click', (e) => {
+                    const option = e.target.closest('.priority-option');
+                    if (option) {
+                        currentTaskPriority = parseInt(option.dataset.priority);
+                        updatePriorityBtn();
+                        priorityPicker.classList.add('hidden');
+                    }
+                });
+            }
+            
+            document.addEventListener('click', () => {
+                if (priorityPicker) {
+                    priorityPicker.classList.add('hidden');
+                }
+            });
+            
+            addTaskBtn.addEventListener('click', () => {
+                add({ text: taskInput.value, priority: currentTaskPriority });
+                taskInput.value = "";
+                taskInput.focus(); // Manter foco para adicionar próxima tarefa
+            });
+            
+            taskInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    add({ text: taskInput.value, priority: currentTaskPriority });
+                    taskInput.value = "";
+                }
+            });
+            
+            if (clearCompletedBtn) {
+                clearCompletedBtn.addEventListener('click', () => {
+                    tasks = tasks.filter(task => !task.completed);
+                    saveTasks();
+                    render();
+                });
+            }
+            
+            taskList.addEventListener('click', (e) => {
+                const item = e.target.closest('.task-item');
+                if (!item) return;
+                
+                const taskId = Number(item.dataset.id);
+                const taskIndex = tasks.findIndex(t => t.id === taskId);
+                if (taskIndex === -1) return;
+
+                if (e.target.closest('.complete-btn')) {
+                    const isCompleted = !tasks[taskIndex].completed;
+                    tasks[taskIndex].completed = isCompleted;
+                    
+                    // Adicionar data de conclusão e salvar no histórico
+                    if (isCompleted) {
+                        const completedDate = typeof Utils !== 'undefined' ? 
+                            Utils.getTodayString() : 
+                            new Date().toISOString().split('T')[0];
+                        tasks[taskIndex].completedDate = completedDate;
+                        
+                        // Salvar no histórico para gráfico de produtividade
+                        if (typeof Utils !== 'undefined' && Utils.saveCompletedTask) {
+                            Utils.saveCompletedTask(tasks[taskIndex].text, completedDate);
+                        }
+                    } else {
+                        delete tasks[taskIndex].completedDate;
+                    }
+                    
+                    // Sincronizar com Goals se for subtarefa
+                    const { goalId, subtaskId } = tasks[taskIndex];
+                    if (goalId && subtaskId && window.Goals && window.Goals.setSubtaskCompletedState) {
+                        window.Goals.setSubtaskCompletedState(Number(goalId), Number(subtaskId), isCompleted);
+                    }
+                }
+
+                if (e.target.closest('.delete-btn')) {
+                    tasks.splice(taskIndex, 1);
+                }
+                
+                saveTasks();
+                render();
+            });
+            
+            // Renderizar e atualizar UI
             render();
+            updatePriorityBtn();
             
             isInitialized = true;
-            console.log('✅ Módulo de Tarefas inicializado');
+            console.log('✅ Tasks module initialized');
             
         } catch (error) {
-            console.error('❌ Erro ao inicializar módulo de Tarefas:', error);
+            console.error('❌ Erro ao inicializar Tasks:', error);
         }
     };
     
-    // Configurar event listeners
-    const setupEventListeners = () => {
-        // Adicionar tarefa
-        addTaskBtn.addEventListener('click', addTask);
-        
-        // Adicionar tarefa com Enter
-        taskInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                addTask();
-            }
-        });
-        
-        // Limpar tarefas concluídas
-        if (clearCompletedBtn) {
-            clearCompletedBtn.addEventListener('click', clearCompletedTasks);
-        }
-        
-        // Foco no input
-        taskInput.addEventListener('focus', () => {
-            taskInput.select();
-        });
-    };
-    
-    // Configurar seletor de prioridade
-    const setupPrioritySelector = () => {
-        if (!priorityBtn || !priorityPicker) return;
-        
-        // Criar opções de prioridade
-        const priorities = [
-            { value: 1, label: 'Alta', color: 'priority-1' },
-            { value: 2, label: 'Média', color: 'priority-2' },
-            { value: 3, label: 'Baixa', color: 'priority-3' }
-        ];
-        
-        priorityPicker.innerHTML = '';
-        priorities.forEach(priority => {
-            const button = document.createElement('button');
-            button.className = `priority-option ${priority.color}`;
-            button.textContent = priority.label;
-            button.dataset.priority = priority.value;
-            
-            button.addEventListener('click', () => {
-                selectPriority(priority.value);
-                priorityPicker.classList.add('hidden');
-            });
-            
-            priorityPicker.appendChild(button);
-        });
-        
-        // Toggle do picker
-        priorityBtn.addEventListener('click', () => {
-            priorityPicker.classList.toggle('hidden');
-        });
-        
-        // Fechar ao clicar fora
-        document.addEventListener('click', (e) => {
-            if (!priorityBtn.contains(e.target) && !priorityPicker.contains(e.target)) {
-                priorityPicker.classList.add('hidden');
-            }
-        });
-        
-        // Definir prioridade padrão
-        selectPriority(3);
-    };
-    
-    // Selecionar prioridade
-    const selectPriority = (priority) => {
-        if (!priorityBtn) return;
-        
-        // Atualizar botão
-        const priorityIndicator = priorityBtn.querySelector('.priority-indicator-btn');
-        if (priorityIndicator) {
-            priorityIndicator.className = `priority-indicator-btn priority-${priority}`;
-        }
-        
-        // Armazenar prioridade selecionada
-        priorityBtn.dataset.priority = priority;
-    };
-    
-    // Adicionar nova tarefa
-    const addTask = () => {
-        try {
-            const text = taskInput.value.trim();
-            if (!text) return;
-            
-            const priority = parseInt(priorityBtn.dataset.priority) || 3;
-            
-            const task = {
-                id: Date.now() + Math.random(),
-                text: text,
-                priority: priority,
-                completed: false,
-                createdAt: new Date().toISOString(),
-                completedAt: null
-            };
-            
-            // Adicionar ao Store
-            if (typeof Store !== 'undefined') {
-                Store.addTask(task);
-            } else {
-                // Fallback para localStorage direto
-                const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-                tasks.push(task);
-                localStorage.setItem('tasks', JSON.stringify(tasks));
-            }
-            
-            // Limpar input
-            taskInput.value = '';
-            taskInput.focus();
-            
-            // Renderizar
-            render();
-            
-            console.log('✅ Tarefa adicionada:', task);
-            
-        } catch (error) {
-            console.error('❌ Erro ao adicionar tarefa:', error);
-        }
-    };
-    
-    // Marcar tarefa como concluída
-    const completeTask = (taskId) => {
-        try {
-            if (typeof Store !== 'undefined') {
-                Store.completeTask(taskId);
-            } else {
-                // Fallback para localStorage direto
-                const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-                const taskIndex = tasks.findIndex(t => t.id === taskId);
-                
-                if (taskIndex !== -1) {
-                    const task = tasks[taskIndex];
-                    task.completed = true;
-                    task.completedAt = new Date().toISOString();
-                    
-                    // Adicionar ao histórico
-                    const completedHistory = JSON.parse(localStorage.getItem('completedTasksHistory') || '[]');
-                    completedHistory.push({
-                        ...task,
-                        completedDate: new Date().toISOString().split('T')[0]
-                    });
-                    localStorage.setItem('completedTasksHistory', JSON.stringify(completedHistory));
-                    
-                    // Remover da lista ativa
-                    tasks.splice(taskIndex, 1);
-                    localStorage.setItem('tasks', JSON.stringify(tasks));
-                }
-            }
-            
-            // Renderizar
-            render();
-            
-        } catch (error) {
-            console.error('❌ Erro ao concluir tarefa:', error);
-        }
-    };
-    
-    // Remover tarefa
-    const removeTask = (taskId) => {
-        try {
-            if (typeof Store !== 'undefined') {
-                Store.removeTask(taskId);
-            } else {
-                // Fallback para localStorage direto
-                const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-                const filteredTasks = tasks.filter(t => t.id !== taskId);
-                localStorage.setItem('tasks', JSON.stringify(filteredTasks));
-            }
-            
-            // Renderizar
-            render();
-            
-        } catch (error) {
-            console.error('❌ Erro ao remover tarefa:', error);
-        }
-    };
-    
-    // Limpar tarefas concluídas
-    const clearCompletedTasks = () => {
-        try {
-            render();
-        } catch (error) {
-            console.error('❌ Erro ao limpar tarefas concluídas:', error);
-        }
-    };
-    
-    // Renderizar lista de tarefas
-    const render = () => {
-        try {
-            if (!taskList) return;
-            
-            // Obter tarefas do Store ou localStorage
-            let tasks = [];
-            if (typeof Store !== 'undefined') {
-                tasks = Store.getState().tasks;
-            } else {
-                tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-            }
-            
-            // Limpar lista
-            taskList.innerHTML = '';
-            
-            if (tasks.length === 0) {
-                const emptyMessage = document.createElement('li');
-                emptyMessage.className = 'empty-state';
-                emptyMessage.innerHTML = '<p>Nenhuma tarefa pendente</p>';
-                taskList.appendChild(emptyMessage);
-                return;
-            }
-            
-            // Ordenar tarefas por prioridade e criação
-            const sortedTasks = tasks.sort((a, b) => {
-                if (a.priority !== b.priority) {
-                    return a.priority - b.priority;
-                }
-                return new Date(a.createdAt) - new Date(b.createdAt);
-            });
-            
-            // Renderizar cada tarefa
-            sortedTasks.forEach(task => {
-                const taskElement = createTaskElement(task);
-                taskList.appendChild(taskElement);
-            });
-            
-            // Atualizar estatísticas
-            updateStats();
-            
-        } catch (error) {
-            console.error('❌ Erro ao renderizar tarefas:', error);
-        }
-    };
-    
-    // Criar elemento de tarefa
-    const createTaskElement = (task) => {
-        const li = document.createElement('li');
-        li.className = 'task-item';
-        li.dataset.taskId = task.id;
-        
-        const priorityClass = `priority-${task.priority}`;
-        
-        li.innerHTML = `
-            <div class="task-content">
-                <button class="task-checkbox" aria-label="Marcar como concluída">
-                    <i class='bx bx-check'></i>
-                </button>
-                <span class="task-text ${priorityClass}">${escapeHTML(task.text)}</span>
-                <div class="task-priority ${priorityClass}">
-                    <i class='bx bxs-circle'></i>
-                </div>
-            </div>
-            <button class="task-remove" aria-label="Remover tarefa">
-                <i class='bx bx-trash'></i>
-            </button>
-        `;
-        
-        // Event listeners
-        const checkbox = li.querySelector('.task-checkbox');
-        const removeBtn = li.querySelector('.task-remove');
-        
-        checkbox.addEventListener('click', () => completeTask(task.id));
-        removeBtn.addEventListener('click', () => removeTask(task.id));
-        
-        return li;
-    };
-    
-    // Atualizar estatísticas
-    const updateStats = () => {
-        try {
-            // Atualizar contador de tarefas pendentes
-            let tasks = [];
-            if (typeof Store !== 'undefined') {
-                tasks = Store.getState().tasks;
-            } else {
-                tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-            }
-            
-            const pendingCount = tasks.length;
-            
-            // Atualizar elementos de estatísticas se existirem
-            const statsElements = document.querySelectorAll('[data-stat="pending-tasks"]');
-            statsElements.forEach(el => {
-                el.textContent = pendingCount;
-            });
-            
-        } catch (error) {
-            console.error('❌ Erro ao atualizar estatísticas:', error);
-        }
-    };
-    
-    // Utilitário para escapar HTML
-    const escapeHTML = (str) => {
-        const div = document.createElement('div');
-        div.appendChild(document.createTextNode(str));
-        return div.innerHTML;
-    };
+
     
     // API pública
-    return {
-        init,
-        render,
-        addTask,
-        completeTask,
-        removeTask,
-        clearCompletedTasks,
-        isInitialized: () => isInitialized
+    return { 
+        init, 
+        add, 
+        render, 
+        setTaskCompletedStateBySubtask, 
+        removeTaskBySubtask, 
+        PRIORITIES,
+        isInitialized: () => isInitialized 
     };
 })();
