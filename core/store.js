@@ -222,8 +222,12 @@ const Store = (() => {
                 state.scrollPositions = JSON.parse(scrollPositions);
             }
             
-            // Carregar aba ativa
-            const activeTab = localStorage.getItem('lifeOS_currentTab');
+            // Carregar aba ativa (com fallback para formato antigo)
+            let activeTab = localStorage.getItem('lifeOS_currentTab');
+            if (!activeTab) {
+                // Fallback para formato antigo
+                activeTab = localStorage.getItem('activeTab');
+            }
             if (activeTab) {
                 state.currentTab = activeTab;
             }
@@ -236,7 +240,14 @@ const Store = (() => {
     // Inicializar o store
     const init = () => {
         loadPersistedState();
+        
+        // Garantir que a aba atual seja válida
+        if (!state.currentTab || !['inicio', 'foco', 'bem-estar', 'financas', 'ajustes'].includes(state.currentTab)) {
+            state.currentTab = 'inicio';
+        }
+        
         console.log('✅ Store inicializado com sucesso');
+        console.log(`📍 Aba atual: ${state.currentTab}`);
     };
     
     // API pública

@@ -25,11 +25,29 @@ const App = (() => {
                 return;
             }
             
+            // 2. Inicializar sistema de refresh
+            if (typeof Refresh !== 'undefined') {
+                Refresh.init();
+                console.log('✅ Sistema de Refresh inicializado');
+            } else {
+                console.warn('⚠️ Sistema de Refresh não encontrado');
+            }
+            
             // 2. Inicializar módulos na ordem correta
             await initializeModules();
             
-            // 3. Configurar navegação inicial
-            setupInitialNavigation();
+            // 3. Configurar navegação inicial (apenas se Router não estiver disponível)
+            if (!window.Router || !window.Router.isInitialized()) {
+                setupInitialNavigation();
+            } else {
+                // Se Router está disponível, aguardar um pouco para garantir que tudo foi inicializado
+                setTimeout(() => {
+                    const currentTab = window.Router.getCurrentTab();
+                    if (currentTab) {
+                        console.log(`🔄 Router ativo, aba atual: ${currentTab}`);
+                    }
+                }, 200);
+            }
             
             // 4. Marcar como inicializado
             isInitialized = true;
@@ -52,6 +70,7 @@ const App = (() => {
     const initializeModules = async () => {
         const moduleOrder = [
             'Theme',
+            'Router', // Inicializar Router primeiro
             'Navigation', 
             'Pomodoro',
             'Tasks',

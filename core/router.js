@@ -35,6 +35,11 @@ const Router = (() => {
             isInitialized = true;
             console.log('✅ Router inicializado com sucesso');
             
+            // Forçar renderização dos módulos da aba atual
+            setTimeout(() => {
+                renderModulesForTab(currentTab);
+            }, 100);
+            
         } catch (error) {
             console.error('❌ Erro ao inicializar Router:', error);
         }
@@ -80,9 +85,17 @@ const Router = (() => {
                 }
             }
             
-            // Fallback para localStorage direto
-            if (!currentTab) {
+            // Fallback para localStorage direto (formato antigo)
+            if (!currentTab || currentTab === 'inicio') {
                 const savedTab = localStorage.getItem('activeTab');
+                if (savedTab && isValidTab(savedTab)) {
+                    currentTab = savedTab;
+                }
+            }
+            
+            // Fallback para localStorage direto (novo formato)
+            if (!currentTab || currentTab === 'inicio') {
+                const savedTab = localStorage.getItem('lifeOS_currentTab');
                 if (savedTab && isValidTab(savedTab)) {
                     currentTab = savedTab;
                 }
@@ -92,6 +105,8 @@ const Router = (() => {
             if (!isValidTab(currentTab)) {
                 currentTab = 'inicio';
             }
+            
+            console.log(`🔄 Carregando aba salva: ${currentTab}`);
             
             // Atualizar UI
             updateUI(currentTab);
