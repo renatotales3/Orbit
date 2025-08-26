@@ -297,6 +297,9 @@ const Store = (() => {
         
         switchTab: (tabId) => {
             setState('currentTab', tabId);
+            // Também salvar no localStorage diretamente para garantir persistência
+            localStorage.setItem('lifeOS_currentTab', tabId);
+            localStorage.setItem('activeTab', tabId); // Compatibilidade
         },
         
         saveScrollPosition: (tabId, position) => {

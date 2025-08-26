@@ -77,38 +77,36 @@ const Router = (() => {
     // Carregar estado inicial
     const loadInitialState = () => {
         try {
-            // Tentar carregar do Store primeiro
+            let savedTab = null;
+            
+            // 1. Tentar carregar do Store primeiro
             if (typeof Store !== 'undefined') {
-                const savedTab = Store.getState().currentTab;
-                if (savedTab && isValidTab(savedTab)) {
-                    currentTab = savedTab;
-                }
+                savedTab = Store.getState().currentTab;
+                console.log(`📦 Store currentTab: ${savedTab}`);
             }
             
-            // Fallback para localStorage direto (formato antigo)
-            if (!currentTab || currentTab === 'inicio') {
-                const savedTab = localStorage.getItem('activeTab');
-                if (savedTab && isValidTab(savedTab)) {
-                    currentTab = savedTab;
-                }
+            // 2. Se Store não tem ou é 'inicio', tentar localStorage novo formato
+            if (!savedTab || savedTab === 'inicio') {
+                savedTab = localStorage.getItem('lifeOS_currentTab');
+                console.log(`💾 localStorage lifeOS_currentTab: ${savedTab}`);
             }
             
-            // Fallback para localStorage direto (novo formato)
-            if (!currentTab || currentTab === 'inicio') {
-                const savedTab = localStorage.getItem('lifeOS_currentTab');
-                if (savedTab && isValidTab(savedTab)) {
-                    currentTab = savedTab;
-                }
+            // 3. Se ainda não tem, tentar formato antigo
+            if (!savedTab || savedTab === 'inicio') {
+                savedTab = localStorage.getItem('activeTab');
+                console.log(`💾 localStorage activeTab: ${savedTab}`);
             }
             
-            // Garantir que temos uma aba válida
-            if (!isValidTab(currentTab)) {
+            // 4. Validar se a aba existe
+            if (savedTab && isValidTab(savedTab)) {
+                currentTab = savedTab;
+                console.log(`✅ Aba válida encontrada: ${currentTab}`);
+            } else {
                 currentTab = 'inicio';
+                console.log(`⚠️ Nenhuma aba válida encontrada, usando 'inicio'`);
             }
             
-            console.log(`🔄 Carregando aba salva: ${currentTab}`);
-            
-            // Atualizar UI
+            // 5. Atualizar UI
             updateUI(currentTab);
             
         } catch (error) {
@@ -136,13 +134,16 @@ const Router = (() => {
             // Atualizar estado
             currentTab = tabId;
             
-            // Sincronizar com o Store
+            // Sincronizar com o Store E localStorage
             if (typeof Store !== 'undefined') {
                 Store.switchTab(tabId);
-            } else {
-                // Fallback para localStorage
-                localStorage.setItem('activeTab', tabId);
             }
+            
+            // SEMPRE salvar no localStorage também (garantia dupla)
+            localStorage.setItem('lifeOS_currentTab', tabId);
+            localStorage.setItem('activeTab', tabId);
+            
+            console.log(`💾 Aba salva: ${tabId}`);
             
             // Atualizar UI
             updateUI(tabId);
