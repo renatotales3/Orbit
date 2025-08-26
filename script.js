@@ -17,9 +17,23 @@ document.addEventListener('DOMContentLoaded', () => {
             // Fitness removido
             // Fitness.init && Fitness.init();
 
-            // Lógica de inicialização corrigida
+            // Lógica de inicialização corrigida com nova arquitetura
             const content = document.querySelector('.content');
-            const savedTab = Utils.loadFromLocalStorage('activeTab', 'inicio');
+            
+            // Tentar carregar aba salva com nova arquitetura
+            let savedTab = Utils.loadFromLocalStorage('lifeOS_currentTab', null);
+            if (!savedTab) {
+                savedTab = Utils.loadFromLocalStorage('activeTab', 'inicio');
+            }
+            
+            // Validar se a aba existe
+            const targetPage = document.getElementById(savedTab);
+            if (!targetPage) {
+                console.warn(`Aba ${savedTab} não encontrada, usando 'inicio'`);
+                savedTab = 'inicio';
+            }
+            
+            console.log(`🔄 Carregando aba salva: ${savedTab}`);
             Navigation.switchTab(savedTab);
             content.classList.add('js-loaded');
         };
@@ -168,7 +182,11 @@ document.addEventListener('DOMContentLoaded', () => {
             pages.forEach(p => p.classList.remove('active'));
             targetPage.classList.add('active');
             allNavButtons.forEach(b => b.classList.toggle('active', b.dataset.target === targetId));
+            // Salvar em ambos os formatos para compatibilidade
             Utils.saveToLocalStorage('activeTab', targetId);
+            Utils.saveToLocalStorage('lifeOS_currentTab', targetId);
+            
+            console.log(`💾 Aba salva: ${targetId}`);
             
             // Restaurar posição do scroll se existir
             const savedScrollPosition = targetPage.dataset.scrollPosition;
