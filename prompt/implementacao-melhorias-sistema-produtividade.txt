@@ -1,0 +1,487 @@
+# IMPLEMENTAÇÃO COMPLETA DE MELHORIAS NO SISTEMA DE PRODUTIVIDADE
+
+## CONTEXTO
+Você é um desenvolvedor especializado em JavaScript, CSS e HTML. Precisa implementar várias melhorias em um sistema de produtividade pessoal, mantendo 100% da funcionalidade existente e seguindo exatamente as especificações fornecidas.
+
+## TAREFAS A IMPLEMENTAR
+
+### 1. 🧠 SISTEMA INTELIGENTE DE SONO
+
+#### 1.1 Score Inteligente (0-100)
+- Implementar cálculo baseado em múltiplos fatores:
+  - Tempo de sono: 7-9h = pontuação máxima, <6h ou >10h = penalização
+  - Hora de dormir: antes das 23h = bônus, após 1h = penalização
+  - Qualidade do sono: 1-5 (peso 20%)
+  - Respostas às 5 perguntas inteligentes (peso 60%)
+
+#### 1.2 5 Perguntas Inteligentes
+Criar modal com as seguintes perguntas e opções:
+
+1. **"Como você se sentiu ao acordar?"**
+   - Energizado (4 pontos)
+   - Normal (3 pontos)
+   - Cansado (2 pontos)
+   - Muito cansado (1 ponto)
+
+2. **"Teve dificuldade para dormir?"**
+   - Nenhuma (4 pontos)
+   - Pouca (3 pontos)
+   - Moderada (2 pontos)
+   - Muita (1 ponto)
+
+3. **"Acordou durante a noite?"**
+   - Não (4 pontos)
+   - 1 vez (3 pontos)
+   - 2-3 vezes (2 pontos)
+   - Mais de 3 vezes (1 ponto)
+
+4. **"Usou dispositivos eletrônicos antes de dormir?"**
+   - Não (4 pontos)
+   - Pouco (3 pontos)
+   - Moderado (2 pontos)
+   - Muito (1 ponto)
+
+5. **"Praticou alguma atividade relaxante?"**
+   - Sim (4 pontos)
+   - Meditação (4 pontos)
+   - Leitura (3 pontos)
+   - Nenhuma (1 ponto)
+
+#### 1.3 Interface Visual
+- Score exibido **ACIMA** da barra de progresso (não centralizado)
+- Barra de progresso com cores dinâmicas:
+  - 0-30: Vermelho (#DC3545)
+  - 31-60: Laranja (#FD7E14)
+  - 61-80: Amarelo (#FFC107)
+  - 81-100: Verde (#28A745)
+- Feedbacks personalizados baseados na pontuação
+- Sugestões específicas para melhorar o sono
+
+#### 1.4 Integração
+- Score salvo no histórico diário
+- Incluído no resumo semanal
+- Modal seguindo padrão do design (modal-backdrop)
+
+### 2. 🎨 HOVER PREENCHIDO NAS CATEGORIAS DAS METAS
+
+#### 2.1 Implementação CSS
+```css
+.category-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+```
+
+#### 2.2 Comportamento
+- Ao passar o mouse: fundo preenchido com cor primária + texto branco
+- Não apenas bordas, mas preenchimento completo
+- Transição suave de 0.3s
+
+### 3. ⏰ FUNCIONALIDADES NOVAS DO POMODORO
+
+#### 3.1 Persistência do Timer
+- Salvar estado do timer no localStorage
+- Continuar do tempo exato ao recarregar a página
+- Funcionar com timer pausado ou ativo
+- Eliminar "picotagem" do tempo
+
+#### 3.2 Implementação
+```javascript
+// Salvar estado
+const saveTimerState = () => {
+    const state = {
+        totalSeconds,
+        currentCycle,
+        isPaused,
+        wasActive: !isPaused,
+        timestamp: Date.now()
+    };
+    localStorage.setItem('pomodoroState', JSON.stringify(state));
+};
+
+// Restaurar estado
+const restoreTimerState = () => {
+    const saved = localStorage.getItem('pomodoroState');
+    if (saved) {
+        const state = JSON.parse(saved);
+        const timeDiff = Math.floor((Date.now() - state.timestamp) / 1000);
+        
+        if (state.wasActive) {
+            totalSeconds = Math.max(0, state.totalSeconds - timeDiff);
+        } else {
+            totalSeconds = state.totalSeconds;
+        }
+        
+        currentCycle = state.currentCycle;
+        isPaused = !state.wasActive;
+        updateDisplay();
+    }
+};
+```
+
+### 4. ✅ ÍCONES DE CHECKMARK DAS BOLINHAS
+
+#### 4.1 Implementação
+- **Tarefas não concluídas:** `bx-circle` (bolinha vazia)
+- **Tarefas concluídas:** `bxs-check-circle` (bolinha com checkmark verde)
+
+#### 4.2 CSS
+```css
+.bx-circle {
+    color: var(--text-color);
+}
+
+.bxs-check-circle {
+    color: #28A745;
+}
+
+.complete-task-btn.completed .bx-circle {
+    display: none;
+}
+
+.complete-task-btn.completed .bxs-check-circle {
+    display: inline-block;
+}
+```
+
+#### 4.3 Aplicação
+- Tarefas do dia
+- Subtarefas das metas
+- Qualquer lista de tarefas
+
+### 5. 🌈 GRADIENTE NAS BARRAS DE PROGRESSO
+
+#### 5.1 Implementação CSS
+```css
+/* Modo claro */
+:root[data-theme="light"] .progress-bar {
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-color) 100%);
+}
+
+/* Modo escuro */
+:root[data-theme="dark"] .progress-bar {
+    background: linear-gradient(90deg, #FF69B4 0%, #FFB6C1 100%);
+}
+```
+
+#### 5.2 Aplicação
+- Barras de progresso das metas
+- Barra de progresso do sono
+- Qualquer barra de progresso do sistema
+
+### 6. 📏 CARD DE TAREFA SE EXPANDIR AUTOMATICAMENTE
+
+#### 6.1 Implementação CSS
+```css
+.task-text {
+    word-wrap: break-word;
+    white-space: normal;
+    line-height: 1.4;
+    min-height: 1.2em;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+```
+
+#### 6.2 Comportamento
+- Texto quebra automaticamente para segunda linha
+- Card aumenta verticalmente conforme necessário
+- Transição suave
+
+### 7. 🎯 CENTRALIZAÇÃO VERTICAL
+
+#### 7.1 Implementação CSS
+```css
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.complete-task-btn,
+.task-priority {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+```
+
+#### 7.2 Aplicação
+- Checkmark sempre centralizado verticalmente
+- Tag de prioridade sempre centralizada
+- Ícones sempre alinhados
+
+### 8. 🎯 SISTEMA DE PRIORIDADES MELHORADO
+
+#### 8.1 Modal de Prioridades para Subtarefas
+- Ao clicar em "Adicionar ao Foco" em uma subtarefa
+- Abrir modal com opções de prioridade
+- Integrar com sistema de tarefas existente
+
+#### 8.2 Implementação
+```javascript
+// Abrir modal de prioridade
+const openPriorityModal = (subtaskData) => {
+    document.body.classList.add('modal-open');
+    priorityModal.classList.remove('hidden');
+    subtaskToAdd = subtaskData;
+};
+
+// Processar seleção de prioridade
+const processPrioritySelection = (priority) => {
+    if (subtaskToAdd) {
+        Tasks.add({
+            text: `[${subtaskToAdd.goalTitle}] ${subtaskToAdd.subtaskText}`,
+            priority: priority,
+            goalId: subtaskToAdd.goalId,
+            subtaskId: subtaskToAdd.subtaskId
+        });
+        closePriorityModal();
+    }
+};
+```
+
+### 9. 🚀 NOVO NOME E LEMA
+
+#### 9.1 Atualizações no HTML
+```html
+<title>Orbit</title>
+<meta name="description" content="Tudo gira em torno de você.">
+```
+
+#### 9.2 Manifest.json
+```json
+{
+    "name": "Orbit",
+    "short_name": "Orbit",
+    "description": "Tudo gira em torno de você."
+}
+```
+
+#### 9.3 Meta Tags
+```html
+<meta property="og:title" content="Orbit - Sua vida, em órbita">
+<meta property="og:description" content="Tudo gira em torno de você.">
+<meta name="twitter:title" content="Orbit - Sua vida, em órbita">
+<meta name="twitter:description" content="Tudo gira em torno de você.">
+```
+
+### 10. 📱 TÍTULOS DINÂMICOS
+
+#### 10.1 Remover Contador do Pomodoro
+```javascript
+// Remover esta linha do updateDisplay do Pomodoro:
+// document.title = `${timerDisplay.textContent} - Life OS`;
+
+// Manter apenas:
+document.title = "Orbit";
+```
+
+#### 10.2 Remover Versão
+- Eliminar qualquer referência à versão no título
+- Manter título limpo: "Orbit"
+
+## REGRAS IMPORTANTES
+
+### ✅ OBRIGATÓRIO
+1. **NÃO quebrar funcionalidades existentes**
+2. **Manter 100% da compatibilidade**
+3. **Seguir exatamente as especificações**
+4. **Testar cada funcionalidade após implementação**
+5. **Manter o padrão de design existente**
+
+### 🔧 IMPLEMENTAÇÃO
+1. **Implementar uma funcionalidade por vez**
+2. **Testar após cada implementação**
+3. **Manter código limpo e comentado**
+4. **Usar variáveis CSS existentes quando possível**
+5. **Seguir padrões de nomenclatura existentes**
+
+### 📱 RESPONSIVIDADE
+1. **Garantir funcionamento em mobile**
+2. **Manter interface touch-friendly**
+3. **Preservar acessibilidade**
+4. **Testar em diferentes tamanhos de tela**
+
+### 🎨 DESIGN
+1. **Manter consistência visual**
+2. **Usar cores do tema existente**
+3. **Preservar animações suaves**
+4. **Manter hierarquia visual**
+
+## ESTRUTURA DE ARQUIVOS
+
+### Arquivos a modificar:
+- `index.html` (meta tags, título)
+- `script.js` (lógica do sistema inteligente de sono, Pomodoro)
+- `style.css` (estilos para hover, gradientes, checkmarks)
+- `manifest.json` (nome e descrição)
+
+### Módulos a criar/modificar:
+- Sistema de sono inteligente (substituir sistema atual)
+- Persistência do Pomodoro
+- Sistema de prioridades melhorado
+
+## TESTES OBRIGATÓRIOS
+
+Após cada implementação, testar:
+1. ✅ Sistema de sono inteligente funciona
+2. ✅ Hover nas categorias preenche completamente
+3. ✅ Pomodoro persiste ao recarregar
+4. ✅ Checkmarks aparecem corretamente
+5. ✅ Gradientes funcionam em ambos os temas
+6. ✅ Cards se expandem automaticamente
+7. ✅ Centralização vertical funciona
+8. ✅ Modal de prioridades funciona
+9. ✅ Nome "Orbit" aparece corretamente
+10. ✅ Título da aba é "Orbit" (sem contador)
+
+## ENTREGA
+
+Implementar todas as funcionalidades seguindo exatamente estas especificações. Cada funcionalidade deve estar 100% funcional e integrada ao sistema existente. Não quebrar nenhuma funcionalidade atual.
+
+## EXEMPLOS DE CÓDIGO COMPLETO
+
+### Sistema Inteligente de Sono - Cálculo de Score
+```javascript
+const calculateSleepScore = (sleepData, answers) => {
+    let score = 0;
+    
+    // Fator 1: Tempo de sono (30%)
+    const sleepHours = sleepData.totalMinutes / 60;
+    if (sleepHours >= 7 && sleepHours <= 9) {
+        score += 30;
+    } else if (sleepHours >= 6 && sleepHours <= 10) {
+        score += 20;
+    } else if (sleepHours >= 5 && sleepHours <= 11) {
+        score += 10;
+    }
+    
+    // Fator 2: Hora de dormir (10%)
+    const bedHour = parseInt(sleepData.bedTime.split(':')[0]);
+    if (bedHour <= 23) {
+        score += 10;
+    } else if (bedHour <= 1) {
+        score += 5;
+    }
+    
+    // Fator 3: Respostas das perguntas (60%)
+    const questionScores = {
+        'wake-feeling': { 'energized': 4, 'normal': 3, 'tired': 2, 'very-tired': 1 },
+        'sleep-difficulty': { 'none': 4, 'little': 3, 'moderate': 2, 'much': 1 },
+        'night-wake': { 'no': 4, 'once': 3, 'twice': 2, 'more': 1 },
+        'electronics': { 'no': 4, 'little': 3, 'moderate': 2, 'much': 1 },
+        'relaxing': { 'yes': 4, 'meditation': 4, 'reading': 3, 'none': 1 }
+    };
+    
+    let questionScore = 0;
+    Object.keys(answers).forEach(question => {
+        const answer = answers[question];
+        questionScore += questionScores[question][answer] || 0;
+    });
+    
+    score += (questionScore / 20) * 60; // Normalizar para 60 pontos
+    
+    return Math.round(Math.min(100, Math.max(0, score)));
+};
+```
+
+### CSS para Gradientes e Hover
+```css
+/* Gradientes nas barras de progresso */
+:root[data-theme="light"] .progress-bar {
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-color) 100%) !important;
+}
+
+:root[data-theme="dark"] .progress-bar {
+    background: linear-gradient(90deg, #FF69B4 0%, #FFB6C1 100%) !important;
+}
+
+/* Hover preenchido nas categorias */
+.category-btn:hover {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* Checkmarks das bolinhas */
+.bx-circle {
+    color: var(--text-color);
+}
+
+.bxs-check-circle {
+    color: #28A745;
+}
+
+.complete-task-btn.completed .bx-circle {
+    display: none;
+}
+
+.complete-task-btn.completed .bxs-check-circle {
+    display: inline-block;
+}
+
+/* Cards expansíveis */
+.task-text {
+    word-wrap: break-word;
+    white-space: normal;
+    line-height: 1.4;
+    min-height: 1.2em;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+```
+
+### Persistência do Pomodoro
+```javascript
+// Salvar estado do timer
+const saveTimerState = () => {
+    const state = {
+        totalSeconds,
+        currentCycle,
+        isPaused,
+        wasActive: !isPaused,
+        timestamp: Date.now()
+    };
+    localStorage.setItem('pomodoroState', JSON.stringify(state));
+};
+
+// Restaurar estado do timer
+const restoreTimerState = () => {
+    const saved = localStorage.getItem('pomodoroState');
+    if (saved) {
+        const state = JSON.parse(saved);
+        const timeDiff = Math.floor((Date.now() - state.timestamp) / 1000);
+        
+        if (state.wasActive) {
+            totalSeconds = Math.max(0, state.totalSeconds - timeDiff);
+        } else {
+            totalSeconds = state.totalSeconds;
+        }
+        
+        currentCycle = state.currentCycle;
+        isPaused = !state.wasActive;
+        updateDisplay();
+    }
+};
+
+// Chamar no init e quando pausar/iniciar
+document.addEventListener('DOMContentLoaded', restoreTimerState);
+```
+
+## NOTAS FINAIS
+
+Este prompt contém todas as especificações técnicas necessárias para implementar exatamente as funcionalidades desenvolvidas. Seguir rigorosamente cada especificação para garantir que o resultado seja idêntico ao sistema original.
